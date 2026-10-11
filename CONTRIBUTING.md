@@ -75,6 +75,7 @@ Database pengembangan adalah satu project Neon bersama.
 - Validasi semua input dari form di sisi server, bukan hanya di tampilan.
 - Jangan menaruh logika harga, stok, atau pembayaran di sisi klien. Hitung dan periksa di server.
 - Jalankan `pnpm lint` dan perbaiki peringatan sebelum commit.
+- Format kode diatur Prettier (`.prettierrc`). Pasang ekstensi Prettier di VS Code (pengaturan proyek di `.vscode/` sudah menyalakan *Format on Save*). Jangan mengubah `.prettierrc` tanpa Pull Request dan kesepakatan tim, supaya tidak ada perubahan format massal yang membuat konflik.
 
 ## 8. Menggunakan AI agent
 
