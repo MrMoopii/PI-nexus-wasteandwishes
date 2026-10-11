@@ -1,0 +1,14 @@
+# Hasil build dan library
+.next
+node_modules
+out
+build
+coverage
+
+# File yang dibuat otomatis oleh alat lain
+pnpm-lock.yaml
+next-env.d.ts
+prisma/migrations
+
+# Aset statis
+public
