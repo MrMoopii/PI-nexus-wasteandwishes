@@ -83,15 +83,19 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
 1. Buat branch kerja dari `development`:
    ```bash
    git checkout development && git pull
-   git checkout -b feat/koneksi-database
+   git checkout -b feat/pasang-drizzle
    ```
 
 2. Pasang paket (hanya pnpm):
    ```bash
-   pnpm add drizzle-orm @neondatabase/serverless @next/env
-   pnpm add -D drizzle-kit
+   pnpm add drizzle-orm@rc @neondatabase/serverless @next/env
+   pnpm add -D drizzle-kit@rc
    ```
-   Pakai versi stabil (tanpa `@rc`). Beberapa halaman dokumentasi Drizzle memakai `@rc` (versi 1.0 uji coba), jangan ikuti. Per 12 Oktober 2026, versi stabil di npm adalah `drizzle-orm` 0.45.x dan `drizzle-kit` 0.31.x. Commit `pnpm-lock.yaml`.
+   Tim memutuskan memakai versi **rc** (1.0 rilis kandidat), sesuai dokumentasi resmi Drizzle saat ini. `drizzle-orm` dan `drizzle-kit` harus sama-sama rc, jangan dicampur dengan versi stabil (0.x). Cek dengan `pnpm list drizzle-orm drizzle-kit`. Karena rc belum final, hindari memperbarui versinya sembarangan: perubahan versi dilakukan lewat PR tersendiri.
+
+   Jika pnpm menampilkan `ERR_PNPM_IGNORED_BUILDS` untuk `esbuild`, jalankan `pnpm approve-builds`, centang `esbuild` (spasi), lalu Enter. Pilihan itu tercatat di `pnpm-workspace.yaml` (`allowBuilds`), jadi file itu ikut di-commit.
+
+   Commit `package.json`, `pnpm-lock.yaml`, dan `pnpm-workspace.yaml`. Paket `tsx` yang muncul di contoh dokumentasi Drizzle tidak diperlukan di proyek ini.
 
 3. Isi `.env.local` dengan connection string branch Neon pribadi (di dashboard Neon: tombol **Connect**, pilih branch milikmu, nyalakan atau matikan *Connection pooling* untuk mendapat kedua versinya):
    ```bash
@@ -117,7 +121,6 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
    ```ts
    import { neon } from "@neondatabase/serverless";
    import { drizzle } from "drizzle-orm/neon-http";
-   import * as schema from "./schema";
 
    // Hanya untuk kode server. Jangan di-import dari file "use client".
    let dbTersimpan: ReturnType<typeof buatDb> | undefined;
@@ -127,7 +130,7 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      if (!databaseUrl) {
        throw new Error("DATABASE_URL belum diisi di .env.local");
      }
-     return drizzle({ client: neon(databaseUrl), schema });
+     return drizzle({ client: neon(databaseUrl) });
    }
 
    export function getDb() {
@@ -135,6 +138,8 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      return dbTersimpan;
    }
    ```
+   Pada versi rc, `drizzle()` tidak lagi menerima opsi `schema`. Jika nanti memakai *relations* (query relasi), definisikan dengan `defineRelations` dan kirim lewat opsi `relations`: `drizzle({ client, relations })`. Tabel biasa untuk `select`, `insert`, dan `update` tidak membutuhkannya.
+   Berhati-hati saat mengetik `DATABASE_URL`: salah satu huruf (misalnya `DATABASSE_URL`) tidak menimbulkan error di editor, tetapi nilainya akan kosong saat dijalankan.
 
 6. Buat `drizzle.config.ts` di root repo. `drizzle-kit` berjalan di luar Next.js sehingga tidak otomatis membaca `.env.local`. `loadEnvConfig` dari `@next/env` memuat file `.env*` dengan aturan yang sama seperti Next.js:
    ```ts
