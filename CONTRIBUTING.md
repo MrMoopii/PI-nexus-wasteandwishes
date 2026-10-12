@@ -121,7 +121,6 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
    ```ts
    import { neon } from "@neondatabase/serverless";
    import { drizzle } from "drizzle-orm/neon-http";
-   import * as schema from "./schema";
 
    // Hanya untuk kode server. Jangan di-import dari file "use client".
    let dbTersimpan: ReturnType<typeof buatDb> | undefined;
@@ -131,7 +130,7 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      if (!databaseUrl) {
        throw new Error("DATABASE_URL belum diisi di .env.local");
      }
-     return drizzle({ client: neon(databaseUrl), schema });
+     return drizzle({ client: neon(databaseUrl) });
    }
 
    export function getDb() {
@@ -139,6 +138,8 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      return dbTersimpan;
    }
    ```
+   Pada versi rc, `drizzle()` tidak lagi menerima opsi `schema`. Jika nanti memakai *relations* (query relasi), definisikan dengan `defineRelations` dan kirim lewat opsi `relations`: `drizzle({ client, relations })`. Tabel biasa untuk `select`, `insert`, dan `update` tidak membutuhkannya.
+   Berhati-hati saat mengetik `DATABASE_URL`: salah satu huruf (misalnya `DATABASSE_URL`) tidak menimbulkan error di editor, tetapi nilainya akan kosong saat dijalankan.
 
 6. Buat `drizzle.config.ts` di root repo. `drizzle-kit` berjalan di luar Next.js sehingga tidak otomatis membaca `.env.local`. `loadEnvConfig` dari `@next/env` memuat file `.env*` dengan aturan yang sama seperti Next.js:
    ```ts
