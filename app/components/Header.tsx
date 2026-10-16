@@ -17,7 +17,7 @@ export default async function Header() {
           className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px]"
         >
           <img
-            src="/legacy/img/Favicon/wasteandwishes_logo.png"
+            src="/img/Favicon/wasteandwishes_logo.png"
             alt=""
             className="h-[35px] w-auto"
           />
