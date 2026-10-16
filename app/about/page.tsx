@@ -2,11 +2,9 @@ export default function Home() {
   return (
     <>
       {/* Hero Banner */}
-      <div className="bg-teal-600 text-center text-white flex flex-col justify-center items-center h-[300px] rounded-b-[30px] mb-[-50px] pb-[50px]">
+      <div className="bg-teal-600 text-center text-white flex flex-col justify-center items-center h-75 rounded-b-[30px] -mb-12.5 pb-12.5">
         <h1 className="font-bold mb-2 text-3xl">Tentang Kami</h1>
-        <p className="text-sm tracking-wide opacity-80">
-          Home • Tentang Kami
-        </p>
+        <p className="text-sm tracking-wide opacity-80">Home • Tentang Kami</p>
       </div>
 
       {/* Cards Section */}
@@ -31,8 +29,8 @@ export default function Home() {
             </div>
             <h4 className="font-bold mb-3">Peluang</h4>
             <p className="text-gray-600 text-sm">
-              Peluang besar bagi penyedia layanan budidaya maggot untuk
-              membantu masyarakat mengelola limbah dapur.
+              Peluang besar bagi penyedia layanan budidaya maggot untuk membantu
+              masyarakat mengelola limbah dapur.
             </p>
           </div>
 
@@ -57,7 +55,9 @@ export default function Home() {
         {/* Visi & Misi */}
         <div className="grid md:grid-cols-2 gap-8">
           <div className="p-6 shadow rounded-xl bg-teal-50 border border-teal-200">
-            <h4 className="font-bold text-teal-600 mb-3 text-center">🌍 Visi Kami</h4>
+            <h4 className="font-bold text-teal-600 mb-3 text-center">
+              🌍 Visi Kami
+            </h4>
             <p className="text-gray-600 text-center leading-relaxed">
               Menjadi pionir platform pengelolaan sampah organik terintegrasi
               yang mewujudkan lingkungan bersih, sehat, dan mendukung ekonomi
@@ -65,10 +65,14 @@ export default function Home() {
             </p>
           </div>
           <div className="p-6 shadow rounded-xl bg-teal-50 border border-teal-200">
-            <h4 className="font-bold text-teal-600 mb-3 text-center">🚀 Misi Kami</h4>
+            <h4 className="font-bold text-teal-600 mb-3 text-center">
+              🚀 Misi Kami
+            </h4>
             <ul className="text-gray-600 leading-relaxed list-disc list-inside">
               <li>Edukasi berkelanjutan terkait pengolahan limbah.</li>
-              <li>Membangun jaringan <i>real-time</i> masyarakat & penyedia.</li>
+              <li>
+                Membangun jaringan <i>real-time</i> masyarakat & penyedia.
+              </li>
               <li>Efisiensi pendataan & penjemputan sampah terjadwal.</li>
             </ul>
           </div>
