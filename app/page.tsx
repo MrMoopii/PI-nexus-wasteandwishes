@@ -62,7 +62,8 @@ export default function Home() {
               Layanan Utama Kami
             </h2>
             <p className="text-gray-600 text-lg">
-              Solusi terintegrasi dari Waste & Wishes untuk kelestarian lingkungan Gejayan
+              Solusi terintegrasi dari Waste & Wishes untuk kelestarian
+              lingkungan Gejayan
             </p>
             <div className="mx-auto bg-teal-600 h-1 w-20 rounded mt-4"></div>
           </div>
@@ -76,9 +77,10 @@ export default function Home() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Langganan Pengambilan Sampah
               </h3>
-              <p className="text-gray-600 flex-grow">
+              <p className="text-gray-600 grow">
                 Pilahlah sampah organik Anda dari rumah atau tempat usaha UMKM,
-                dan biarkan tim kami menjemputnya secara terjadwal langsung di depan pintu rumah Anda.
+                dan biarkan tim kami menjemputnya secara terjadwal langsung di
+                depan pintu rumah Anda.
               </p>
               <a
                 href="/langganan"
@@ -96,9 +98,10 @@ export default function Home() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Edukasi & Event Lingkungan
               </h3>
-              <p className="text-gray-600 flex-grow">
-                Ikuti berbagai program pelatihan gratis, sosialisasi budidaya maggot BSF, dan gerakan
-                kerelawanan aksi hijau demi meningkatkan kesadaran ekologis bersama komunitas.
+              <p className="text-gray-600 grow">
+                Ikuti berbagai program pelatihan gratis, sosialisasi budidaya
+                maggot BSF, dan gerakan kerelawanan aksi hijau demi meningkatkan
+                kesadaran ekologis bersama komunitas.
               </p>
               <a
                 href="/event"
@@ -115,16 +118,24 @@ export default function Home() {
       <section className="container mx-auto py-16">
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div>
-            <h2 className="text-4xl font-extrabold text-teal-600 mb-2">10+ Ton</h2>
-            <p className="text-gray-600 font-semibold">Limbah Organik Terolah</p>
+            <h2 className="text-4xl font-extrabold text-teal-600 mb-2">
+              10+ Ton
+            </h2>
+            <p className="text-gray-600 font-semibold">
+              Limbah Organik Terolah
+            </p>
           </div>
           <div className="border-x">
             <h2 className="text-4xl font-extrabold text-teal-600 mb-2">250+</h2>
-            <p className="text-gray-600 font-semibold">Mitra Rumah Tangga & UMKM</p>
+            <p className="text-gray-600 font-semibold">
+              Mitra Rumah Tangga & UMKM
+            </p>
           </div>
           <div>
             <h2 className="text-4xl font-extrabold text-teal-600 mb-2">15+</h2>
-            <p className="text-gray-600 font-semibold">Event Edukasi Terlaksana</p>
+            <p className="text-gray-600 font-semibold">
+              Event Edukasi Terlaksana
+            </p>
           </div>
         </div>
       </section>
