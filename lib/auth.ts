@@ -46,10 +46,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         return {
-          id: user.id.toString(),
+          idUser: user.idUser.toString(),
           email: user.email,
-          name: user.name,
-          image: user.image,
+          username: user.username,
         };
       },
     }),
@@ -81,10 +80,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Create new user
           await db.insert(users).values({
             email: user.email,
-            name: user.name,
-            image: user.image,
+            username: user.name,
             role: "user",
-            subscriptionActive: false,
+            nomorTelp: user.nomorTelp,
           });
         }
       }

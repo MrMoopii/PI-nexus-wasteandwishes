@@ -55,7 +55,7 @@ export const pendaftaranEvent = pgTable(
     eventId: integer("event_id")
       .notNull()
       .references(() => events.idEvent),
-    userId: integer("user_id")
+    userId: integer("id_user")
       .notNull()
       .references(() => users.idUser),
     tanggalDaftar: timestamp("tanggal_daftar", { withTimezone: true })
@@ -80,7 +80,7 @@ export const produk = pgTable("produk", {
 
 export const transaksi = pgTable("transaksi", {
   idTransaksi: integer("id_transaksi").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("user_id")
+  userId: integer("id_user")
     .notNull()
     .references(() => users.idUser),
   tanggalTransaksi: timestamp("tanggal_transaksi", { withTimezone: true })
@@ -113,7 +113,7 @@ export const detailTransaksi = pgTable(
 
 export const keranjang = pgTable("keranjang", {
   idKeranjang: integer("id_keranjang").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("user_id")
+  userId: integer("id_user")
     .notNull()
     .unique()
     .references(() => users.idUser),
@@ -135,7 +135,7 @@ export const detailKeranjang = pgTable(
 
 export const dataLangganan = pgTable("data_langganan", {
   idLangganan: integer("id_langganan").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("user_id")
+  userId: integer("id_user")
     .notNull()
     .unique()
     .references(() => users.idUser),
