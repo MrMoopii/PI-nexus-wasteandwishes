@@ -1,18 +1,19 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function LogoutPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
     setLoading(true);
-    await signOut({ redirect: false });
-    router.push("/");
-    router.refresh();
+    try {
+      await signOut({ redirectTo: "/" });
+    } catch {
+      setLoading(false);
+    }
   }
 
   return (
@@ -30,12 +31,12 @@ export default function LogoutPage() {
           >
             {loading ? "Memuat..." : "Ya, Keluar"}
           </button>
-          <link
+          <Link
             href="/"
             className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition text-center"
           >
             Batal
-          </link>
+          </Link>
         </div>
       </div>
     </div>

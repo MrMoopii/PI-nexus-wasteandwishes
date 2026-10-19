@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SessionProvider from "./SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -1,6 +1,6 @@
 CREATE TABLE "data_langganan" (
 	"id_langganan" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "data_langganan_id_langganan_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"user_id" integer NOT NULL UNIQUE,
+	"id_user" integer NOT NULL UNIQUE,
 	"status_langganan" text NOT NULL
 );
 --> statement-breakpoint
@@ -48,13 +48,13 @@ CREATE TABLE "jadwal_rutin" (
 --> statement-breakpoint
 CREATE TABLE "keranjang" (
 	"id_keranjang" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "keranjang_id_keranjang_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"user_id" integer NOT NULL UNIQUE
+	"id_user" integer NOT NULL UNIQUE
 );
 --> statement-breakpoint
 CREATE TABLE "pendaftaran_event" (
 	"id_pendaftaran" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "pendaftaran_event_id_pendaftaran_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"event_id" integer NOT NULL,
-	"user_id" integer NOT NULL,
+	"id_user" integer NOT NULL,
 	"tanggal_daftar" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -76,7 +76,7 @@ CREATE TABLE "riwayat_pengambilan" (
 --> statement-breakpoint
 CREATE TABLE "transaksi" (
 	"id_transaksi" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "transaksi_id_transaksi_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"user_id" integer NOT NULL,
+	"id_user" integer NOT NULL,
 	"tanggal_transaksi" timestamp with time zone DEFAULT now() NOT NULL,
 	"metode_pembayaran" text NOT NULL
 );
@@ -97,10 +97,10 @@ CREATE TABLE "users" (
 --> statement-breakpoint
 DROP TABLE "test_koneksi";--> statement-breakpoint
 CREATE UNIQUE INDEX "detail_transaksi_transaksi_produk_unique" ON "detail_transaksi" ("transaksi_id","produk_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "pendaftaran_event_event_user_unique" ON "pendaftaran_event" ("event_id","user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "pendaftaran_event_event_user_unique" ON "pendaftaran_event" ("event_id","id_user");--> statement-breakpoint
 CREATE UNIQUE INDEX "users_username_unique" ON "users" ("username");--> statement-breakpoint
 CREATE UNIQUE INDEX "users_email_unique" ON "users" ("email");--> statement-breakpoint
-ALTER TABLE "data_langganan" ADD CONSTRAINT "data_langganan_user_id_users_id_user_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id_user");--> statement-breakpoint
+ALTER TABLE "data_langganan" ADD CONSTRAINT "data_langganan_id_user_users_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "users"("id_user");--> statement-breakpoint
 ALTER TABLE "detail_keranjang" ADD CONSTRAINT "detail_keranjang_keranjang_id_keranjang_id_keranjang_fkey" FOREIGN KEY ("keranjang_id") REFERENCES "keranjang"("id_keranjang");--> statement-breakpoint
 ALTER TABLE "detail_keranjang" ADD CONSTRAINT "detail_keranjang_produk_id_produk_id_produk_fkey" FOREIGN KEY ("produk_id") REFERENCES "produk"("id_produk");--> statement-breakpoint
 ALTER TABLE "detail_transaksi" ADD CONSTRAINT "detail_transaksi_transaksi_id_transaksi_id_transaksi_fkey" FOREIGN KEY ("transaksi_id") REFERENCES "transaksi"("id_transaksi");--> statement-breakpoint
@@ -108,8 +108,8 @@ ALTER TABLE "detail_transaksi" ADD CONSTRAINT "detail_transaksi_produk_id_produk
 ALTER TABLE "jadwal" ADD CONSTRAINT "jadwal_langganan_id_data_langganan_id_langganan_fkey" FOREIGN KEY ("langganan_id") REFERENCES "data_langganan"("id_langganan");--> statement-breakpoint
 ALTER TABLE "jadwal_janjian" ADD CONSTRAINT "jadwal_janjian_jadwal_id_jadwal_id_jadwal_fkey" FOREIGN KEY ("jadwal_id") REFERENCES "jadwal"("id_jadwal");--> statement-breakpoint
 ALTER TABLE "jadwal_rutin" ADD CONSTRAINT "jadwal_rutin_jadwal_id_jadwal_id_jadwal_fkey" FOREIGN KEY ("jadwal_id") REFERENCES "jadwal"("id_jadwal");--> statement-breakpoint
-ALTER TABLE "keranjang" ADD CONSTRAINT "keranjang_user_id_users_id_user_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id_user");--> statement-breakpoint
+ALTER TABLE "keranjang" ADD CONSTRAINT "keranjang_id_user_users_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "users"("id_user");--> statement-breakpoint
 ALTER TABLE "pendaftaran_event" ADD CONSTRAINT "pendaftaran_event_event_id_events_id_event_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id_event");--> statement-breakpoint
-ALTER TABLE "pendaftaran_event" ADD CONSTRAINT "pendaftaran_event_user_id_users_id_user_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id_user");--> statement-breakpoint
+ALTER TABLE "pendaftaran_event" ADD CONSTRAINT "pendaftaran_event_id_user_users_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "users"("id_user");--> statement-breakpoint
 ALTER TABLE "riwayat_pengambilan" ADD CONSTRAINT "riwayat_pengambilan_jadwal_id_jadwal_id_jadwal_fkey" FOREIGN KEY ("jadwal_id") REFERENCES "jadwal"("id_jadwal");--> statement-breakpoint
-ALTER TABLE "transaksi" ADD CONSTRAINT "transaksi_user_id_users_id_user_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id_user");
+ALTER TABLE "transaksi" ADD CONSTRAINT "transaksi_id_user_users_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "users"("id_user");

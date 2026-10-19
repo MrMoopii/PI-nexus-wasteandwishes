@@ -15,14 +15,20 @@ export async function register(formData: {
   tanggalLahir: string;
 }) {
   const {
-    username,
-    namaPelanggan,
-    email,
+    username: rawUsername,
+    namaPelanggan: rawNamaPelanggan,
+    email: rawEmail,
     password,
-    nomorTelp,
-    alamat,
+    nomorTelp: rawNomorTelp,
+    alamat: rawAlamat,
     tanggalLahir,
   } = formData;
+
+  const username = rawUsername.trim();
+  const namaPelanggan = rawNamaPelanggan.trim();
+  const email = rawEmail.trim().toLowerCase();
+  const nomorTelp = rawNomorTelp.trim();
+  const alamat = rawAlamat.trim();
 
   try {
     // Check if email already exists

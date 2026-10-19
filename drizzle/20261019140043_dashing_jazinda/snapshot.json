@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "aacd161c-58ed-4479-99c8-9bab99ab44cb",
+  "id": "fd3781ed-1a3f-46f7-bace-c6c0ce00d928",
   "prevIds": [
     "b64b2ff3-3348-40fa-9fe8-c5c11ee4b245"
   ],
@@ -114,7 +114,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "user_id",
+      "name": "id_user",
       "entityType": "columns",
       "schema": "public",
       "table": "data_langganan"
@@ -488,7 +488,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "user_id",
+      "name": "id_user",
       "entityType": "columns",
       "schema": "public",
       "table": "keranjang"
@@ -536,7 +536,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "user_id",
+      "name": "id_user",
       "entityType": "columns",
       "schema": "public",
       "table": "pendaftaran_event"
@@ -732,7 +732,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "user_id",
+      "name": "id_user",
       "entityType": "columns",
       "schema": "public",
       "table": "transaksi"
@@ -954,7 +954,7 @@
           "opclass": null
         },
         {
-          "value": "user_id",
+          "value": "id_user",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -1016,7 +1016,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "schemaTo": "public",
       "tableTo": "users",
@@ -1025,7 +1025,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
-      "name": "data_langganan_user_id_users_id_user_fkey",
+      "name": "data_langganan_id_user_users_id_user_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "data_langganan"
@@ -1152,7 +1152,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "schemaTo": "public",
       "tableTo": "users",
@@ -1161,7 +1161,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
-      "name": "keranjang_user_id_users_id_user_fkey",
+      "name": "keranjang_id_user_users_id_user_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "keranjang"
@@ -1186,7 +1186,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "schemaTo": "public",
       "tableTo": "users",
@@ -1195,7 +1195,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
-      "name": "pendaftaran_event_user_id_users_id_user_fkey",
+      "name": "pendaftaran_event_id_user_users_id_user_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "pendaftaran_event"
@@ -1220,7 +1220,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "schemaTo": "public",
       "tableTo": "users",
@@ -1229,7 +1229,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
-      "name": "transaksi_user_id_users_id_user_fkey",
+      "name": "transaksi_id_user_users_id_user_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "transaksi"
@@ -1368,10 +1368,10 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "nullsNotDistinct": false,
-      "name": "data_langganan_user_id_key",
+      "name": "data_langganan_id_user_key",
       "schema": "public",
       "table": "data_langganan",
       "entityType": "uniques"
@@ -1379,10 +1379,10 @@
     {
       "nameExplicit": false,
       "columns": [
-        "user_id"
+        "id_user"
       ],
       "nullsNotDistinct": false,
-      "name": "keranjang_user_id_key",
+      "name": "keranjang_id_user_key",
       "schema": "public",
       "table": "keranjang",
       "entityType": "uniques"

@@ -91,13 +91,13 @@ export default function RegisterPage() {
 
           <div>
             <label
-              htmlFor="email"
+              htmlFor="rawEmail"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Email
             </label>
             <input
-              id="email"
+              id="rawEmail"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -203,12 +203,11 @@ export default function RegisterPage() {
             </label>
             <input
               id="tanggalLahir"
-              type="text"
-              value={username}
+              type="date"
+              value={tanggalLahir}
               onChange={(e) => setTanggalLahir(e.target.value)}
               required
               className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-              placeholder="DD-MM-YYYY"
             />
           </div>
 

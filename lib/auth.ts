@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -11,10 +10,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
+    // Google({
+    //   clientId: process.env.AUTH_GOOGLE_ID,
+    //   clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    // }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -25,68 +24,43 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
-
-        const email = credentials.email as string;
+        const email = (credentials.email as string).trim().toLowerCase();
         const password = credentials.password as string;
-
         const [user] = await db
           .select()
           .from(users)
           .where(eq(users.email, email))
           .limit(1);
-
         if (!user || !user.password) {
           return null;
         }
-
         const isValid = await bcrypt.compare(password, user.password);
-
         if (!isValid) {
           return null;
         }
-
         return {
-          idUser: user.idUser.toString(),
+          id: user.idUser.toString(),
+          name: user.username,
           email: user.email,
-          username: user.username,
+          peran: user.peran,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.provider = account?.provider;
+        token.idUser = user.id;
+        token.peran = (user as typeof user & { peran?: string }).peran;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
+        session.user.idUser = token.idUser as string;
+        session.user.peran = token.peran as string;
       }
       return session;
-    },
-    async signIn({ user, account }) {
-      if (account?.provider === "google" && user.email) {
-        // Check if user exists
-        const [existing] = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, user.email))
-          .limit(1);
-
-        if (!existing) {
-          // Create new user
-          await db.insert(users).values({
-            email: user.email,
-            username: user.name,
-            role: "user",
-            nomorTelp: user.nomorTelp,
-          });
-        }
-      }
-      return true;
     },
   },
   pages: {
