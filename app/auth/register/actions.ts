@@ -5,8 +5,24 @@ import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-export async function register(formData: { name: string; email: string; password: string }) {
-  const { name, email, password } = formData;
+export async function register(formData: {
+  username: string;
+  namaPelanggan: string;
+  email: string;
+  password: string;
+  nomorTelp: string;
+  alamat: string;
+  tanggalLahir: string;
+}) {
+  const {
+    username,
+    namaPelanggan,
+    email,
+    password,
+    nomorTelp,
+    alamat,
+    tanggalLahir,
+  } = formData;
 
   try {
     // Check if email already exists
@@ -24,7 +40,7 @@ export async function register(formData: { name: string; email: string; password
     const [existingUsername] = await db
       .select()
       .from(users)
-      .where(eq(users.name, name))
+      .where(eq(users.username, username))
       .limit(1);
 
     if (existingUsername) {
@@ -36,11 +52,14 @@ export async function register(formData: { name: string; email: string; password
 
     // Insert new user
     await db.insert(users).values({
-      name,
-      email,
+      username: username,
+      namaPelanggan: namaPelanggan,
+      peran: "user",
       password: hashedPassword,
-      role: "user",
-      subscriptionActive: false,
+      email: email,
+      nomorTelp: nomorTelp,
+      alamat: alamat,
+      tanggalLahir: tanggalLahir,
     });
 
     return { success: true };

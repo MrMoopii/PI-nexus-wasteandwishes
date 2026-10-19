@@ -86,7 +86,7 @@ CREATE TABLE "users" (
 	"username" text NOT NULL,
 	"nama_pelanggan" text NOT NULL,
 	"peran" text DEFAULT 'user' NOT NULL,
-	"password_hash" text NOT NULL,
+	"password" text NOT NULL,
 	"email" text NOT NULL,
 	"nomor_telp" text NOT NULL,
 	"alamat" text NOT NULL,

@@ -18,7 +18,7 @@ export const users = pgTable(
     username: text("username").notNull(),
     namaPelanggan: text("nama_pelanggan").notNull(),
     peran: text("peran").notNull().default("user"),
-    passwordHash: text("password_hash").notNull(),
+    password: text("password").notNull(),
     email: text("email").notNull(),
     nomorTelp: text("nomor_telp").notNull(),
     alamat: text("alamat").notNull(),

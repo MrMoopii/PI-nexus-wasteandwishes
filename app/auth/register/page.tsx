@@ -7,10 +7,14 @@ import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [username, setName] = useState("");
+  const [namaPelanggan, setNamaPelanggan] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [nomorTelp, setNomorTelp] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [tanggalLahir, setTanggalLahir] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +35,15 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const result = await register({ name, email, password });
+      const result = await register({
+        username,
+        namaPelanggan,
+        email,
+        password,
+        nomorTelp,
+        alamat,
+        tanggalLahir,
+      });
 
       if (result?.error) {
         setError(result.error);
@@ -61,22 +73,27 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Nama Lengkap
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Username Akun
             </label>
             <input
-              id="name"
+              id="username"
               type="text"
-              value={name}
+              value={username}
               onChange={(e) => setName(e.target.value)}
               required
               className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-              placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email
             </label>
             <input
@@ -86,12 +103,14 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-              placeholder="nama@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password
             </label>
             <input
@@ -107,7 +126,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Konfirmasi Password
             </label>
             <input
@@ -118,6 +140,75 @@ export default function RegisterPage() {
               required
               className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
               placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Nama Lengkap
+            </label>
+            <input
+              id="namaPelanggan"
+              type="text"
+              value={namaPelanggan}
+              onChange={(e) => setNamaPelanggan(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="nomorTelp"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Nomor Telepon
+            </label>
+            <input
+              id="nomorTelp"
+              type="text"
+              value={nomorTelp}
+              onChange={(e) => setNomorTelp(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="alamat"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Alamat
+            </label>
+            <input
+              id="alamat"
+              type="text"
+              value={alamat}
+              onChange={(e) => setAlamat(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="tanggalLahir"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Tanggal Lahir
+            </label>
+            <input
+              id="tanggalLahir"
+              type="text"
+              value={username}
+              onChange={(e) => setTanggalLahir(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
+              placeholder="DD-MM-YYYY"
             />
           </div>
 
@@ -132,7 +223,10 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-gray-600">
           Sudah punya akun?{" "}
-          <Link href="/auth/login" className="text-teal-600 font-semibold hover:underline">
+          <Link
+            href="/auth/login"
+            className="text-teal-600 font-semibold hover:underline"
+          >
             Masuk sini
           </Link>
         </p>

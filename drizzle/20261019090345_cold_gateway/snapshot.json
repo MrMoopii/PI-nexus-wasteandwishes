@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "fb45bbfb-25bd-4628-b8f6-8e6c90709d2d",
+  "id": "aacd161c-58ed-4479-99c8-9bab99ab44cb",
   "prevIds": [
     "b64b2ff3-3348-40fa-9fe8-c5c11ee4b245"
   ],
@@ -832,7 +832,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "password_hash",
+      "name": "password",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
