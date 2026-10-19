@@ -40,12 +40,13 @@ Versi Next.js di proyek ini berbeda dari banyak tutorial di internet. Sebelum me
 
 Pembagian folder mengurangi konflik saat merge. Pembagian ini awal dan bisa disesuaikan tim.
 
-| Tim | Anggota | Area utama |
-|---|---|---|
-| Tampilan (frontend) | 2 orang | `components/`, halaman publik di `app/`, styling (Tailwind), `public/` |
-| Backend | 3 orang | `app/api/`, `lib/`, skema database dan migrasi (`lib/db/` dan `drizzle/`), autentikasi, pembayaran |
+| Tim                 | Anggota | Area utama                                                                                         |
+| ------------------- | ------- | -------------------------------------------------------------------------------------------------- |
+| Tampilan (frontend) | 2 orang | `components/`, halaman publik di `app/`, styling (Tailwind), `public/`                             |
+| Backend             | 3 orang | `app/api/`, `lib/`, skema database dan migrasi (`lib/db/` dan `drizzle/`), autentikasi, pembayaran |
 
 Aturan:
+
 - Jangan mengedit file milik area lain tanpa memberi tahu pemiliknya, terutama `app/layout.tsx`, `package.json`, dan skema database.
 - Jika butuh perubahan di area lain, buat issue di GitHub atau kabari lewat grup tim, lalu sepakati siapa yang mengerjakan.
 
@@ -81,29 +82,34 @@ Setelah file-file di bawah ada di `development`, anggota lain cukup `git pull` d
 Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 16, tetapi **belum dijalankan**. Jika ada error (misalnya tipe atau versi), jangan memaksa: catat pesan errornya dan tanyakan ke agent atau tim.
 
 1. Buat branch kerja dari `development`:
+
    ```bash
    git checkout development && git pull
    git checkout -b feat/pasang-drizzle
    ```
 
 2. Pasang paket (hanya pnpm):
+
    ```bash
    pnpm add drizzle-orm@rc @neondatabase/serverless @next/env
    pnpm add -D drizzle-kit@rc
    ```
+
    Tim memutuskan memakai versi **rc** (1.0 rilis kandidat), sesuai dokumentasi resmi Drizzle saat ini. `drizzle-orm` dan `drizzle-kit` harus sama-sama rc, jangan dicampur dengan versi stabil (0.x). Cek dengan `pnpm list drizzle-orm drizzle-kit`. Karena rc belum final, hindari memperbarui versinya sembarangan: perubahan versi dilakukan lewat PR tersendiri.
 
    Jika pnpm menampilkan `ERR_PNPM_IGNORED_BUILDS` untuk `esbuild`, jalankan `pnpm approve-builds`, centang `esbuild` (spasi), lalu Enter. Pilihan itu tercatat di `pnpm-workspace.yaml` (`allowBuilds`), jadi file itu ikut di-commit.
 
    Commit `package.json`, `pnpm-lock.yaml`, dan `pnpm-workspace.yaml`. Paket `tsx` yang muncul di contoh dokumentasi Drizzle tidak diperlukan di proyek ini.
 
-3. Isi `.env.local` dengan connection string branch Neon pribadi (di dashboard Neon: tombol **Connect**, pilih branch milikmu, nyalakan atau matikan *Connection pooling* untuk mendapat kedua versinya):
+3. Isi `.env.local` dengan connection string branch Neon pribadi (di dashboard Neon: tombol **Connect**, pilih branch milikmu, nyalakan atau matikan _Connection pooling_ untuk mendapat kedua versinya):
+
    ```bash
    DATABASE_URL="postgresql://...-pooler...?sslmode=require"
    DIRECT_URL="postgresql://...(tanpa -pooler)...?sslmode=require"
    ```
 
 4. Buat `lib/db/schema.ts` dengan satu tabel uji:
+
    ```ts
    import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
@@ -118,6 +124,7 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
    ```
 
 5. Buat `lib/db/index.ts` untuk koneksi. Koneksi dibuat saat `getDb()` dipanggil, bukan saat file di-import, supaya `pnpm build` tidak gagal di mesin yang belum punya `DATABASE_URL`:
+
    ```ts
    import { neon } from "@neondatabase/serverless";
    import { drizzle } from "drizzle-orm/neon-http";
@@ -138,10 +145,12 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      return dbTersimpan;
    }
    ```
-   Pada versi rc, `drizzle()` tidak lagi menerima opsi `schema`. Jika nanti memakai *relations* (query relasi), definisikan dengan `defineRelations` dan kirim lewat opsi `relations`: `drizzle({ client, relations })`. Tabel biasa untuk `select`, `insert`, dan `update` tidak membutuhkannya.
+
+   Pada versi rc, `drizzle()` tidak lagi menerima opsi `schema`. Jika nanti memakai _relations_ (query relasi), definisikan dengan `defineRelations` dan kirim lewat opsi `relations`: `drizzle({ client, relations })`. Tabel biasa untuk `select`, `insert`, dan `update` tidak membutuhkannya.
    Berhati-hati saat mengetik `DATABASE_URL`: salah satu huruf (misalnya `DATABASSE_URL`) tidak menimbulkan error di editor, tetapi nilainya akan kosong saat dijalankan.
 
 6. Buat `drizzle.config.ts` di root repo. `drizzle-kit` berjalan di luar Next.js sehingga tidak otomatis membaca `.env.local`. `loadEnvConfig` dari `@next/env` memuat file `.env*` dengan aturan yang sama seperti Next.js:
+
    ```ts
    import { loadEnvConfig } from "@next/env";
    import { defineConfig } from "drizzle-kit";
@@ -163,19 +172,23 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
    ```
 
 7. Tambahkan dua script di `package.json` (bagian `scripts`). Sengaja tidak ada script `push`:
+
    ```json
    "db:generate": "drizzle-kit generate",
    "db:migrate": "drizzle-kit migrate"
    ```
 
 8. Buat dan terapkan migrasi pertama:
+
    ```bash
    pnpm db:generate   # membuat folder drizzle/ berisi file SQL
    pnpm db:migrate    # menerapkan ke branch Neon pribadimu
    ```
+
    Cek di dashboard Neon (menu Tables) bahwa tabel `tes_koneksi` muncul.
 
 9. Buat halaman uji sementara `app/cek-database/page.tsx`. Next.js 16 dengan Cache Components mewajibkan akses data yang berubah-ubah dibungkus `<Suspense>`, dan `connection()` membuatnya dijalankan saat ada permintaan (bukan saat build):
+
    ```tsx
    import { count } from "drizzle-orm";
    import { connection } from "next/server";
@@ -187,10 +200,14 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
    async function HasilTes() {
      await connection();
      try {
-       const [baris] = await getDb().select({ jumlah: count() }).from(tesKoneksi);
+       const [baris] = await getDb()
+         .select({ jumlah: count() })
+         .from(tesKoneksi);
        return <p>Koneksi berhasil. Jumlah baris: {baris.jumlah}</p>;
      } catch {
-       return <p>Koneksi gagal. Cek .env.local dan pastikan migrasi sudah jalan.</p>;
+       return (
+         <p>Koneksi gagal. Cek .env.local dan pastikan migrasi sudah jalan.</p>
+       );
      }
    }
 
@@ -205,15 +222,16 @@ Contoh kode di bawah disusun dari dokumentasi resmi Drizzle, Neon, dan Next.js 1
      );
    }
    ```
+
    Jalankan `pnpm dev`, lalu buka `http://localhost:3000/cek-database`.
 
 10. Rapikan sisa Prisma di repo:
 
-    | Berkas | Yang diubah |
-    |---|---|
-    | `.env.example` | Komentar "dipakai Prisma untuk migrasi" menjadi "dipakai untuk migrasi" |
-    | `.prettierignore` | Ganti `prisma/migrations` dengan `drizzle` |
-    | `.vscode/extensions.json` | Hapus `Prisma.prisma` |
+    | Berkas                    | Yang diubah                                                             |
+    | ------------------------- | ----------------------------------------------------------------------- |
+    | `.env.example`            | Komentar "dipakai Prisma untuk migrasi" menjadi "dipakai untuk migrasi" |
+    | `.prettierignore`         | Ganti `prisma/migrations` dengan `drizzle`                              |
+    | `.vscode/extensions.json` | Hapus `Prisma.prisma`                                                   |
 
 11. Jalankan `pnpm lint` dan `pnpm build`, lalu buka PR ke `development`.
 
@@ -223,19 +241,20 @@ Catatan untuk dibahas tim sebelum membangun fitur stok toko dan kuota event: dri
 
 ### 6.3 Alur mengubah struktur tabel
 
-| Berkas | Fungsi |
-|---|---|
-| `lib/db/schema.ts` | Definisi tabel |
-| `lib/db/index.ts` | Koneksi (`getDb()`), hanya untuk kode server |
-| `drizzle.config.ts` | Pengaturan drizzle-kit (membaca `.env.local`) |
-| `drizzle/` | File migrasi hasil `generate`. Di-commit, jangan diedit manual |
+| Berkas              | Fungsi                                                         |
+| ------------------- | -------------------------------------------------------------- |
+| `lib/db/schema.ts`  | Definisi tabel                                                 |
+| `lib/db/index.ts`   | Koneksi (`getDb()`), hanya untuk kode server                   |
+| `drizzle.config.ts` | Pengaturan drizzle-kit (membaca `.env.local`)                  |
+| `drizzle/`          | File migrasi hasil `generate`. Di-commit, jangan diedit manual |
 
 Langkah:
+
 1. `git pull`, lalu terapkan migrasi baru dari rekan: `pnpm db:migrate`.
 2. Ubah `lib/db/schema.ts`.
 3. `pnpm db:generate` untuk membuat file migrasi, lalu baca isi file SQL-nya.
 4. `pnpm db:migrate` untuk menerapkannya ke branch Neon pribadi.
-5. Commit `lib/db/schema.ts` dan folder `drizzle/` dalam PR yang sama.
+5. Commit `lib/db/schema.ts` dan folder `drizzle/` dalam PR yang sama. Ini dilakukan supaya semua anggota tim punya riwayat migrasi yang sama.
 
 Jangan memakai `drizzle-kit push` pada database bersama, karena `push` mengubah database tanpa meninggalkan file migrasi. Jangan mengedit file migrasi yang sudah di-merge. Kalau salah, buat migrasi baru.
 
@@ -247,11 +266,12 @@ Jangan memakai `drizzle-kit push` pada database bersama, karena `push` mengubah 
 - Validasi semua input dari form di sisi server, bukan hanya di tampilan.
 - Jangan menaruh logika harga, stok, atau pembayaran di sisi klien. Hitung dan periksa di server.
 - Jalankan `pnpm lint` dan perbaiki peringatan sebelum commit.
-- Format kode diatur Prettier (`.prettierrc`). Pasang ekstensi Prettier di VS Code (pengaturan proyek di `.vscode/` sudah menyalakan *Format on Save*). Jangan mengubah `.prettierrc` tanpa Pull Request dan kesepakatan tim, supaya tidak ada perubahan format massal yang membuat konflik.
+- Format kode diatur Prettier (`.prettierrc`). Pasang ekstensi Prettier di VS Code (pengaturan proyek di `.vscode/` sudah menyalakan _Format on Save_). Jangan mengubah `.prettierrc` tanpa Pull Request dan kesepakatan tim, supaya tidak ada perubahan format massal yang membuat konflik.
 
 ## 8. Menggunakan AI agent
 
 AI agent boleh dipakai membantu, dengan syarat:
+
 - Hasilnya dibaca dan dipahami penulis PR sebelum dikirim.
 - Penulis PR sudah menjalankan `pnpm lint` dan `pnpm build` di laptopnya sendiri.
 - Tidak ada rahasia (connection string, kunci API) yang ditempel ke percakapan dengan agent.

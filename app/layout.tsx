@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import favIcon from "./img/favicon/wasteandwishes_logo.ico";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import SessionProvider from "./SessionProvider";
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SessionProvider>
-          <Suspense fallback={<div className="h-[76px] bg-gray-900" />}><Header /></Suspense>
+          <Suspense fallback={<div className="h-[76px] bg-gray-900" />}>
+            <Header />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
         </SessionProvider>
