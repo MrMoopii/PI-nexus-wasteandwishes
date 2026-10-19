@@ -1,23 +1,20 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export default async function Header() {
-  const cookieStore = await cookies();
-  const loggedIn = cookieStore.has("ww_session");
-  const role = cookieStore.get("ww_role")?.value;
-  const username = cookieStore.get("ww_username")?.value ?? "Pengguna";
-  const subscriptionActive =
-    cookieStore.get("ww_subscription_active")?.value === "true";
+  const session = await auth();
+  const loggedIn = !!session?.user;
+  const username = session?.user?.name ?? "Pengguna";
 
   return (
     <header className="bg-gray-900 text-white shadow">
-      <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-4 px-3 py-5">
+      <nav className="mx-auto flex w-full max-w-[1140px] flex-wrap items-center justify-between gap-4 px-3 py-5">
         <Link
           href="/"
           className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px]"
         >
           <img
-            src="/img/Favicon/wasteandwishes_logo.png"
+            src="/legacy/img/Favicon/wasteandwishes_logo.png"
             alt=""
             className="h-[35px] w-auto"
           />
@@ -36,7 +33,7 @@ export default async function Header() {
           >
             Tentang Kami
           </Link>
-          {loggedIn && role === "user" && (
+          {loggedIn && (
             <>
               <Link
                 className="px-3 py-2 transition-colors hover:text-waste"
@@ -52,18 +49,10 @@ export default async function Header() {
               </Link>
             </>
           )}
-          {loggedIn && role === "admin" && (
-            <Link
-              className="px-3 py-2 transition-colors hover:text-waste"
-              href="/admin"
-            >
-              Dashboard Admin
-            </Link>
-          )}
           {!loggedIn ? (
             <>
               <Link
-                href="/auth"
+                href="/auth/login"
                 className="rounded-lg border border-white/60 px-5 py-2 text-base font-semibold text-white transition hover:border-waste hover:text-waste"
               >
                 Masuk
@@ -85,13 +74,6 @@ export default async function Header() {
               </summary>
               <div className="absolute right-0 z-20 mt-3 w-56 rounded-xl bg-white p-4 text-center text-gray-900 shadow-xl">
                 <p className="font-bold">{username}</p>
-                <p className="mt-2 inline-block rounded-full bg-teal-600 px-3 py-1 text-xs text-white">
-                  {role === "admin"
-                    ? "🛡️ Admin"
-                    : subscriptionActive
-                      ? "⭐ Langganan Aktif"
-                      : "Belum Langganan"}
-                </p>
                 <hr className="my-3 border-gray-200" />
                 <Link className="block py-2 text-gray-600" href="/profil">
                   Profil Saya
