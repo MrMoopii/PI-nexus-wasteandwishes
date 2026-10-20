@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 
 export default async function Header() {
@@ -8,15 +9,17 @@ export default async function Header() {
 
   return (
     <header className="bg-gray-900 text-white shadow">
-      <nav className="mx-auto flex w-full max-w-[1140px] flex-wrap items-center justify-between gap-4 px-3 py-5">
+      <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-4 px-3 py-5">
         <Link
           href="/"
           className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px]"
         >
-          <img
-            src="/legacy/img/Favicon/wasteandwishes_logo.png"
-            alt=""
-            className="h-[35px] w-auto"
+          <Image
+            src="/icon/waste-and-wishes-logo.png"
+            alt="Waste and Wishes logo"
+            width={35}
+            height={35}
+            className="h-8.75 w-auto"
           />
           Waste <span className="text-teal-400">&</span> Wishes
         </Link>
