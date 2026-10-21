@@ -4,16 +4,17 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import Google from "next-auth/providers/google";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
   providers: [
-    // Google({
-    //   clientId: process.env.AUTH_GOOGLE_ID,
-    //   clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    // }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -24,6 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
+
         const email = (credentials.email as string).trim().toLowerCase();
         const password = credentials.password as string;
         const [user] = await db
@@ -31,14 +33,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .from(users)
           .where(eq(users.email, email))
           .limit(1);
+
         if (!user || !user.password) {
           return null;
         }
+
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
           return null;
         }
+
         return {
+          // nama variabel return mengikuti format Auth.js
           id: user.idUser.toString(),
           name: user.username,
           email: user.email,
@@ -48,10 +54,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ user, token, account }) {
+      if (account?.provider === "google" && token.email) {
+        const [row] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, token.email.toLowerCase()))
+          .limit(1);
+
+        if (row) {
+          token.idUser = row.idUser.toString();
+          token.peran = row.peran;
+        }
+      } else if (user) {
         token.idUser = user.id;
-        token.peran = (user as typeof user & { peran?: string }).peran;
+        token.peran = user.peran;
       }
       return token;
     },
@@ -61,6 +78,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.peran = token.peran as string;
       }
       return session;
+    },
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      if (!user.email || profile?.email_verified !== true) {
+        return false;
+      }
+
+      const email = user.email.trim().toLowerCase();
+      const [row] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (row?.password) {
+        return "/auth/login?error=EmailSudahTerdaftar";
+      }
+
+      if (!row) {
+        await db.insert(users).values({
+          email: email,
+        });
+      }
+
+      return true;
     },
   },
   pages: {
