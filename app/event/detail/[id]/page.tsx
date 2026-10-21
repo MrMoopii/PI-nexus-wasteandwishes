@@ -138,7 +138,7 @@ export default async function EventDetailPage({
               Tanggal Pelaksanaan
             </h4>
             <div className="p-4 bg-white rounded-2xl border border-gray-200 text-2xl font-bold text-gray-800 flex items-center gap-3">
-              <span>📅</span>
+              <span></span>
               <span>{event.tanggal_pelaksanaan}</span>
             </div>
           </div>
