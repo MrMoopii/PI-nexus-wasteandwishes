@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HideOnAdmin from "@/components/HideOnAdmin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +32,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Suspense fallback={<div className="h-19 bg-gray-900" />}>
-          <Header />
-        </Suspense>
+        <HideOnAdmin>
+          <Suspense fallback={<div className="h-19 bg-gray-900" />}>
+            <Header />
+          </Suspense>
+        </HideOnAdmin>
         <main className="flex-1">{children}</main>
-        <Footer />
+        <HideOnAdmin>
+          <Footer />
+        </HideOnAdmin>
       </body>
     </html>
   );
