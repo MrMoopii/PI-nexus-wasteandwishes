@@ -32,13 +32,13 @@ export async function register(formData: {
 
   try {
     // Check if email already exists
-    const [existingUser] = await db
+    const [checkEmailTerpakai] = await db
       .select()
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
 
-    if (existingUser) {
+    if (checkEmailTerpakai) {
       return { error: "Email sudah terdaftar" };
     }
 
@@ -50,7 +50,7 @@ export async function register(formData: {
       .limit(1);
 
     if (existingUsername) {
-      return { error: "Nama pengguna sudah digunakan" };
+      return { error: "Username sudah dipakai!" };
     }
 
     // Hash password

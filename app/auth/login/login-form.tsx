@@ -54,7 +54,7 @@ export default function LoginForm() {
 
   async function handleGoogleLogin() {
     setLoading(true);
-    await signIn("google", { redirectTo: "/" });
+    await signIn("google", { redirectTo: "/lengkapi-profil" });
   }
 
   return (

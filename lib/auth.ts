@@ -12,8 +12,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID, // Kode Auth Google ID
+      clientSecret: process.env.AUTH_GOOGLE_SECRET, // Kode Google Secret
+      authorization: { params: { prompt: "select_account" } }, // Selalu tampilkan daftar akun ketika mau login dengan Google
     }),
     Credentials({
       name: "credentials",
