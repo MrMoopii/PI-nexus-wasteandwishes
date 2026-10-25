@@ -15,14 +15,14 @@ export const users = pgTable(
   "users",
   {
     idUser: integer("id_user").primaryKey().generatedAlwaysAsIdentity(),
-    username: text("username").notNull(),
-    namaPelanggan: text("nama_pelanggan").notNull(),
+    username: text("username"),
+    namaPelanggan: text("nama_pelanggan"),
     peran: text("peran").notNull().default("user"),
-    password: text("password").notNull(),
+    password: text("password"),
     email: text("email").notNull(),
-    nomorTelp: text("nomor_telp").notNull(),
-    alamat: text("alamat").notNull(),
-    tanggalLahir: date("tanggal_lahir").notNull(),
+    nomorTelp: text("nomor_telp"),
+    alamat: text("alamat"),
+    tanggalLahir: date("tanggal_lahir"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
