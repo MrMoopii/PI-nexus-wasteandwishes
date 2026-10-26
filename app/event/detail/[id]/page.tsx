@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 
 export const instant = false;
 
-
 // Fallback lookup
 const DEFAULT_EVENTS: Record<
   number,
@@ -16,6 +15,10 @@ const DEFAULT_EVENTS: Record<
     deskripsi: string;
     gambar: string;
     tanggal_pelaksanaan: string;
+    lokasi?: string;
+    kategori?: string;
+    waktu?: string;
+    kuota?: string;
   }
 > = {
   1: {
@@ -25,6 +28,10 @@ const DEFAULT_EVENTS: Record<
       "Pelajari teknik budidaya Black Soldier Fly (BSF) dari pembibitan hingga panen larva sebagai pakan ternak berkualitas tinggi dan pengolah sampah organik tercepat.",
     gambar: "1.jpg",
     tanggal_pelaksanaan: "25 Oktober 2026",
+    lokasi: "Wedomartani, Sleman, D.I. Yogyakarta",
+    kategori: "Workshop Budidaya",
+    waktu: "09.00 - 14.30 WIB",
+    kuota: "30 Peserta",
   },
   2: {
     id_event: 2,
@@ -33,6 +40,10 @@ const DEFAULT_EVENTS: Record<
       "Panduan praktis bagi ibu rumah tangga dan pelaku UMKM dalam memilah sampah basah dan kering agar bernilai guna dan tidak mencemari lingkungan.",
     gambar: "2.jpg",
     tanggal_pelaksanaan: "02 November 2026",
+    lokasi: "Balai RW Gejayan, Yogyakarta",
+    kategori: "Edukasi Warga",
+    waktu: "08.30 - 11.30 WIB",
+    kuota: "50 Peserta",
   },
   3: {
     id_event: 3,
@@ -41,6 +52,10 @@ const DEFAULT_EVENTS: Record<
       "Gerakan relawan lingkungan bersama komunitas Nexus membersihkan bantaran sungai dan kawasan Gejayan secara berkala.",
     gambar: "3.jpg",
     tanggal_pelaksanaan: "15 November 2026",
+    lokasi: "Kawasan Gejayan & Bantaran Sungai",
+    kategori: "Aksi Relawan",
+    waktu: "06.30 - 10.00 WIB",
+    kuota: "100 Relawan",
   },
   4: {
     id_event: 4,
@@ -49,6 +64,10 @@ const DEFAULT_EVENTS: Record<
       "Mengolah residu kasgot (bekas maggot) menjadi pupuk organik padat dan cair yang kaya nutrisi untuk tanaman dan pertanian urban.",
     gambar: "4.jpg",
     tanggal_pelaksanaan: "28 November 2026",
+    lokasi: "Kranggan, Sleman, D.I. Yogyakarta",
+    kategori: "Pertanian Urban",
+    waktu: "09.00 - 13.00 WIB",
+    kuota: "25 Peserta",
   },
   5: {
     id_event: 5,
@@ -57,6 +76,10 @@ const DEFAULT_EVENTS: Record<
       "Membuka potensi ekonomi dari pengelolaan limbah berbasis komunitas menuju desa mandiri energi dan pakan berkelanjutan.",
     gambar: "5.jpg",
     tanggal_pelaksanaan: "10 Desember 2026",
+    lokasi: "Aula Balai Desa, Sleman",
+    kategori: "Seminar Komunitas",
+    waktu: "09.30 - 12.30 WIB",
+    kuota: "60 Peserta",
   },
 };
 
@@ -86,6 +109,10 @@ export default async function EventDetailPage({
         gambar: fallback.gambar,
         tanggal_pelaksanaan:
           dbEvent.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
+        lokasi: fallback.lokasi,
+        kategori: fallback.kategori,
+        waktu: fallback.waktu,
+        kuota: fallback.kuota,
       };
     }
   } catch {
@@ -96,62 +123,225 @@ export default async function EventDetailPage({
     notFound();
   }
 
+  const plateNo = String(event.id_event).padStart(2, "0");
+
   return (
-    <div className="container mx-auto px-4 max-w-6xl py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-        {/* Left Column: Gambar & CTA */}
-        <div>
-          <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-sm bg-gray-100">
-            <Image
-              src={`/img/event/${event.gambar}`}
-              alt={event.nama_event}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </div>
-
-          <Link
-            href={`/event/checkout/${event.id_event}`}
-            className="mt-6 block w-full py-4 text-center rounded-xl text-lg font-bold text-white bg-[#17afb0] hover:bg-[#118586] transition-colors shadow-md"
-          >
-            Daftar Sekarang (Gratis)
-          </Link>
-        </div>
-
-        {/* Right Column: Detail info */}
-        <div className="space-y-6">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight">
-            {event.nama_event}
-          </h1>
-
-          <div>
-            <h4 className="text-lg font-bold text-gray-900 mb-2">Deskripsi</h4>
-            <div className="bg-[#E6F7F7] p-6 rounded-2xl text-gray-700 leading-relaxed text-base shadow-xs min-h-[140px]">
-              {event.deskripsi}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-bold text-gray-900 mb-2">
-              Tanggal Pelaksanaan
-            </h4>
-            <div className="p-4 bg-white rounded-2xl border border-gray-200 text-2xl font-bold text-gray-800 flex items-center gap-3">
-              <span></span>
-              <span>{event.tanggal_pelaksanaan}</span>
-            </div>
-          </div>
-        </div>
+    <div className="relative min-h-screen bg-[#F4F7FA] text-[#1B2233] font-[family-name:var(--font-inter)] selection:bg-[#17afb0]/20 selection:text-[#118586]">
+      {/* Ambient gradient washes matching Helix Drift */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-[#B9CDE5]/40 blur-3xl" />
+        <div className="absolute top-[30%] -right-32 h-[550px] w-[550px] rounded-full bg-[#DDE7F2]/70 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/4 h-[450px] w-[450px] rounded-full bg-[#B9CDE5]/30 blur-3xl" />
       </div>
 
-      <div className="mt-10">
-        <Link
-          href="/event"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-xs"
-        >
-          ⬅ Kembali ke Daftar Event
-        </Link>
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        {/* Breadcrumb / Tag Line */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/event"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#5B6879] hover:text-[#17afb0] transition-colors"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span>Kembali ke Daftar Agenda</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-[#17afb0]" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] text-[#93A0B2] uppercase">
+              Plate {plateNo} / 05
+            </span>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column (5 Cols): Static Image Plate & Quick Action */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="relative aspect-[16/11] w-full rounded-2xl overflow-hidden bg-[#DDE7F2] border border-[#B9CDE5]/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
+              <Image
+                src={`/img/event/${event.gambar}`}
+                alt={event.nama_event}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 42vw"
+                className="object-cover"
+              />
+              {/* Inner subtle rim highlight matching template */}
+              <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)]" />
+
+              {/* Tag pill on image */}
+              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-[#17afb0] uppercase tracking-wider shadow-sm">
+                {event.kategori || "Workshop"}
+              </div>
+
+              <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-[#17afb0] text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                Gratis
+              </div>
+            </div>
+
+            {/* Registration Action Card */}
+            <div className="rounded-2xl border border-[#B9CDE5]/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+              <div className="flex items-baseline justify-between mb-3">
+                <span className="text-xs uppercase tracking-wider text-[#93A0B2] font-semibold">
+                  Biaya Kepesertaan
+                </span>
+                <span className="text-2xl font-bold text-[#17afb0] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  Rp 0 <span className="text-xs font-normal text-[#5B6879]">(Gratis)</span>
+                </span>
+              </div>
+
+              <p className="text-xs text-[#5B6879] font-light leading-relaxed mb-5">
+                Kegiatan didanai melalui inisiatif keberlanjutan Waste &amp; Wishes.
+                Setiap peserta akan mendapatkan sertifikat digital dan modul praktik.
+              </p>
+
+              <Link
+                href={`/event/checkout/${event.id_event}`}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#17afb0] px-6 py-4 text-sm font-bold text-white shadow-md shadow-[#17afb0]/25 transition-all duration-200 hover:bg-[#118586] hover:shadow-lg"
+              >
+                <span>Daftar Sekarang (Gratis)</span>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </Link>
+
+              {/* Key perks */}
+              <div className="mt-5 pt-4 border-t border-[#DDE7F2]/60 space-y-2 text-xs text-[#5B6879]">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#17afb0]">✓</span>
+                  <span>Materi panduan &amp; starter kit</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#17afb0]">✓</span>
+                  <span>Sertifikat keikutsertaan resmi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#17afb0]">✓</span>
+                  <span>Sesi tanya-jawab langsung bersama mentor</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column (7 Cols): Event Details */}
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            {/* Title & Category */}
+            <div>
+              <span className="inline-block text-[11px] font-semibold tracking-[0.2em] text-[#17afb0] uppercase mb-2">
+                {event.kategori || "Program Edukasi Lingkungan"}
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)] leading-tight">
+                {event.nama_event}
+              </h1>
+            </div>
+
+            {/* Quick Metadata Grid (Helix Drift Facts style) */}
+            <div className="grid grid-cols-2 gap-px bg-[#B9CDE5]/40 rounded-xl overflow-hidden border border-[#B9CDE5]/40 shadow-sm">
+              <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+                  Tanggal Pelaksanaan
+                </span>
+                <p className="text-sm sm:text-base font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  {event.tanggal_pelaksanaan}
+                </p>
+              </div>
+
+              <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+                  Waktu &amp; Sesi
+                </span>
+                <p className="text-sm sm:text-base font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  {event.waktu || "09.00 - 13.00 WIB"}
+                </p>
+              </div>
+
+              <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+                  Lokasi Pertemuan
+                </span>
+                <p className="text-sm sm:text-base font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  {event.lokasi || "Wedomartani & Gejayan, Sleman"}
+                </p>
+              </div>
+
+              <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+                  Kuota Peserta
+                </span>
+                <p className="text-sm sm:text-base font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  {event.kuota || "30 Peserta (Terbuka)"}
+                </p>
+              </div>
+            </div>
+
+            {/* Description Sheet */}
+            <div className="rounded-2xl border border-[#B9CDE5]/50 bg-white/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+              <span className="block text-[11px] font-semibold tracking-[0.2em] text-[#93A0B2] uppercase mb-3">
+                Deskripsi &amp; Gambaran Acara
+              </span>
+              <p className="text-sm sm:text-base text-[#5B6879] font-light leading-relaxed">
+                {event.deskripsi}
+              </p>
+
+              <hr className="my-5 border-[#DDE7F2]/80" />
+
+              <h3 className="text-sm font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)] mb-3">
+                Agenda Kegiatan
+              </h3>
+              <ul className="space-y-2 text-xs sm:text-sm text-[#5B6879]">
+                <li className="flex items-start gap-2.5">
+                  <span className="font-mono text-[#17afb0] font-semibold shrink-0">01.</span>
+                  <span>Registrasi ulang peserta dan pembagian modul materi pengantar.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="font-mono text-[#17afb0] font-semibold shrink-0">02.</span>
+                  <span>Pemaparan materi inti dan demonstrasi praktik oleh fasilitator.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="font-mono text-[#17afb0] font-semibold shrink-0">03.</span>
+                  <span>Praktik langsung per kelompok serta diskusi studi kasus.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="font-mono text-[#17afb0] font-semibold shrink-0">04.</span>
+                  <span>Sesi tanya-jawab interaktif dan penyerahan starter kit kepada peserta.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Important Notes */}
+            <div className="rounded-2xl border border-[#B9CDE5]/40 bg-[#E8F4F4]/60 p-5 text-xs text-[#5B6879] leading-relaxed">
+              <strong className="text-[#17afb0] font-semibold block mb-1">
+                Catatan Kehadiran
+              </strong>
+              Peserta diharapkan hadir 15 menit sebelum kegiatan dimulai dan membawa alat tulis pribadi serta tumbler minum demi mendukung gerakan minim sampah.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
