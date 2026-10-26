@@ -1,18 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-
-const adminNavigation = [
-  { name: "Dashboard", href: "/admin", category: "NAVIGATION" },
-  { name: "Data Pengguna", href: "/admin/users", category: "NAVIGATION" },
-  { name: "Jadwal Pengambilan", href: "/admin/schedules", category: "NAVIGATION" },
-  { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
-  { name: "Produk", href: "/admin/products", category: "APPLICATION" },
-  { name: "Laporan", href: "/admin/reports", category: "APPLICATION" },
-];
+import { Suspense, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import AdminNav, { NavLinks } from "./AdminNav";
 
 interface User {
   name?: string | null;
@@ -20,13 +11,18 @@ interface User {
   peran?: string;
 }
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem("admin-theme") === "dark",
+    () =>
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("admin-theme") === "dark",
   );
 
   function toggleTheme() {
@@ -77,46 +73,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="h-9 w-9 shrink-0 object-contain"
             priority
           />
-          <span className="admin-brand text-lg font-semibold text-white">Waste & Wishes</span>
+          <span className="admin-brand text-lg font-semibold text-white">
+            Waste & Wishes
+          </span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide">
-          <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Navigation</div>
-          <ul className="space-y-1 mb-6">
-            {adminNavigation.filter(item => item.category === "NAVIGATION").map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    pathname === item.href
-                      ? "bg-white/10 text-white border-l-2 border-blue-500 rounded-l-none"
-                      : "text-slate-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Application</div>
-          <ul className="space-y-1">
-            {adminNavigation.filter(item => item.category === "APPLICATION").map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    pathname === item.href
-                      ? "bg-white/10 text-white border-l-2 border-blue-500 rounded-l-none"
-                      : "text-slate-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <Suspense fallback={<NavLinks activeHref={null} />}>
+          <AdminNav />
+        </Suspense>
 
         {/* User Profile at Bottom */}
         <div className="border-t border-slate-700/50 p-4">
@@ -125,7 +89,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {(user.name || user.email || "A").slice(0, 2).toUpperCase()}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-white">{user.name || user.email}</p>
+              <p className="truncate text-sm font-medium text-white">
+                {user.name || user.email}
+              </p>
               <p className="text-xs text-slate-400 capitalize">{user.peran}</p>
             </div>
           </div>
@@ -135,12 +101,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Navbar */}
-        <header className={`admin-header flex h-[72px] shrink-0 items-center justify-end gap-5 border-b px-6 shadow-sm z-10 transition-colors ${darkMode ? "border-slate-700 bg-gray-900" : "border-slate-100 bg-white"}`}>
+        <header
+          className={`admin-header flex h-[72px] shrink-0 items-center justify-end gap-5 border-b px-6 shadow-sm z-10 transition-colors ${darkMode ? "border-slate-700 bg-gray-900" : "border-slate-100 bg-white"}`}
+        >
           <div className="flex items-center gap-5 text-slate-500">
             <button
               type="button"
               onClick={toggleTheme}
-              aria-label={darkMode ? "Aktifkan tema terang" : "Aktifkan tema gelap"}
+              aria-label={
+                darkMode ? "Aktifkan tema terang" : "Aktifkan tema gelap"
+              }
               aria-pressed={darkMode}
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
@@ -152,7 +122,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className={`flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 transition-colors ${darkMode ? "bg-gray-900" : "bg-[#f4f5f7]"}`}>
+        <main
+          className={`flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 transition-colors ${darkMode ? "bg-gray-900" : "bg-[#f4f5f7]"}`}
+        >
           {children}
         </main>
       </div>
