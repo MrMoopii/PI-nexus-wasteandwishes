@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -24,7 +24,7 @@ export default async function EditEventPage({
     );
   }
 
-  const dataEvent = await db
+  const dataEvent = await getDb
     .select()
     .from(events)
     .where(eq(events.idEvent, eventId));
@@ -62,7 +62,7 @@ export default async function EditEventPage({
     const statusEvent = formData.get("statusEvent") as string;
     const gambarUrl = formData.get("gambarUrl") as string;
 
-    await db
+    await getDb
       .update(events)
       .set({
         namaEvent,
