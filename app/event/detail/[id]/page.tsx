@@ -1,88 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getDb } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { DEFAULT_EVENTS } from "@/app/event/page";
 
 export const instant = false;
-
-// Fallback lookup
-const DEFAULT_EVENTS: Record<
-  number,
-  {
-    id_event: number;
-    nama_event: string;
-    deskripsi: string;
-    gambar: string;
-    tanggal_pelaksanaan: string;
-    lokasi?: string;
-    kategori?: string;
-    waktu?: string;
-    kuota?: string;
-  }
-> = {
-  1: {
-    id_event: 1,
-    nama_event: "Pelatihan Budidaya Maggot BSF",
-    deskripsi:
-      "Pelajari teknik budidaya Black Soldier Fly (BSF) dari pembibitan hingga panen larva sebagai pakan ternak berkualitas tinggi dan pengolah sampah organik tercepat.",
-    gambar: "1.jpg",
-    tanggal_pelaksanaan: "25 Oktober 2026",
-    lokasi: "Wedomartani, Sleman, D.I. Yogyakarta",
-    kategori: "Workshop Budidaya",
-    waktu: "09.00 - 14.30 WIB",
-    kuota: "30 Peserta",
-  },
-  2: {
-    id_event: 2,
-    nama_event: "Sosialisasi Pemilahan Limbah Dapur",
-    deskripsi:
-      "Panduan praktis bagi ibu rumah tangga dan pelaku UMKM dalam memilah sampah basah dan kering agar bernilai guna dan tidak mencemari lingkungan.",
-    gambar: "2.jpg",
-    tanggal_pelaksanaan: "02 November 2026",
-    lokasi: "Balai RW Gejayan, Yogyakarta",
-    kategori: "Edukasi Warga",
-    waktu: "08.30 - 11.30 WIB",
-    kuota: "50 Peserta",
-  },
-  3: {
-    id_event: 3,
-    nama_event: "Aksi Hijau Gejayan Bersih",
-    deskripsi:
-      "Gerakan relawan lingkungan bersama komunitas Nexus membersihkan bantaran sungai dan kawasan Gejayan secara berkala.",
-    gambar: "3.jpg",
-    tanggal_pelaksanaan: "15 November 2026",
-    lokasi: "Kawasan Gejayan & Bantaran Sungai",
-    kategori: "Aksi Relawan",
-    waktu: "06.30 - 10.00 WIB",
-    kuota: "100 Relawan",
-  },
-  4: {
-    id_event: 4,
-    nama_event: "Workshop Kasgot & Pupuk Organik",
-    deskripsi:
-      "Mengolah residu kasgot (bekas maggot) menjadi pupuk organik padat dan cair yang kaya nutrisi untuk tanaman dan pertanian urban.",
-    gambar: "4.jpg",
-    tanggal_pelaksanaan: "28 November 2026",
-    lokasi: "Kranggan, Sleman, D.I. Yogyakarta",
-    kategori: "Pertanian Urban",
-    waktu: "09.00 - 13.00 WIB",
-    kuota: "25 Peserta",
-  },
-  5: {
-    id_event: 5,
-    nama_event: "Edukasi Sirkular Ekonomi Desa",
-    deskripsi:
-      "Membuka potensi ekonomi dari pengelolaan limbah berbasis komunitas menuju desa mandiri energi dan pakan berkelanjutan.",
-    gambar: "5.jpg",
-    tanggal_pelaksanaan: "10 Desember 2026",
-    lokasi: "Aula Balai Desa, Sleman",
-    kategori: "Seminar Komunitas",
-    waktu: "09.30 - 12.30 WIB",
-    kuota: "60 Peserta",
-  },
-};
 
 export default async function EventDetailPage({
   params,
@@ -92,33 +13,7 @@ export default async function EventDetailPage({
   const resolvedParams = await params;
   const eventId = parseInt(resolvedParams.id, 10) || 1;
 
-  let event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
-
-  try {
-    const [dbEvent] = await getDb()
-      .select()
-      .from(eventsTable)
-      .where(eq(eventsTable.idEvent, eventId))
-      .limit(1);
-
-    if (dbEvent) {
-      const fallback = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
-      event = {
-        id_event: dbEvent.idEvent,
-        nama_event: dbEvent.namaEvent,
-        deskripsi: fallback.deskripsi,
-        gambar: fallback.gambar,
-        tanggal_pelaksanaan:
-          dbEvent.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
-        lokasi: fallback.lokasi,
-        kategori: fallback.kategori,
-        waktu: fallback.waktu,
-        kuota: fallback.kuota,
-      };
-    }
-  } catch {
-    // Keep fallback
-  }
+  const event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
 
   if (!event) {
     notFound();
@@ -199,13 +94,17 @@ export default async function EventDetailPage({
                   Biaya Kepesertaan
                 </span>
                 <span className="text-2xl font-bold text-[var(--hx-accent)] font-[family-name:var(--font-plus-jakarta-sans)]">
-                  Rp 0 <span className="text-xs font-normal text-[var(--hx-ink-2)]">(Gratis)</span>
+                  Rp 0{" "}
+                  <span className="text-xs font-normal text-[var(--hx-ink-2)]">
+                    (Gratis)
+                  </span>
                 </span>
               </div>
 
               <p className="text-xs text-[var(--hx-ink-2)] font-light leading-relaxed mb-5">
-                Kegiatan didanai melalui inisiatif keberlanjutan Waste &amp; Wishes.
-                Setiap peserta akan mendapatkan sertifikat digital dan modul praktik.
+                Kegiatan didanai melalui inisiatif keberlanjutan Waste &amp;
+                Wishes. Setiap peserta akan mendapatkan sertifikat digital dan
+                modul praktik.
               </p>
 
               <Link
@@ -313,20 +212,39 @@ export default async function EventDetailPage({
               </h3>
               <ul className="space-y-2 text-xs sm:text-sm text-[var(--hx-ink-2)]">
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">01.</span>
-                  <span>Registrasi ulang peserta dan pembagian modul materi pengantar.</span>
+                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">
+                    01.
+                  </span>
+                  <span>
+                    Registrasi ulang peserta dan pembagian modul materi
+                    pengantar.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">02.</span>
-                  <span>Pemaparan materi inti dan demonstrasi praktik oleh fasilitator.</span>
+                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">
+                    02.
+                  </span>
+                  <span>
+                    Pemaparan materi inti dan demonstrasi praktik oleh
+                    fasilitator.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">03.</span>
-                  <span>Praktik langsung per kelompok serta diskusi studi kasus.</span>
+                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">
+                    03.
+                  </span>
+                  <span>
+                    Praktik langsung per kelompok serta diskusi studi kasus.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">04.</span>
-                  <span>Sesi tanya-jawab interaktif dan penyerahan starter kit kepada peserta.</span>
+                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">
+                    04.
+                  </span>
+                  <span>
+                    Sesi tanya-jawab interaktif dan penyerahan starter kit
+                    kepada peserta.
+                  </span>
                 </li>
               </ul>
             </div>
@@ -336,7 +254,9 @@ export default async function EventDetailPage({
               <strong className="text-[var(--hx-accent)] font-semibold block mb-1">
                 Catatan Kehadiran
               </strong>
-              Peserta diharapkan hadir 15 menit sebelum kegiatan dimulai dan membawa alat tulis pribadi serta tumbler minum demi mendukung gerakan minim sampah.
+              Peserta diharapkan hadir 15 menit sebelum kegiatan dimulai dan
+              membawa alat tulis pribadi serta tumbler minum demi mendukung
+              gerakan minim sampah.
             </div>
           </div>
         </div>

@@ -7,13 +7,13 @@
   --color-waste-dark: #118586;
 
   /* ── Helix Drift Design Tokens ── */
-  --hx-canvas: #F4F7FA;
-  --hx-sunk: #DDE7F2;
-  --hx-pastel: #B9CDE5;
-  --hx-pastel-deep: #96B1D0;
-  --hx-ink: #1B2233;
-  --hx-ink-2: #5B6879;
-  --hx-ink-3: #93A0B2;
+  --hx-canvas: #f4f7fa;
+  --hx-sunk: #dde7f2;
+  --hx-pastel: #b9cde5;
+  --hx-pastel-deep: #96b1d0;
+  --hx-ink: #1b2233;
+  --hx-ink-2: #5b6879;
+  --hx-ink-3: #93a0b2;
   --hx-accent: #17afb0;
   --hx-accent-dark: #118586;
   --hx-rx: 600;
@@ -38,7 +38,52 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+@media print {
+  header,
+  footer,
+  .print-button,
+  .print-proof-footer .flex > p:last-child {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-proof-page {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-proof-shell {
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .print-proof-header {
+    background: #0f766e !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-proof-footer {
+    background: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
 }
 
@@ -79,8 +124,16 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(120vw 90vh at 8% -10%, rgba(185, 205, 229, 0.55), transparent 62%),
-    radial-gradient(110vw 80vh at 98% 108%, rgba(221, 231, 242, 0.85), transparent 60%);
+    radial-gradient(
+      120vw 90vh at 8% -10%,
+      rgba(185, 205, 229, 0.55),
+      transparent 62%
+    ),
+    radial-gradient(
+      110vw 80vh at 98% 108%,
+      rgba(221, 231, 242, 0.85),
+      transparent 60%
+    );
 }
 
 .hx-wrap::after {
@@ -91,12 +144,19 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.34' numOctaves='2' stitchTiles='stitch'/></filter><rect width='320' height='320' filter='url(%23n)' opacity='0.10'/></svg>"),
-    linear-gradient(to right, rgba(150, 177, 208, 0.30) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(150, 177, 208, 0.30) 1px, transparent 1px);
-  background-size: 320px 320px, 72px 72px, 72px 72px;
+    linear-gradient(to right, rgba(150, 177, 208, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(150, 177, 208, 0.3) 1px, transparent 1px);
+  background-size:
+    320px 320px,
+    72px 72px,
+    72px 72px;
   mix-blend-mode: overlay;
   opacity: 0.5;
-  -webkit-mask-image: radial-gradient(80vw 80vh at 50% 42%, #000 20%, transparent 82%);
+  -webkit-mask-image: radial-gradient(
+    80vw 80vh at 50% 42%,
+    #000 20%,
+    transparent 82%
+  );
   mask-image: radial-gradient(80vw 80vh at 50% 42%, #000 20%, transparent 82%);
 }
 
@@ -152,7 +212,9 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--hx-sunk);
   background-size: cover;
   background-position: center;
-  box-shadow: 0 22px 46px -20px rgba(27, 34, 51, 0.42), 0 2px 6px rgba(27, 34, 51, 0.08);
+  box-shadow:
+    0 22px 46px -20px rgba(27, 34, 51, 0.42),
+    0 2px 6px rgba(27, 34, 51, 0.08);
   transition: transform 0.14s var(--hx-ease);
 }
 
@@ -201,7 +263,9 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 96px;
   margin: 1.9rem auto 0;
   padding: 0 clamp(18px, 5vw, 24px);
-  transition: opacity 0.22s var(--hx-ease), transform 0.22s var(--hx-ease);
+  transition:
+    opacity 0.22s var(--hx-ease),
+    transform 0.22s var(--hx-ease);
 }
 
 .hx-caption.hx-swap {
@@ -288,7 +352,9 @@ h1, h2, h3, h4, h5, h6 {
   height: 4px;
   border-radius: 2px;
   background: var(--hx-sunk);
-  box-shadow: inset 0 1px 2px rgba(90, 110, 145, 0.22), inset 0 -1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 1px 2px rgba(90, 110, 145, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .hx-scrub-fill {
@@ -315,7 +381,10 @@ h1, h2, h3, h4, h5, h6 {
   height: 9px;
   margin-top: -4.5px;
   background: var(--hx-pastel);
-  transition: height 0.3s var(--hx-ease), background 0.3s, margin-top 0.3s var(--hx-ease);
+  transition:
+    height 0.3s var(--hx-ease),
+    background 0.3s,
+    margin-top 0.3s var(--hx-ease);
 }
 
 .hx-tick.on {
@@ -487,7 +556,9 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 6px 18px -6px rgba(27, 34, 51, 0.22);
-  transition: opacity 0.3s var(--hx-ease), transform 0.3s var(--hx-ease);
+  transition:
+    opacity 0.3s var(--hx-ease),
+    transform 0.3s var(--hx-ease);
 }
 
 body.away .hx-transport {
@@ -592,7 +663,9 @@ body.lock .hx-transport {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.3s var(--hx-ease), transform 0.3s var(--hx-ease);
+  transition:
+    opacity 0.3s var(--hx-ease),
+    transform 0.3s var(--hx-ease);
 }
 
 .hx-fab.gone {
@@ -620,12 +693,17 @@ body.away .hx-panel {
   backdrop-filter: blur(16px) saturate(124%);
   -webkit-backdrop-filter: blur(16px) saturate(124%);
   border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: -6px -6px 16px rgba(255, 255, 255, 0.9), 6px 6px 20px rgba(150, 177, 208, 0.34);
+  box-shadow:
+    -6px -6px 16px rgba(255, 255, 255, 0.9),
+    6px 6px 20px rgba(150, 177, 208, 0.34);
   opacity: 0;
   visibility: hidden;
   transform: translateY(14px) scale(0.97);
   pointer-events: none;
-  transition: opacity 0.3s var(--hx-ease), transform 0.3s var(--hx-ease), visibility 0.3s;
+  transition:
+    opacity 0.3s var(--hx-ease),
+    transform 0.3s var(--hx-ease),
+    visibility 0.3s;
 }
 
 .hx-panel.open {
@@ -736,7 +814,9 @@ body.away .hx-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: -3px -3px 8px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(150, 177, 208, 0.3);
+  box-shadow:
+    -3px -3px 8px rgba(255, 255, 255, 0.9),
+    3px 3px 8px rgba(150, 177, 208, 0.3);
   color: var(--hx-ink-2);
   font-size: 1rem;
   line-height: 1;
@@ -746,7 +826,9 @@ body.away .hx-panel {
 .hx-rv {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.55s var(--hx-ease), transform 0.55s var(--hx-ease);
+  transition:
+    opacity 0.55s var(--hx-ease),
+    transform 0.55s var(--hx-ease);
 }
 
 .hx-rv.in {
