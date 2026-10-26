@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { events } from '@/lib/db/schema';
 import { desc } from 'drizzle-orm';
 
@@ -12,7 +12,7 @@ export default async function AdminEventPage({
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
 
-  const allEvents = await db
+  const allEvents = await getDb
     .select()
     .from(events)
     .orderBy(desc(events.idEvent));
