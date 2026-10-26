@@ -77,35 +77,33 @@ export default function SchedulesManagementContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-gray-500">Total Jadwal</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.totalJadwal}
               </p>
+              <p className="mt-1 text-xs text-gray-500">Seluruh jadwal pengambilan</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-teal-100 flex items-center justify-center">
-              <span className="text-2xl">📅</span>
-            </div>
+            <span className="rounded-md bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800">Semua</span>
           </div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-gray-500">Jadwal Rutin</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.rutinCount}
               </p>
+              <p className="mt-1 text-xs text-gray-500">Pengambilan berkala</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <span className="text-2xl">🔄</span>
-            </div>
+            <span className="rounded-md bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800">Berkala</span>
           </div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-gray-500">
                 Jadwal Janjian
@@ -113,15 +111,14 @@ export default function SchedulesManagementContent() {
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.janjianCount}
               </p>
+              <p className="mt-1 text-xs text-gray-500">Pengambilan sesuai permintaan</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
-              <span className="text-2xl">🤝</span>
-            </div>
+            <span className="rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">Sesuai permintaan</span>
           </div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-gray-500">
                 Total Sampah Terbulan
@@ -129,10 +126,9 @@ export default function SchedulesManagementContent() {
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.totalWaste.toFixed(1)} kg
               </p>
+              <p className="mt-1 text-xs text-gray-500">Akumulasi sampah terkelola</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <span className="text-2xl">♻️</span>
-            </div>
+            <span className="rounded-md bg-green-50 px-3 py-2 text-xs font-medium text-green-800">Terkelola</span>
           </div>
         </div>
       </div>
@@ -257,8 +253,8 @@ export default function SchedulesManagementContent() {
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     <div className="flex flex-col items-center">
-                      <span className="text-4xl mb-2">📅</span>
-                      <p>Tidak ada jadwal ditemukan</p>
+                      <p className="font-medium text-gray-700">Belum ada jadwal</p>
+                      <p className="mt-1 text-sm text-gray-500">Ubah kata kunci atau jenis jadwal untuk melihat hasil lain.</p>
                     </div>
                   </td>
                 </tr>

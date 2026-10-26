@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { users, dataLangganan } from "@/lib/db/schema";
-import { count, eq, desc, sql } from "drizzle-orm";
+import { asc, count, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
@@ -41,11 +41,14 @@ export async function GET(request: Request) {
         email: users.email,
         peran: users.peran,
         nomorTelp: users.nomorTelp,
+        alamat: users.alamat,
+        tanggalLahir: users.tanggalLahir,
         createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
       })
       .from(users)
       .where(whereCondition)
-      .orderBy(desc(users.createdAt))
+      .orderBy(asc(users.idUser))
       .limit(limit)
       .offset(offset);
 
