@@ -12,7 +12,7 @@ interface DashboardStats {
 
 interface RecentUser {
   id: number;
-  nama: string;
+  namaPelanggan: string;
   email: string;
   peran: string;
   createdAt: string;

@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { db, events as eventsTable, users as usersTable } from "@/lib/db"; // Pastikan usersTable di-import
+import { getDb } from "@/lib/db";
+import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; // Pastikan usersTable di-import
 import { eq } from "drizzle-orm";
 
 export const instant = false;
@@ -14,13 +15,50 @@ const DEFAULT_EVENTS: Record<
     nama_event: string;
     gambar: string;
     tanggal_pelaksanaan?: string;
+    lokasi?: string;
+    kategori?: string;
   }
 > = {
-  1: { id_event: 1, nama_event: "Pelatihan Budidaya Maggot BSF", gambar: "1.jpg", tanggal_pelaksanaan: "25 Oktober 2026" },
-  2: { id_event: 2, nama_event: "Sosialisasi Pemilahan Limbah Dapur", gambar: "2.jpg", tanggal_pelaksanaan: "02 November 2026" },
-  3: { id_event: 3, nama_event: "Aksi Hijau Gejayan Bersih", gambar: "3.jpg", tanggal_pelaksanaan: "15 November 2026" },
-  4: { id_event: 4, nama_event: "Workshop Kasgot & Pupuk Organik", gambar: "4.jpg", tanggal_pelaksanaan: "28 November 2026" },
-  5: { id_event: 5, nama_event: "Edukasi Sirkular Ekonomi Desa", gambar: "5.jpg", tanggal_pelaksanaan: "10 Desember 2026" },
+  1: {
+    id_event: 1,
+    nama_event: "Pelatihan Budidaya Maggot BSF",
+    gambar: "1.jpg",
+    tanggal_pelaksanaan: "25 Oktober 2026",
+    lokasi: "Wedomartani, Sleman",
+    kategori: "Workshop Budidaya",
+  },
+  2: {
+    id_event: 2,
+    nama_event: "Sosialisasi Pemilahan Limbah Dapur",
+    gambar: "2.jpg",
+    tanggal_pelaksanaan: "02 November 2026",
+    lokasi: "Gejayan, Yogyakarta",
+    kategori: "Edukasi Warga",
+  },
+  3: {
+    id_event: 3,
+    nama_event: "Aksi Hijau Gejayan Bersih",
+    gambar: "3.jpg",
+    tanggal_pelaksanaan: "15 November 2026",
+    lokasi: "Kawasan Gejayan",
+    kategori: "Aksi Relawan",
+  },
+  4: {
+    id_event: 4,
+    nama_event: "Workshop Kasgot & Pupuk Organik",
+    gambar: "4.jpg",
+    tanggal_pelaksanaan: "28 November 2026",
+    lokasi: "Kranggan, Sleman",
+    kategori: "Pertanian Urban",
+  },
+  5: {
+    id_event: 5,
+    nama_event: "Edukasi Sirkular Ekonomi Desa",
+    gambar: "5.jpg",
+    tanggal_pelaksanaan: "10 Desember 2026",
+    lokasi: "Sleman, D.I. Yogyakarta",
+    kategori: "Seminar Komunitas",
+  },
 };
 
 export default async function EventCheckoutPage({
@@ -29,10 +67,10 @@ export default async function EventCheckoutPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  
-  // Jika tidak ada session / belum login, lempar ke halaman auth
+
+  // Jika belum login, redirect ke halaman login
   if (!session || !session.user?.email) {
-    redirect("/auth");
+    redirect("/auth/login");
   }
 
   const resolvedParams = await params;
@@ -43,7 +81,7 @@ export default async function EventCheckoutPage({
 
   try {
     // 1. Ambil data Event dari Database
-    const [dbEvent] = await db
+    const [dbEvent] = await getDb()
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.idEvent, eventId))
@@ -55,12 +93,14 @@ export default async function EventCheckoutPage({
         id_event: dbEvent.idEvent,
         nama_event: dbEvent.namaEvent,
         gambar: fallback.gambar,
-        tanggal_pelaksanaan: dbEvent.tanggalPelaksanaan,
+        tanggal_pelaksanaan: dbEvent.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
+        lokasi: fallback.lokasi,
+        kategori: fallback.kategori,
       };
     }
 
     // 2. Ambil data User dari Database berdasarkan email dari session
-    const [dbUser] = await db
+    const [dbUser] = await getDb()
       .select()
       .from(usersTable)
       .where(eq(usersTable.email, session.user.email))
@@ -78,128 +118,226 @@ export default async function EventCheckoutPage({
   }
 
   // Format tanggal lahir untuk input type="date" (YYYY-MM-DD)
-  const formatTanggalLahir = currentUser?.tanggalLahir 
-    ? new Date(currentUser.tanggalLahir).toISOString().split('T')[0] 
+  const formatTanggalLahir = currentUser?.tanggalLahir
+    ? new Date(currentUser.tanggalLahir).toISOString().split("T")[0]
     : "";
 
+  const plateNo = String(event.id_event).padStart(2, "0");
+
   return (
-    <div className="container mx-auto px-4 max-w-6xl py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        
-        {/* Kolom Kiri: Informasi Event */}
-        <div className="flex flex-col gap-4">
-          <div className="relative w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-sm bg-gray-100">
-            <Image
-              src={`/img/event/${event.gambar}`}
-              alt={event.nama_event}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              {event.nama_event}
-            </h2>
-            <p className="text-gray-600 flex items-center gap-2 text-sm font-medium">
-              📅 {event.tanggal_pelaksanaan || "Tanggal belum ditentukan"}
-            </p>
-            <hr className="my-4 border-gray-100" />
-            <p className="text-gray-500 text-sm">
-              Pastikan data diri Anda di samping sudah benar sebelum menekan tombol konfirmasi pendaftaran. Tiket dan informasi lanjutan akan dikirimkan ke kontak Anda.
-            </p>
-          </div>
-        </div>
-
-        {/* Kolom Kanan: Form Pendaftaran (Pre-filled Data) */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 h-fit">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            Konfirmasi Pendaftaran
-          </h3>
-          <p className="text-sm text-gray-500 mb-6">
-            Data di bawah diambil otomatis dari profil akun Anda.
-          </p>
-
-          <form action="/api/event/checkout" method="POST" className="space-y-4">
-            <input type="hidden" name="id_event" value={event.id_event} />
-            {currentUser && <input type="hidden" name="id_user" value={currentUser.idUser} />}
-
-            <div>
-              <label
-                htmlFor="nama"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Nama Lengkap
-              </label>
-              <input
-                type="text"
-                id="nama"
-                name="nama"
-                required
-                readOnly // Membuat form tidak bisa diubah (opsional, ganti jadi defaultValue jika ingin bisa diubah)
-                defaultValue={currentUser?.namaPelanggan || ""}
-                placeholder="Masukkan nama lengkap"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-700 text-sm focus:outline-none cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="no_hp"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                No. Handphone / WhatsApp
-              </label>
-              <input
-                type="tel"
-                id="no_hp"
-                name="no_hp"
-                required
-                readOnly
-                defaultValue={currentUser?.nomorTelp || ""}
-                placeholder="Contoh: 081234567890"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-700 text-sm focus:outline-none cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="tgl_lahir"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Tanggal Lahir
-              </label>
-              <input
-                type="date"
-                id="tgl_lahir"
-                name="tgl_lahir"
-                required
-                readOnly
-                defaultValue={formatTanggalLahir}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-700 text-sm focus:outline-none cursor-not-allowed"
-              />
-            </div>
-
-            <div className="text-center text-3xl py-2">🌿</div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 px-4 rounded-xl text-base font-bold text-white bg-waste hover:bg-[#118586] transition-colors shadow-md"
-            >
-              Konfirmasi & Daftar (Gratis)
-            </button>
-          </form>
-        </div>
+    <div className="relative min-h-screen bg-[var(--hx-canvas)] text-[var(--hx-ink)] font-[family-name:var(--font-inter)] selection:bg-[var(--hx-accent)]/20 selection:text-[var(--hx-accent-dark)]">
+      {/* Ambient gradient washes matching Helix Drift */}
+      <div aria-hidden="true" className="hx-ambient-wash">
+        <div className="hx-ambient-blob-1" />
+        <div className="hx-ambient-blob-2" />
+        <div className="hx-ambient-blob-3" />
       </div>
 
-      <div className="mt-8">
-        <Link
-          href={`/event/detail/${event.id_event}`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-xs"
-        >
-          ⬅ Kembali ke Detail
-        </Link>
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        {/* Navigation Breadcrumb */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href={`/event/detail/${event.id_event}`}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--hx-ink-2)] hover:text-[var(--hx-accent)] transition-colors"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span>Kembali ke Detail Agenda</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-[var(--hx-accent)]" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-ink-3)] uppercase">
+              Konfirmasi Registrasi
+            </span>
+          </div>
+        </div>
+
+        {/* Main 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Kolom Kiri (5 Cols): Ringkasan Event */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="rounded-2xl border border-[var(--hx-pastel)]/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+              <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-[var(--hx-sunk)] border border-[var(--hx-pastel)]/40 mb-5">
+                <Image
+                  src={`/img/event/${event.gambar}`}
+                  alt={event.nama_event}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover"
+                />
+                <div className="hx-rim-highlight" />
+
+                <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-semibold text-[var(--hx-accent)] tracking-wider uppercase">
+                  Plate {plateNo}
+                </div>
+              </div>
+
+              <span className="text-[10px] font-semibold tracking-[0.2em] text-[var(--hx-accent)] uppercase block mb-1">
+                Agenda Terpilih
+              </span>
+              <h2 className="text-xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] leading-snug">
+                {event.nama_event}
+              </h2>
+
+              <div className="mt-4 pt-4 border-t border-[var(--hx-sunk)]/60 space-y-2 text-xs text-[var(--hx-ink-2)]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--hx-ink-3)]">Tanggal:</span>
+                  <span className="font-medium text-[var(--hx-ink)]">
+                    {event.tanggal_pelaksanaan || "Sesuai Jadwal Publikasi"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--hx-ink-3)]">Lokasi:</span>
+                  <span className="font-medium text-[var(--hx-ink)]">
+                    {event.lokasi || "Wedomartani & Gejayan, Sleman"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--hx-ink-3)]">Status Tiket:</span>
+                  <span className="font-bold text-[var(--hx-accent)]">Gratis (1 Slot)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Catatan Penting Sheet */}
+            <div className="rounded-2xl border border-[var(--hx-pastel)]/40 bg-[#E8F4F4]/60 p-5 text-xs text-[var(--hx-ink-2)] leading-relaxed space-y-2">
+              <strong className="text-[var(--hx-accent)] font-semibold block">
+                Petunjuk Registrasi
+              </strong>
+              <p>
+                1. Tiket digital akan otomatis dicatat atas nama akun yang sedang aktif.
+              </p>
+              <p>
+                2. Pengingat jadwal dan koordinasi teknis akan dihubungi via nomor WhatsApp terdaftar.
+              </p>
+            </div>
+          </div>
+
+          {/* Kolom Kanan (7 Cols): Form Konfirmasi Data */}
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl border border-[var(--hx-pastel)]/60 bg-white/95 p-8 sm:p-10 shadow-[0_12px_40px_rgb(27,34,51,0.06)] backdrop-blur-md">
+              <div className="border-b border-[var(--hx-sunk)]/80 pb-5 mb-6">
+                <span className="text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-accent)] uppercase block mb-1">
+                  Verifikasi Identitas
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                  Konfirmasi Pendaftaran
+                </h1>
+                <p className="mt-2 text-xs sm:text-sm text-[var(--hx-ink-2)] font-light">
+                  Data peserta di bawah diambil secara otomatis dari profil akun terdaftar Anda.
+                </p>
+              </div>
+
+              <form action="/api/event/checkout" method="POST" className="space-y-5">
+                <input type="hidden" name="id_event" value={event.id_event} />
+                {currentUser && (
+                  <input type="hidden" name="id_user" value={currentUser.idUser} />
+                )}
+
+                <div>
+                  <label
+                    htmlFor="nama"
+                    className="block text-xs font-semibold text-[var(--hx-ink)] uppercase tracking-wider mb-2"
+                  >
+                    Nama Lengkap Peserta
+                  </label>
+                  <input
+                    type="text"
+                    id="nama"
+                    name="nama"
+                    required
+                    readOnly
+                    defaultValue={currentUser?.namaPelanggan || ""}
+                    placeholder="Masukkan nama lengkap"
+                    className="hx-input-readonly"
+                  />
+                  <span className="mt-1 block text-[11px] text-[var(--hx-ink-3)]">
+                    Nama sesuai profil akun pengguna
+                  </span>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="no_hp"
+                    className="block text-xs font-semibold text-[var(--hx-ink)] uppercase tracking-wider mb-2"
+                  >
+                    No. Handphone / WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    id="no_hp"
+                    name="no_hp"
+                    required
+                    readOnly
+                    defaultValue={currentUser?.nomorTelp || ""}
+                    placeholder="Contoh: 081234567890"
+                    className="hx-input-readonly"
+                  />
+                  <span className="mt-1 block text-[11px] text-[var(--hx-ink-3)]">
+                    Untuk pengiriman informasi lokasi &amp; pengingat acara
+                  </span>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="tgl_lahir"
+                    className="block text-xs font-semibold text-[var(--hx-ink)] uppercase tracking-wider mb-2"
+                  >
+                    Tanggal Lahir
+                  </label>
+                  <input
+                    type="date"
+                    id="tgl_lahir"
+                    name="tgl_lahir"
+                    required
+                    readOnly
+                    defaultValue={formatTanggalLahir}
+                    className="hx-input-readonly"
+                  />
+                </div>
+
+                {/* Summary Box */}
+                <div className="rounded-xl border border-[var(--hx-sunk)] bg-[var(--hx-canvas)]/80 p-4 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-[var(--hx-ink-3)] block">Total Biaya Pendaftaran</span>
+                    <strong className="text-sm text-[var(--hx-accent)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                      Rp 0 (Gratis Penuh)
+                    </strong>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--hx-accent)]/15 text-[var(--hx-accent)]">
+                    Terkonfirmasi
+                  </span>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="hx-btn-primary w-full"
+                  >
+                    Konfirmasi &amp; Amankan Slot (Gratis)
+                  </button>
+                </div>
+
+                <p className="text-center text-[11px] text-[var(--hx-ink-3)]">
+                  Dengan menekan tombol di atas, Anda menyetujui komitmen kehadiran untuk agenda ini.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

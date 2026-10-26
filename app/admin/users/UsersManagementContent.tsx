@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 interface User {
   id: number;
-  nama: string;
+  namaPelanggan: string;
   username: string;
   email: string;
   peran: string;
@@ -24,7 +24,11 @@ interface UserStats {
 
 export default function UsersManagementContent() {
   const [userList, setUserList] = useState<User[]>([]);
-  const [stats, setStats] = useState<UserStats>({ total: 0, adminCount: 0, subscribedCount: 0 });
+  const [stats, setStats] = useState<UserStats>({
+    total: 0,
+    adminCount: 0,
+    subscribedCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");

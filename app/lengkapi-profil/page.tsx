@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { users } from "@/lib/db/schema";
 import { redirect } from "next/navigation";
@@ -23,7 +23,7 @@ async function ProfileGate() {
     redirect("/auth/login");
   }
 
-  const [row] = await db
+  const [row] = await getDb()
     .select()
     .from(users)
     .where(eq(users.idUser, idUser))
