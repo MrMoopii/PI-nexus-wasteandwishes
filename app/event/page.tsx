@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { db, events as eventsTable } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { events as eventsTable } from "@/lib/db/schema";
 
 export const instant = false;
 
@@ -68,7 +69,7 @@ export default async function EventPage() {
   let events = DEFAULT_EVENTS;
 
   try {
-    const dbEvents = await db.select().from(eventsTable);
+    const dbEvents = await getDb().select().from(eventsTable);
     if (dbEvents && dbEvents.length > 0) {
       events = dbEvents.map((e, index) => {
         const fallback =

@@ -1,6 +1,6 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users, dataLangganan } from "@/lib/db/schema";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
@@ -9,12 +9,12 @@ export async function GET() {
   const h = await headers();
   h.get("x-vercel-ip-city");
   try {
-    const [totalResult] = await db.select({ count: count() }).from(users);
-    const [adminResult] = await db
+    const [totalResult] = await getDb().select({ count: count() }).from(users);
+    const [adminResult] = await getDb()
       .select({ count: count() })
       .from(users)
       .where(eq(users.peran, "admin"));
-    const [subscribedResult] = await db
+    const [subscribedResult] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
       .where(eq(dataLangganan.statusLangganan, "aktif"));
@@ -26,6 +26,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error fetching user stats:", error);
-    return NextResponse.json({ error: "Failed to fetch user stats" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch user stats" },
+      { status: 500 },
+    );
   }
 }

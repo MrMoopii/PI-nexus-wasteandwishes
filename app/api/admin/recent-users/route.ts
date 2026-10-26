@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -9,10 +9,10 @@ export async function GET() {
   const h = await headers();
   h.get("x-vercel-ip-city");
   try {
-    const recentUsers = await db
+    const recentUsers = await getDb()
       .select({
         id: users.idUser,
-        nama: users.namaPelanggan,
+        namaPelanggan: users.namaPelanggan,
         email: users.email,
         peran: users.peran,
         createdAt: users.createdAt,
@@ -24,6 +24,9 @@ export async function GET() {
     return NextResponse.json(recentUsers);
   } catch (error) {
     console.error("Error fetching recent users:", error);
-    return NextResponse.json({ error: "Failed to fetch recent users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch recent users" },
+      { status: 500 },
+    );
   }
 }

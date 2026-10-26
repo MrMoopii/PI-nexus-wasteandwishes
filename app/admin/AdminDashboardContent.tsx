@@ -12,7 +12,7 @@ interface DashboardStats {
 
 interface RecentUser {
   id: number;
-  nama: string;
+  namaPelanggan: string;
   email: string;
   peran: string;
   createdAt: string;
@@ -178,10 +178,10 @@ export default function AdminDashboardContent() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium text-sm">
-                        {user.nama?.slice(0, 1).toUpperCase()}
+                        {user.namaPelanggan?.slice(0, 1).toUpperCase()}
                       </div>
                       <span className="ml-3 text-sm font-medium text-gray-900">
-                        {user.nama}
+                        {user.namaPelanggan}
                       </span>
                     </div>
                   </td>

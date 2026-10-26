@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { db, events as eventsTable } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { events as eventsTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export const instant = false;
@@ -94,7 +95,7 @@ export default async function EventDetailPage({
   let event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
 
   try {
-    const [dbEvent] = await db
+    const [dbEvent] = await getDb()
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.idEvent, eventId))

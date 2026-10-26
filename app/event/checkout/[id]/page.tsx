@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { db, events as eventsTable, users as usersTable } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; // Pastikan usersTable di-import
 import { eq } from "drizzle-orm";
 
 export const instant = false;
@@ -69,7 +70,7 @@ export default async function EventCheckoutPage({
 
   // Jika belum login, redirect ke halaman login
   if (!session || !session.user?.email) {
-    redirect("/auth");
+    redirect("/auth/login");
   }
 
   const resolvedParams = await params;
@@ -80,7 +81,7 @@ export default async function EventCheckoutPage({
 
   try {
     // 1. Ambil data Event dari Database
-    const [dbEvent] = await db
+    const [dbEvent] = await getDb()
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.idEvent, eventId))
@@ -99,7 +100,7 @@ export default async function EventCheckoutPage({
     }
 
     // 2. Ambil data User dari Database berdasarkan email dari session
-    const [dbUser] = await db
+    const [dbUser] = await getDb()
       .select()
       .from(usersTable)
       .where(eq(usersTable.email, session.user.email))
