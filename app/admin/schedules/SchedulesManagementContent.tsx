@@ -8,7 +8,7 @@ interface Schedule {
   jamPengambilan: string;
   jenisJadwal: string;
   user?: {
-    nama: string;
+    namaPelanggan: string;
     email: string;
   };
   janjian?: {
@@ -194,11 +194,13 @@ export default function SchedulesManagementContent() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium">
-                        {schedule.user?.nama?.slice(0, 1).toUpperCase() || "?"}
+                        {schedule.user?.namaPelanggan
+                          ?.slice(0, 1)
+                          .toUpperCase() || "?"}
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">
-                          {schedule.user?.nama || "Unknown"}
+                          {schedule.user?.namaPelanggan || "Unknown"}
                         </p>
                         <p className="text-xs text-gray-500">
                           {schedule.user?.email || "-"}

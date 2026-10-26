@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const userList = await db
       .select({
         id: users.idUser,
-        nama: users.namaPelanggan,
+        namaPelanggan: users.namaPelanggan,
         username: users.username,
         email: users.email,
         peran: users.peran,
@@ -59,9 +59,10 @@ export async function GET(request: Request) {
           .limit(1);
         return {
           ...user,
-          statusLangganan: subscription?.statusLangganan || "tidak_berlangganan",
+          statusLangganan:
+            subscription?.statusLangganan || "tidak_berlangganan",
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -71,6 +72,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 },
+    );
   }
 }
