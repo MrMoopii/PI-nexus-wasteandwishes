@@ -1,5 +1,12 @@
 import { db } from "@/lib/db";
-import { jadwal, jadwalJanjian, jadwalRutin, dataLangganan, users, riwayatPengambilan } from "@/lib/db/schema";
+import {
+  jadwal,
+  jadwalJanjian,
+  jadwalRutin,
+  dataLangganan,
+  users,
+  riwayatPengambilan,
+} from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
@@ -49,7 +56,7 @@ export async function GET(request: Request) {
         if (subscription?.userId) {
           const [user] = await db
             .select({
-              nama: users.namaPelanggan,
+              namaPelanggan: users.namaPelanggan,
               email: users.email,
             })
             .from(users)
@@ -80,7 +87,9 @@ export async function GET(request: Request) {
         if (search && userInfo) {
           const searchLower = search.toLowerCase();
           const matchesSearch =
-            userInfo.nama.toLowerCase().includes(searchLower) ||
+            (userInfo.namaPelanggan ?? "")
+              .toLowerCase()
+              .includes(searchLower) ||
             userInfo.email.toLowerCase().includes(searchLower);
           if (!matchesSearch) return null;
         }
@@ -95,7 +104,7 @@ export async function GET(request: Request) {
           janjian,
           rutin,
         };
-      })
+      }),
     );
 
     // Filter out null values from search
@@ -104,6 +113,9 @@ export async function GET(request: Request) {
     return NextResponse.json(finalSchedules);
   } catch (error) {
     console.error("Error fetching schedules:", error);
-    return NextResponse.json({ error: "Failed to fetch schedules" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch schedules" },
+      { status: 500 },
+    );
   }
 }
