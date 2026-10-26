@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         if (subscription?.userId) {
           const [user] = await db
             .select({
-              nama: users.namaPelanggan,
+              namaPelanggan: users.namaPelanggan,
               email: users.email,
             })
             .from(users)
@@ -87,7 +87,9 @@ export async function GET(request: Request) {
         if (search && userInfo) {
           const searchLower = search.toLowerCase();
           const matchesSearch =
-            (userInfo.nama ?? "").toLowerCase().includes(searchLower) ||
+            (userInfo.namaPelanggan ?? "")
+              .toLowerCase()
+              .includes(searchLower) ||
             userInfo.email.toLowerCase().includes(searchLower);
           if (!matchesSearch) return null;
         }
