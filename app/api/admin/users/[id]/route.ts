@@ -24,8 +24,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   try {
-    const body: { nama?: string; username?: string; email?: string; peran?: string } = await request.json();
-    const nama = body.nama?.trim();
+    const body: { namaPelanggan?: string; username?: string; email?: string; peran?: string } = await request.json();
+    const namaPelanggan = body.namaPelanggan?.trim();
     const username = body.username?.trim();
     const email = body.email?.trim();
     const peran = body.peran;
@@ -34,7 +34,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Nama, email, dan peran yang valid wajib diisi." }, { status: 400 });
     }
 
-    await db.update(users).set({ namaPelanggan: nama, username: username || null, email, peran }).where(eq(users.idUser, id));
+    await getDb.update(users).set({ namaPelanggan: namaPelanggan, username: username || null, email, peran }).where(eq(users.idUser, id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error updating user:", error);
@@ -52,7 +52,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   try {
-    await db.delete(users).where(eq(users.idUser, id));
+    await getDb.delete(users).where(eq(users.idUser, id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting user:", error);
