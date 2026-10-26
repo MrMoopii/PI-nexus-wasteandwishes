@@ -76,7 +76,7 @@ export default function UsersManagementContent() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nama: editingUser.nama,
+          namaPelanggan: editingUser.namaPelanggan,
           username: editingUser.username,
           email: editingUser.email,
           peran: editingUser.peran,
@@ -93,7 +93,7 @@ export default function UsersManagementContent() {
   }
 
   async function deleteUser(user: User) {
-    if (!window.confirm(`Hapus pengguna ${user.nama}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    if (!window.confirm(`Hapus pengguna ${user.namaPelanggan}? Tindakan ini tidak dapat dibatalkan.`)) return;
     setActionError("");
     try {
       const response = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
@@ -169,7 +169,7 @@ export default function UsersManagementContent() {
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">#{user.id}</td>
                   <td className="px-5 py-4 whitespace-nowrap">
-                    <p className="text-sm font-semibold text-gray-900">{user.nama}</p>
+                    <p className="text-sm font-semibold text-gray-900">{user.namaPelanggan}</p>
                     <p className="mt-0.5 text-xs text-gray-500">@{user.username}</p>
                   </td>
                   <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
@@ -202,7 +202,7 @@ export default function UsersManagementContent() {
                   </td>
                   <td className="px-5 py-4 whitespace-nowrap text-right">
                     <div className="relative inline-block text-left">
-                      <button type="button" aria-label={`Aksi untuk ${user.nama}`} aria-expanded={menuUserId === user.id} onClick={() => setMenuUserId(menuUserId === user.id ? null : user.id)} className="user-action-trigger rounded px-2 py-1 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-semibold tracking-widest">•••</button>
+                      <button type="button" aria-label={`Aksi untuk ${user.namaPelanggan}`} aria-expanded={menuUserId === user.id} onClick={() => setMenuUserId(menuUserId === user.id ? null : user.id)} className="user-action-trigger rounded px-2 py-1 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-semibold tracking-widest">•••</button>
                       {menuUserId === user.id && (
                         <div className="user-action-menu absolute right-0 z-20 mt-2 w-32 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
                           <button type="button" onClick={() => { setEditingUser({ ...user }); setMenuUserId(null); }} className="user-action-edit block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Edit</button>
