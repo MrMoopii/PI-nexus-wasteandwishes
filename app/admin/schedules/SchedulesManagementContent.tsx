@@ -36,29 +36,29 @@ export default function SchedulesManagementContent() {
   const [type, setType] = useState("");
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (type) params.set("type", type);
+
+        const [schedulesRes, statsRes] = await Promise.all([
+          fetch(`/api/admin/schedules?${params}`),
+          fetch("/api/admin/schedules/stats"),
+        ]);
+        const schedulesData = await schedulesRes.json();
+        const statsData = await statsRes.json();
+        setSchedules(schedulesData);
+        setStats(statsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, [search, type]);
-
-  const fetchData = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (type) params.set("type", type);
-
-      const [schedulesRes, statsRes] = await Promise.all([
-        fetch(`/api/admin/schedules?${params}`),
-        fetch("/api/admin/schedules/stats"),
-      ]);
-      const schedulesData = await schedulesRes.json();
-      const statsData = await statsRes.json();
-      setSchedules(schedulesData);
-      setStats(statsData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
