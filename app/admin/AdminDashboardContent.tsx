@@ -133,7 +133,7 @@ export default function AdminDashboardContent() {
                 ) : recentUsers.length ? (
                   recentUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-5 py-4 font-medium">{user.nama}</td>
+                      <td className="px-5 py-4 font-medium">{user.namaPelanggan}</td>
                       <td className="px-5 py-4 text-slate-500">{user.email}</td>
                       <td className="px-5 py-4 capitalize">{user.peran}</td>
                       <td className="px-5 py-4 text-slate-500">
