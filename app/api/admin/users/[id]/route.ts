@@ -30,11 +30,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     const email = body.email?.trim();
     const peran = body.peran;
 
-    if (!nama || !email || !["user", "admin"].includes(peran || "")) {
+    if (!namaPelanggan || !email || !["user", "admin"].includes(peran || "")) {
       return NextResponse.json({ error: "Nama, email, dan peran yang valid wajib diisi." }, { status: 400 });
     }
 
-    await getDb.update(users).set({ namaPelanggan: namaPelanggan, username: username || null, email, peran }).where(eq(users.idUser, id));
+    await getDb().update(users).set({ namaPelanggan: namaPelanggan, username: username || null, email, peran }).where(eq(users.idUser, id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error updating user:", error);
@@ -52,7 +52,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   try {
-    await getDb.delete(users).where(eq(users.idUser, id));
+    await getDb().delete(users).where(eq(users.idUser, id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting user:", error);
