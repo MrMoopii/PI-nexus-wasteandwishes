@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users, dataLangganan } from "@/lib/db/schema";
 import { count, eq, desc, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -28,15 +28,15 @@ export async function GET(request: Request) {
       whereCondition = eq(users.peran, role);
     }
 
-    const [totalResult] = await db
+    const [totalResult] = await getDb()
       .select({ count: count() })
       .from(users)
       .where(whereCondition);
 
-    const userList = await db
+    const userList = await getDb()
       .select({
         id: users.idUser,
-        nama: users.namaPelanggan,
+        namaPelanggan: users.namaPelanggan,
         username: users.username,
         email: users.email,
         peran: users.peran,
@@ -52,16 +52,17 @@ export async function GET(request: Request) {
     // Get subscription status for each user
     const usersWithSubscription = await Promise.all(
       userList.map(async (user) => {
-        const [subscription] = await db
+        const [subscription] = await getDb()
           .select()
           .from(dataLangganan)
           .where(eq(dataLangganan.userId, user.id))
           .limit(1);
         return {
           ...user,
-          statusLangganan: subscription?.statusLangganan || "tidak_berlangganan",
+          statusLangganan:
+            subscription?.statusLangganan || "tidak_berlangganan",
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -71,6 +72,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 },
+    );
   }
 }

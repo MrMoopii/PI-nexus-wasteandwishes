@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -29,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const email = (credentials.email as string).trim().toLowerCase();
         const password = credentials.password as string;
-        const [user] = await db
+        const [user] = await getDb()
           .select()
           .from(users)
           .where(eq(users.email, email))
@@ -57,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ user, token, account }) {
       if (account?.provider === "google" && token.email) {
-        const [row] = await db
+        const [row] = await getDb()
           .select()
           .from(users)
           .where(eq(users.email, token.email.toLowerCase()))
@@ -90,7 +90,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       const email = user.email.trim().toLowerCase();
-      const [row] = await db
+      const [row] = await getDb()
         .select()
         .from(users)
         .where(eq(users.email, email))
@@ -101,7 +101,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (!row) {
-        await db.insert(users).values({
+        await getDb().insert(users).values({
           email: email,
         });
       }

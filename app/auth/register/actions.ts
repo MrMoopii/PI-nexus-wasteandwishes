@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -32,7 +32,7 @@ export async function register(formData: {
 
   try {
     // Check if email already exists
-    const [checkEmailTerpakai] = await db
+    const [checkEmailTerpakai] = await getDb()
       .select()
       .from(users)
       .where(eq(users.email, email))
@@ -43,7 +43,7 @@ export async function register(formData: {
     }
 
     // Check if username already exists
-    const [existingUsername] = await db
+    const [existingUsername] = await getDb()
       .select()
       .from(users)
       .where(eq(users.username, username))
@@ -57,7 +57,7 @@ export async function register(formData: {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Insert new user
-    await db.insert(users).values({
+    await getDb().insert(users).values({
       username: username,
       namaPelanggan: namaPelanggan,
       peran: "user",

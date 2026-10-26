@@ -1,5 +1,10 @@
-import { db } from "@/lib/db";
-import { users, dataLangganan, events, riwayatPengambilan } from "@/lib/db/schema";
+import { getDb } from "@/lib/db";
+import {
+  users,
+  dataLangganan,
+  events,
+  riwayatPengambilan,
+} from "@/lib/db/schema";
 import { count, eq, gte, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
@@ -9,18 +14,18 @@ export async function GET() {
   const h = await headers();
   h.get("x-vercel-ip-city");
   try {
-    const [totalUsers] = await db.select({ count: count() }).from(users);
-    const [activeSubscriptions] = await db
+    const [totalUsers] = await getDb().select({ count: count() }).from(users);
+    const [activeSubscriptions] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
       .where(eq(dataLangganan.statusLangganan, "aktif"));
-    const [totalEvents] = await db.select({ count: count() }).from(events);
+    const [totalEvents] = await getDb().select({ count: count() }).from(events);
 
     // Get waste collected this month
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [wasteThisMonth] = await db
+    const [wasteThisMonth] = await getDb()
       .select({
         total: sql<number>`COALESCE(SUM(${riwayatPengambilan.bobotSampah}), 0)`,
       })
@@ -35,6 +40,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch stats" },
+      { status: 500 },
+    );
   }
 }
