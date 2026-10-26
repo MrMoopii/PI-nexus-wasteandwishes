@@ -235,7 +235,7 @@ export default function UsersManagementContent() {
               <h2 className="text-xl font-semibold text-gray-900">Edit Pengguna</h2>
               <p className="mt-1 text-sm text-gray-500">Perbarui informasi akun pengguna.</p>
             </div>
-            {([ ["nama", "Nama"], ["username", "Username"], ["email", "Email"] ] as const).map(([field, label]) => (
+            {([ ["namaPelanggan", "Nama"], ["username", "Username"], ["email", "Email"] ] as const).map(([field, label]) => (
               <label key={field} className="block text-sm font-medium text-gray-700">{label}
                 <input required type={field === "email" ? "email" : "text"} value={editingUser[field] || ""} onChange={(event) => setEditingUser({ ...editingUser, [field]: event.target.value })} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-normal" />
               </label>
