@@ -20,7 +20,7 @@ export default function TambahEventPage() {
     const gambarUrl = formData.get("gambarUrl") as string;
 
     // Memasukkan data ke tabel events menggunakan Drizzle ORM
-    await getDb.insert(events).values({
+    await getDb().insert(events).values({
       namaEvent,
       jenisEvent,
       tanggalPelaksanaan,

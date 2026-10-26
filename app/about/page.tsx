@@ -50,7 +50,7 @@ export default function Home() {
             <div className="text-gray-600 text-sm leading-relaxed text-left w-full space-y-2">
               <p>
                 <strong className="text-teal-700">1. Edukasi:</strong> Ubah pola
-                pikir dari "membuang" jadi "menyediakan bahan baku".
+                pikir dari 'membuang' jadi 'menyediakan bahan baku'.
               </p>
               <p>
                 <strong className="text-teal-700">2. Standar:</strong> Panduan

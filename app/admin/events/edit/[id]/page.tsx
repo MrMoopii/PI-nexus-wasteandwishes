@@ -24,7 +24,7 @@ export default async function EditEventPage({
     );
   }
 
-  const dataEvent = await getDb
+  const dataEvent = await getDb()
     .select()
     .from(events)
     .where(eq(events.idEvent, eventId));
@@ -62,7 +62,7 @@ export default async function EditEventPage({
     const statusEvent = formData.get("statusEvent") as string;
     const gambarUrl = formData.get("gambarUrl") as string;
 
-    await getDb
+    await getDb()
       .update(events)
       .set({
         namaEvent,

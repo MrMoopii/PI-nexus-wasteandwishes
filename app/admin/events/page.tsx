@@ -12,7 +12,7 @@ export default async function AdminEventPage({
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
 
-  const allEvents = await getDb
+  const allEvents = await getDb()
     .select()
     .from(events)
     .orderBy(desc(events.idEvent));
