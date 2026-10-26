@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -32,4 +33,247 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.admin-theme-dark {
+  background-color: #111827;
+  color: #e5e7eb;
+  color-scheme: dark;
+}
+
+.admin-theme-dark main {
+  color: #e5e7eb;
+}
+
+.admin-theme-dark main [class~="bg-white"],
+.admin-theme-dark main [class~="bg-white/95"] {
+  background-color: #1f2937 !important;
+}
+
+.admin-theme-dark main [class~="bg-slate-50"],
+.admin-theme-dark main [class~="bg-slate-50/50"] {
+  background-color: #273449 !important;
+}
+
+.admin-theme-dark main [class~="bg-emerald-100"] {
+  background-color: #14532d !important;
+}
+
+.admin-theme-dark main [class~="text-emerald-700"] {
+  color: #bbf7d0 !important;
+}
+
+.admin-theme-dark main [class~="border-slate-100"],
+.admin-theme-dark main [class~="divide-slate-100"] > :not(:last-child) {
+  border-color: #374151 !important;
+}
+
+.admin-theme-dark main [class~="text-slate-800"],
+.admin-theme-dark main [class~="text-slate-700"] {
+  color: #f3f4f6 !important;
+}
+
+.admin-theme-dark main [class~="text-slate-500"],
+.admin-theme-dark main [class~="text-slate-400"] {
+  color: #9ca3af !important;
+}
+
+.admin-theme-dark main [class~="hover:bg-slate-50/50"]:hover {
+  background-color: #273449 !important;
+}
+
+.admin-theme-dark main [class~="hover:bg-blue-50/50"]:hover {
+  background-color: #273449 !important;
+}
+
+.admin-theme-dark main [class~="hover:border-blue-200"]:hover {
+  border-color: #4b6484 !important;
+}
+
+.admin-theme-dark main a[class~="hover:bg-blue-50/50"]:hover {
+  background-color: #273449 !important;
+  border-color: #4b6484 !important;
+}
+
+.admin-theme-dark main a[class~="hover:bg-blue-50/50"]:hover p {
+  color: #f3f4f6 !important;
+}
+
+.admin-theme-dark main [class~="bg-gray-50"],
+.admin-theme-dark main [class~="hover:bg-gray-50"]:hover {
+  background-color: #273449 !important;
+}
+
+.admin-theme-dark main [class~="bg-gray-100"] {
+  background-color: #374151 !important;
+}
+
+.admin-theme-dark main [class~="bg-slate-100"] {
+  background-color: #374151 !important;
+}
+
+.admin-theme-dark main [class~="bg-teal-50"],
+.admin-theme-dark main [class~="bg-emerald-50"],
+.admin-theme-dark main [class~="bg-blue-50"],
+.admin-theme-dark main [class~="bg-amber-50"],
+.admin-theme-dark main [class~="bg-green-50"] {
+  background-color: #374151 !important;
+}
+
+.admin-theme-dark main [class~="border-gray-100"],
+.admin-theme-dark main [class~="border-gray-300"],
+.admin-theme-dark main [class~="divide-gray-100"] > :not(:last-child) {
+  border-color: #4b5563 !important;
+}
+
+.admin-theme-dark main [class~="text-gray-900"],
+.admin-theme-dark main [class~="text-gray-800"],
+.admin-theme-dark main [class~="text-gray-700"] {
+  color: #f3f4f6 !important;
+}
+
+.admin-theme-dark main [class~="text-gray-600"],
+.admin-theme-dark main [class~="text-gray-500"] {
+  color: #cbd5e1 !important;
+}
+
+.admin-theme-dark main [class~="text-slate-700"] {
+  color: #e2e8f0 !important;
+}
+
+.admin-theme-dark main [class~="text-teal-800"],
+.admin-theme-dark main [class~="text-emerald-800"],
+.admin-theme-dark main [class~="text-blue-800"],
+.admin-theme-dark main [class~="text-amber-800"],
+.admin-theme-dark main [class~="text-green-800"] {
+  color: #e2e8f0 !important;
+}
+
+.admin-theme-dark main input,
+.admin-theme-dark main select {
+  background-color: #1f2937;
+  border-color: #4b5563;
+  color: #f3f4f6;
+}
+
+.admin-theme-dark main input::placeholder {
+  color: #9ca3af;
+}
+
+.admin-theme-dark main option {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.admin-theme-dark .user-action-trigger {
+  color: #cbd5e1;
+}
+
+.admin-theme-dark .user-action-trigger:hover,
+.admin-theme-dark .user-action-trigger:focus-visible {
+  background-color: #374151;
+  color: #fff;
+}
+
+.admin-theme-dark .user-action-menu {
+  border-color: #64748b !important;
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+.admin-theme-dark .user-action-edit {
+  color: #f3f4f6 !important;
+}
+
+.admin-theme-dark .user-action-edit:hover,
+.admin-theme-dark .user-action-edit:focus-visible {
+  background-color: #374151 !important;
+  color: #fff !important;
+}
+
+.admin-theme-dark .user-action-delete {
+  color: #fca5a5 !important;
+}
+
+.admin-theme-dark .user-action-delete:hover,
+.admin-theme-dark .user-action-delete:focus-visible {
+  background-color: #7f1d1d !important;
+  color: #fff !important;
+}
+
+/* Helix Drift-inspired editorial styling for the admin workspace. */
+.admin-shell {
+  --admin-canvas: #f4f7fa;
+  --admin-sunk: #dde7f2;
+  --admin-pastel: #b9cde5;
+  --admin-ink: #1b2233;
+  --admin-ink-2: #5b6879;
+  --admin-accent: #4a6e96;
+  font-family: "Albert Sans", system-ui, sans-serif;
+  font-weight: 300;
+  background-image:
+    radial-gradient(1000px 560px at 0% 0%, rgb(185 205 229 / 35%), transparent 65%),
+    radial-gradient(900px 520px at 100% 100%, rgb(221 231 242 / 55%), transparent 65%);
+}
+
+.admin-shell .admin-sidebar {
+  background: linear-gradient(165deg, #202c3d, #273142 64%, #303c4f);
+}
+
+.admin-shell .admin-brand,
+.admin-shell main h1,
+.admin-shell main h2,
+.admin-shell main h3 {
+  font-family: "Newsreader", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.015em;
+}
+
+.admin-shell .admin-header {
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border-color: rgb(150 177 208 / 34%);
+}
+
+.admin-shell main > div > section,
+.admin-shell main > div > div > section,
+.admin-shell main > div > div.bg-white,
+.admin-shell main > div > div > div.bg-white,
+.admin-shell main .admin-metric-card {
+  border-color: rgb(150 177 208 / 28%);
+  box-shadow: 0 14px 36px rgb(27 34 51 / 5%);
+}
+
+.admin-shell main a,
+.admin-shell main button {
+  transition-duration: 300ms;
+}
+
+.admin-shell main table thead {
+  letter-spacing: 0.09em;
+}
+
+.admin-theme-dark {
+  --admin-canvas: #111827;
+  --admin-sunk: #273449;
+  --admin-pastel: #33465f;
+  --admin-ink: #f3f4f6;
+  --admin-ink-2: #cbd5e1;
+  --admin-accent: #96b1d0;
+  background-image:
+    radial-gradient(900px 520px at 0% 0%, rgb(74 110 150 / 14%), transparent 65%),
+    radial-gradient(800px 500px at 100% 100%, rgb(39 52 73 / 28%), transparent 65%);
+}
+
+.admin-theme-dark .admin-header {
+  background-color: rgb(17 24 39 / 88%);
+  border-color: rgb(150 177 208 / 20%);
+}
+
+.admin-theme-dark .admin-header button {
+  color: #d1d5db;
+}
+
+.admin-theme-dark .admin-header button:hover {
+  background-color: #374151;
 }

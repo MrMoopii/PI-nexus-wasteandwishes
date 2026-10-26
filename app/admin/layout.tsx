@@ -3,15 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const adminNavigation = [
-  { name: "Dashboard", href: "/admin", icon: "📊" },
-  { name: "Data Pengguna", href: "/admin/users", icon: "👥" },
-  { name: "Jadwal Pengambilan", href: "/admin/schedules", icon: "📅" },
-  { name: "Data Event", href: "/admin/events", icon: "🎉" },
-  { name: "Produk", href: "/admin/products", icon: "📦" },
-  { name: "Laporan", href: "/admin/reports", icon: "📈" },
+  { name: "Dashboard", href: "/admin", category: "NAVIGATION" },
+  { name: "Data Pengguna", href: "/admin/users", category: "NAVIGATION" },
+  { name: "Jadwal Pengambilan", href: "/admin/schedules", category: "NAVIGATION" },
+  { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
+  { name: "Produk", href: "/admin/products", category: "APPLICATION" },
+  { name: "Laporan", href: "/admin/reports", category: "APPLICATION" },
 ];
 
 interface User {
@@ -20,96 +20,142 @@ interface User {
   peran?: string;
 }
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(
+    () => typeof window !== "undefined" && window.localStorage.getItem("admin-theme") === "dark",
+  );
+
+  function toggleTheme() {
+    setDarkMode((current) => {
+      const next = !current;
+      window.localStorage.setItem("admin-theme", next ? "dark" : "light");
+      return next;
+    });
+  }
 
   useEffect(() => {
-    // Check authentication on mount
     fetch("/api/auth/me")
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Not authenticated");
-        }
+        if (!res.ok) throw new Error("Not authenticated");
         return res.json();
       })
       .then((data) => {
-        if (data.user?.peran !== "admin") {
-          router.push("/auth/login");
-        } else {
-          setUser(data.user);
-        }
+        if (data.user?.peran !== "admin") router.push("/auth/login");
+        else setUser(data.user);
       })
-      .catch(() => {
-        router.push("/auth/login");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(() => router.push("/auth/login"))
+      .finally(() => setLoading(false));
   }, [router]);
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gray-100 items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7]">
+        <div className="h-10 w-10 animate-pulse rounded-full border-2 border-blue-600/30 border-t-blue-600" />
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-800">
-          <Link href="/admin  " className="flex items-center gap-3">
-            <Image
-              src="/icon/waste-and-wishes-logo.png"
-              alt="Waste and Wishes logo"
-              width={35}
-              height={35}
-              className="h-8.75 w-auto"
-            />
-            <div>
-              <h1 className="text-lg font-bold tracking-[.5px]">
-                Waste <span className="text-teal-400">&</span> Wishes
-              </h1>
-              <p className="text-xs text-gray-500">Admin Panel</p>
-            </div>
-          </Link>
+    <div
+      className={`admin-shell flex h-screen overflow-hidden transition-colors ${darkMode ? "admin-theme-dark" : "bg-[#f4f5f7]"}`}
+      data-theme={darkMode ? "dark" : "light"}
+    >
+      {/* Sidebar (Dark Theme) */}
+      <aside className="admin-sidebar flex w-64 shrink-0 flex-col bg-[#273142] text-slate-300 transition-all">
+        <div className="flex h-[72px] items-center gap-3 px-6">
+          <Image
+            src="/icon/waste-and-wishes-logo.png"
+            alt="Waste and Wishes"
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 object-contain"
+            priority
+          />
+          <span className="admin-brand text-lg font-semibold text-white">Waste & Wishes</span>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {adminNavigation.map((item) => (
+        <nav className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide">
+          <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Navigation</div>
+          <ul className="space-y-1 mb-6">
+            {adminNavigation.filter(item => item.category === "NAVIGATION").map((item) => (
               <li key={item.name}>
                 <Link
                   href={item.href}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    pathname === item.href
+                      ? "bg-white/10 text-white border-l-2 border-blue-500 rounded-l-none"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  }`}
                 >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium">{item.name}</span>
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Application</div>
+          <ul className="space-y-1">
+            {adminNavigation.filter(item => item.category === "APPLICATION").map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    pathname === item.href
+                      ? "bg-white/10 text-white border-l-2 border-blue-500 rounded-l-none"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  {item.name}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
+
+        {/* User Profile at Bottom */}
+        <div className="border-t border-slate-700/50 p-4">
+          <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-white/5 cursor-pointer">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+              {(user.name || user.email || "A").slice(0, 2).toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-white">{user.name || user.email}</p>
+              <p className="text-xs text-slate-400 capitalize">{user.peran}</p>
+            </div>
+          </div>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">{children}</div>
-      </main>
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Top Navbar */}
+        <header className={`admin-header flex h-[72px] shrink-0 items-center justify-end gap-5 border-b px-6 shadow-sm z-10 transition-colors ${darkMode ? "border-slate-700 bg-gray-900" : "border-slate-100 bg-white"}`}>
+          <div className="flex items-center gap-5 text-slate-500">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={darkMode ? "Aktifkan tema terang" : "Aktifkan tema gelap"}
+              aria-pressed={darkMode}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
+            </button>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white ml-2">
+              {(user.name || user.email || "A").slice(0, 2).toUpperCase()}
+            </span>
+          </div>
+        </header>
+
+        <main className={`flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 transition-colors ${darkMode ? "bg-gray-900" : "bg-[#f4f5f7]"}`}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
