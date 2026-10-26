@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
 export default function TambahEventPage() {
@@ -20,7 +20,7 @@ export default function TambahEventPage() {
     const gambarUrl = formData.get("gambarUrl") as string;
 
     // Memasukkan data ke tabel events menggunakan Drizzle ORM
-    await db.insert(events).values({
+    await getDb.insert(events).values({
       namaEvent,
       jenisEvent,
       tanggalPelaksanaan,
