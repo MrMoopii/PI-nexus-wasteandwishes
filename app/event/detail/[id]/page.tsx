@@ -1,11 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { db, events as eventsTable } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { events as eventsTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export const instant = false;
-
 
 // Fallback lookup
 const DEFAULT_EVENTS: Record<
@@ -71,7 +71,7 @@ export default async function EventDetailPage({
   let event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
 
   try {
-    const [dbEvent] = await db
+    const [dbEvent] = await getDb()
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.idEvent, eventId))
@@ -101,7 +101,7 @@ export default async function EventDetailPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
         {/* Left Column: Gambar & CTA */}
         <div>
-          <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-sm bg-gray-100">
+          <div className="relative w-full h-100 rounded-2xl overflow-hidden shadow-sm bg-gray-100">
             <Image
               src={`/img/event/${event.gambar}`}
               alt={event.nama_event}

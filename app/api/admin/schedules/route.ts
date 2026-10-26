@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   jadwal,
   jadwalJanjian,
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || "";
     const type = searchParams.get("type") || "";
 
-    const allJadwal = await db
+    const allJadwal = await getDb()
       .select({
         id: jadwal.idJadwal,
         hariPengambilan: jadwal.hariPengambilan,
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     // Get details for each jadwal
     const schedulesWithDetails = await Promise.all(
       filteredJadwal.map(async (j) => {
-        const [subscription] = await db
+        const [subscription] = await getDb()
           .select({
             id: dataLangganan.idLangganan,
             userId: dataLangganan.userId,
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
 
         let userInfo = null;
         if (subscription?.userId) {
-          const [user] = await db
+          const [user] = await getDb()
             .select({
               namaPelanggan: users.namaPelanggan,
               email: users.email,
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
           userInfo = user;
         }
 
-        const [janjian] = await db
+        const [janjian] = await getDb()
           .select({
             keterangan: jadwalJanjian.keteranganTujuan,
             status: jadwalJanjian.statusKonfirmasi,
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
           .where(eq(jadwalJanjian.jadwalId, j.id))
           .limit(1);
 
-        const [rutin] = await db
+        const [rutin] = await getDb()
           .select({
             mulai: jadwalRutin.tanggalMulai,
             selesai: jadwalRutin.tanggalSelesai,

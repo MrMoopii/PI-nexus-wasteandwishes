@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import {
@@ -61,7 +61,7 @@ export async function lengkapiProfil(props: {
   if (errTanggalLahir) return { error: errTanggalLahir };
 
   try {
-    const [checkUserTerpakai] = await db
+    const [checkUserTerpakai] = await getDb()
       .select()
       .from(users)
       .where(and(eq(users.username, username), ne(users.idUser, idUser)))
@@ -71,7 +71,7 @@ export async function lengkapiProfil(props: {
       return { error: "Username sudah dipakai!" };
     }
 
-    await db
+    await getDb()
       .update(users)
       .set({
         username: username,

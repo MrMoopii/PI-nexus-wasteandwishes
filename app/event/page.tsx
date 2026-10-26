@@ -1,13 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { db, events as eventsTable } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { events as eventsTable } from "@/lib/db/schema";
 
 export const instant = false;
 
 export const metadata: Metadata = {
   title: "Daftar Event - Waste & Wishes",
-  description: "Daftar kegiatan pelatihan, sosialisasi, dan aksi hijau pengelolaan limbah organik.",
+  description:
+    "Daftar kegiatan pelatihan, sosialisasi, dan aksi hijau pengelolaan limbah organik.",
 };
 
 // Fallback events if database hasn't been seeded yet
@@ -58,7 +60,7 @@ export default async function EventPage() {
   let events = DEFAULT_EVENTS;
 
   try {
-    const dbEvents = await db.select().from(eventsTable);
+    const dbEvents = await getDb().select().from(eventsTable);
     if (dbEvents && dbEvents.length > 0) {
       events = dbEvents.map((e, index) => {
         const fallback =
@@ -86,7 +88,8 @@ export default async function EventPage() {
           Daftar Event &amp; Edukasi
         </h1>
         <p className="text-gray-600">
-          Ikuti berbagai agenda dan pelatihan pengelolaan limbah organik bersama kami.
+          Ikuti berbagai agenda dan pelatihan pengelolaan limbah organik bersama
+          kami.
         </p>
       </div>
 
@@ -112,7 +115,9 @@ export default async function EventPage() {
             </p>
 
             <div className="mt-2 flex items-baseline justify-between">
-              <strong className="text-[#17afb0] font-bold text-sm">Gratis</strong>
+              <strong className="text-[#17afb0] font-bold text-sm">
+                Gratis
+              </strong>
             </div>
 
             <Link
@@ -132,7 +137,8 @@ export default async function EventPage() {
             Event Spesial Bulan Ini
           </p>
           <p className="text-gray-500 text-sm">
-            Daftarkan diri Anda sekarang sebelum kuota peserta pelatihan maggot BSF penuh!
+            Daftarkan diri Anda sekarang sebelum kuota peserta pelatihan maggot
+            BSF penuh!
           </p>
         </div>
         <Link

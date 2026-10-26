@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { db, events as eventsTable, users as usersTable } from "@/lib/db"; // Pastikan usersTable di-import
+import { getDb } from "@/lib/db";
+import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; // Pastikan usersTable di-import
 import { eq } from "drizzle-orm";
 
 export const instant = false;
@@ -16,11 +17,36 @@ const DEFAULT_EVENTS: Record<
     tanggal_pelaksanaan?: string;
   }
 > = {
-  1: { id_event: 1, nama_event: "Pelatihan Budidaya Maggot BSF", gambar: "1.jpg", tanggal_pelaksanaan: "25 Oktober 2026" },
-  2: { id_event: 2, nama_event: "Sosialisasi Pemilahan Limbah Dapur", gambar: "2.jpg", tanggal_pelaksanaan: "02 November 2026" },
-  3: { id_event: 3, nama_event: "Aksi Hijau Gejayan Bersih", gambar: "3.jpg", tanggal_pelaksanaan: "15 November 2026" },
-  4: { id_event: 4, nama_event: "Workshop Kasgot & Pupuk Organik", gambar: "4.jpg", tanggal_pelaksanaan: "28 November 2026" },
-  5: { id_event: 5, nama_event: "Edukasi Sirkular Ekonomi Desa", gambar: "5.jpg", tanggal_pelaksanaan: "10 Desember 2026" },
+  1: {
+    id_event: 1,
+    nama_event: "Pelatihan Budidaya Maggot BSF",
+    gambar: "1.jpg",
+    tanggal_pelaksanaan: "25 Oktober 2026",
+  },
+  2: {
+    id_event: 2,
+    nama_event: "Sosialisasi Pemilahan Limbah Dapur",
+    gambar: "2.jpg",
+    tanggal_pelaksanaan: "02 November 2026",
+  },
+  3: {
+    id_event: 3,
+    nama_event: "Aksi Hijau Gejayan Bersih",
+    gambar: "3.jpg",
+    tanggal_pelaksanaan: "15 November 2026",
+  },
+  4: {
+    id_event: 4,
+    nama_event: "Workshop Kasgot & Pupuk Organik",
+    gambar: "4.jpg",
+    tanggal_pelaksanaan: "28 November 2026",
+  },
+  5: {
+    id_event: 5,
+    nama_event: "Edukasi Sirkular Ekonomi Desa",
+    gambar: "5.jpg",
+    tanggal_pelaksanaan: "10 Desember 2026",
+  },
 };
 
 export default async function EventCheckoutPage({
@@ -29,10 +55,10 @@ export default async function EventCheckoutPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  
-  // Jika tidak ada session / belum login, lempar ke halaman auth
+
+  // Jika tidak ada session / belum login, lempar ke halaman login
   if (!session || !session.user?.email) {
-    redirect("/auth");
+    redirect("/auth/login");
   }
 
   const resolvedParams = await params;
@@ -43,7 +69,7 @@ export default async function EventCheckoutPage({
 
   try {
     // 1. Ambil data Event dari Database
-    const [dbEvent] = await db
+    const [dbEvent] = await getDb()
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.idEvent, eventId))
@@ -60,7 +86,7 @@ export default async function EventCheckoutPage({
     }
 
     // 2. Ambil data User dari Database berdasarkan email dari session
-    const [dbUser] = await db
+    const [dbUser] = await getDb()
       .select()
       .from(usersTable)
       .where(eq(usersTable.email, session.user.email))
@@ -78,17 +104,16 @@ export default async function EventCheckoutPage({
   }
 
   // Format tanggal lahir untuk input type="date" (YYYY-MM-DD)
-  const formatTanggalLahir = currentUser?.tanggalLahir 
-    ? new Date(currentUser.tanggalLahir).toISOString().split('T')[0] 
+  const formatTanggalLahir = currentUser?.tanggalLahir
+    ? new Date(currentUser.tanggalLahir).toISOString().split("T")[0]
     : "";
 
   return (
     <div className="container mx-auto px-4 max-w-6xl py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        
         {/* Kolom Kiri: Informasi Event */}
         <div className="flex flex-col gap-4">
-          <div className="relative w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-sm bg-gray-100">
+          <div className="relative w-full h-75 md:h- rounded-2xl overflow-hidden shadow-sm bg-gray-100">
             <Image
               src={`/img/event/${event.gambar}`}
               alt={event.nama_event}
@@ -107,7 +132,9 @@ export default async function EventCheckoutPage({
             </p>
             <hr className="my-4 border-gray-100" />
             <p className="text-gray-500 text-sm">
-              Pastikan data diri Anda di samping sudah benar sebelum menekan tombol konfirmasi pendaftaran. Tiket dan informasi lanjutan akan dikirimkan ke kontak Anda.
+              Pastikan data diri Anda di samping sudah benar sebelum menekan
+              tombol konfirmasi pendaftaran. Tiket dan informasi lanjutan akan
+              dikirimkan ke kontak Anda.
             </p>
           </div>
         </div>
@@ -121,9 +148,15 @@ export default async function EventCheckoutPage({
             Data di bawah diambil otomatis dari profil akun Anda.
           </p>
 
-          <form action="/api/event/checkout" method="POST" className="space-y-4">
+          <form
+            action="/api/event/checkout"
+            method="POST"
+            className="space-y-4"
+          >
             <input type="hidden" name="id_event" value={event.id_event} />
-            {currentUser && <input type="hidden" name="id_user" value={currentUser.idUser} />}
+            {currentUser && (
+              <input type="hidden" name="id_user" value={currentUser.idUser} />
+            )}
 
             <div>
               <label
