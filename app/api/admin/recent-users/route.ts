@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -9,7 +9,7 @@ export async function GET() {
   const h = await headers();
   h.get("x-vercel-ip-city");
   try {
-    const recentUsers = await db
+    const recentUsers = await getDb()
       .select({
         id: users.idUser,
         namaPelanggan: users.namaPelanggan,
