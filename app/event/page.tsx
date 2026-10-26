@@ -94,79 +94,76 @@ export default async function EventPage() {
   const leadEvent = events[0] || DEFAULT_EVENTS[0];
 
   return (
-    <div className="relative min-h-screen bg-[#F4F7FA] text-[#1B2233] font-[family-name:var(--font-inter)] selection:bg-[#17afb0]/20 selection:text-[#118586]">
+    <div className="relative min-h-screen bg-[var(--hx-canvas)] text-[var(--hx-ink)] font-[family-name:var(--font-inter)] selection:bg-[var(--hx-accent)]/20 selection:text-[var(--hx-accent-dark)]">
       {/* Ambient gradient washes matching Helix Drift */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-[#B9CDE5]/40 blur-3xl" />
-        <div className="absolute top-[35%] -right-32 h-[550px] w-[550px] rounded-full bg-[#DDE7F2]/70 blur-3xl" />
-        <div className="absolute -bottom-32 left-1/3 h-[450px] w-[450px] rounded-full bg-[#B9CDE5]/30 blur-3xl" />
+      <div aria-hidden="true" className="hx-ambient-wash">
+        <div className="hx-ambient-blob-1" />
+        <div className="hx-ambient-blob-2" />
+        <div className="hx-ambient-blob-3" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         {/* Header Section */}
         <header className="mb-12 md:mb-16">
           <div className="flex items-center gap-2 mb-3">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#17afb0]" />
-            <span className="text-[11px] font-semibold tracking-[0.2em] text-[#5B6879] uppercase">
+            <span className="inline-block h-2 w-2 rounded-full bg-[var(--hx-accent)]" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-ink-2)] uppercase">
               Agenda &amp; Pelatihan Komunitas
             </span>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#96B1D0]/30">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hx-pastel-deep)]/30">
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] leading-tight">
                 Daftar Kegiatan &amp; Aksi Hijau
               </h1>
-              <p className="mt-3 max-w-2xl text-base sm:text-lg text-[#5B6879] font-light leading-relaxed">
+              <p className="mt-3 max-w-2xl text-base sm:text-lg text-[var(--hx-ink-2)] font-light leading-relaxed">
                 Tingkatkan kesadaran ekologis dan keterampilan pengolahan sampah organik
                 melalui serangkaian agenda pelatihan praktis, workshop maggot BSF, dan gerakan kerelawanan.
               </p>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <span className="text-xs uppercase tracking-widest text-[#93A0B2]">
+              <span className="text-xs uppercase tracking-widest text-[var(--hx-ink-3)]">
                 Total Tersedia
               </span>
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/80 border border-[#B9CDE5] text-[#17afb0] shadow-sm backdrop-blur-sm">
+              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/80 border border-[var(--hx-pastel)] text-[var(--hx-accent)] shadow-sm backdrop-blur-sm">
                 {String(totalEvents).padStart(2, "0")} Agenda
               </span>
             </div>
           </div>
 
           {/* Facts / Key Highlights Bar (Helix Drift Style) */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-px bg-[#B9CDE5]/40 rounded-xl overflow-hidden border border-[#B9CDE5]/40 shadow-sm">
-            <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4 sm:p-5">
-              <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--hx-pastel)]/40 rounded-xl overflow-hidden border border-[var(--hx-pastel)]/40 shadow-sm">
+            <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
                 Akses
               </span>
-              <p className="text-xl sm:text-2xl font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+              <p className="text-xl sm:text-2xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
                 100% Gratis
               </p>
             </div>
-            <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4 sm:p-5">
-              <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+            <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
                 Fasilitas
               </span>
-              <p className="text-xl sm:text-2xl font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+              <p className="text-xl sm:text-2xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
                 Sertifikat &amp; Kit
               </p>
             </div>
-            <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4 sm:p-5">
-              <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+            <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
                 Wilayah
               </span>
-              <p className="text-xl sm:text-2xl font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+              <p className="text-xl sm:text-2xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
                 Gejayan &amp; Sleman
               </p>
             </div>
-            <div className="bg-[#F4F7FA]/90 backdrop-blur-sm p-4 sm:p-5">
-              <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-1">
+            <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
                 Peserta
               </span>
-              <p className="text-xl sm:text-2xl font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)]">
+              <p className="text-xl sm:text-2xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
                 Terbuka Umum
               </p>
             </div>
@@ -187,27 +184,27 @@ export default async function EventPage() {
               return (
                 <article
                   key={event.id_event}
-                  className="group relative flex flex-col rounded-2xl bg-white/80 border border-[#B9CDE5]/50 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(27,34,51,0.08)] hover:border-[#17afb0]/40"
+                  className="hx-card group"
                 >
                   {/* Plate Header Info */}
-                  <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[#DDE7F2]/60 text-xs">
+                  <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[var(--hx-sunk)]/60 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-[#17afb0] font-[family-name:var(--font-plus-jakarta-sans)]">
+                      <span className="font-semibold text-[var(--hx-accent)] font-[family-name:var(--font-plus-jakarta-sans)]">
                         {plateNo}
                       </span>
-                      <span className="h-3 w-px bg-[#B9CDE5]" />
-                      <span className="text-[#93A0B2] font-mono tracking-wider">
+                      <span className="h-3 w-px bg-[var(--hx-pastel)]" />
+                      <span className="text-[var(--hx-ink-3)] font-mono tracking-wider">
                         {totalNo}
                       </span>
                     </div>
 
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#E8F4F4] text-[#17afb0]">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#E8F4F4] text-[var(--hx-accent)]">
                       {event.kategori || "Workshop"}
                     </span>
                   </div>
 
                   {/* Static Image Plate */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#DDE7F2]">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--hx-sunk)]">
                     <Image
                       src={`/img/event/${event.gambar}`}
                       alt={event.nama_event}
@@ -216,33 +213,33 @@ export default async function EventPage() {
                       className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                     />
                     {/* Inner subtle rim highlight matching template */}
-                    <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]" />
+                    <div className="hx-rim-highlight" />
 
                     {/* Badge Date */}
-                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-md bg-white/90 backdrop-blur-md text-[11px] font-medium text-[#1B2233] shadow-sm">
+                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-md bg-white/90 backdrop-blur-md text-[11px] font-medium text-[var(--hx-ink)] shadow-sm">
                       📅 {event.tanggal_pelaksanaan}
                     </div>
 
                     {/* Free Badge */}
-                    <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-[#17afb0] text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                    <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-[var(--hx-accent)] text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
                       Gratis
                     </div>
                   </div>
 
                   {/* Content Info */}
                   <div className="flex flex-1 flex-col p-5">
-                    <h3 className="text-lg font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)] group-hover:text-[#17afb0] transition-colors leading-snug line-clamp-2">
+                    <h3 className="text-lg font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] group-hover:text-[var(--hx-accent)] transition-colors leading-snug line-clamp-2">
                       {event.nama_event}
                     </h3>
 
-                    <p className="mt-2.5 text-sm text-[#5B6879] font-light leading-relaxed line-clamp-3 flex-1">
+                    <p className="mt-2.5 text-sm text-[var(--hx-ink-2)] font-light leading-relaxed line-clamp-3 flex-1">
                       {event.deskripsi}
                     </p>
 
-                    <div className="mt-4 pt-4 border-t border-[#DDE7F2]/60 flex items-center justify-between text-xs text-[#93A0B2]">
+                    <div className="mt-4 pt-4 border-t border-[var(--hx-sunk)]/60 flex items-center justify-between text-xs text-[var(--hx-ink-3)]">
                       <span className="flex items-center gap-1.5 truncate">
                         <svg
-                          className="h-3.5 w-3.5 shrink-0 text-[#17afb0]"
+                          className="h-3.5 w-3.5 shrink-0 text-[var(--hx-accent)]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -263,7 +260,7 @@ export default async function EventPage() {
                         <span className="truncate">{event.lokasi || "Wedomartani & Gejayan"}</span>
                       </span>
 
-                      <span className="font-semibold text-[#17afb0] shrink-0">
+                      <span className="font-semibold text-[var(--hx-accent)] shrink-0">
                         Slot Terbatas
                       </span>
                     </div>
@@ -272,7 +269,7 @@ export default async function EventPage() {
                     <div className="mt-5">
                       <Link
                         href={`/event/detail/${event.id_event}`}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#B9CDE5] bg-white px-4 py-2.5 text-xs font-semibold text-[#1B2233] transition-all duration-200 hover:border-[#17afb0] hover:bg-[#17afb0] hover:text-white shadow-sm"
+                        className="hx-btn-outline w-full"
                       >
                         <span>Lihat Detail Agenda</span>
                         <svg
@@ -298,34 +295,34 @@ export default async function EventPage() {
         </section>
 
         {/* Featured Special Banner (Helix Drift Sheet Style) */}
-        <section className="relative overflow-hidden rounded-3xl border border-[#B9CDE5]/60 bg-gradient-to-br from-white/95 via-[#F4F7FA]/90 to-[#DDE7F2]/60 p-8 sm:p-10 shadow-[0_12px_40px_rgb(27,34,51,0.06)] backdrop-blur-md">
+        <section className="relative overflow-hidden rounded-3xl border border-[var(--hx-pastel)]/60 bg-gradient-to-br from-white/95 via-[var(--hx-canvas)]/90 to-[var(--hx-sunk)]/60 p-8 sm:p-10 shadow-[0_12px_40px_rgb(27,34,51,0.06)] backdrop-blur-md">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="max-w-2xl">
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#17afb0] text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[var(--hx-accent)] text-white">
                   Pilihan Utama
                 </span>
-                <span className="text-xs text-[#93A0B2] font-mono">
+                <span className="text-xs text-[var(--hx-ink-3)] font-mono">
                   Bulan Ini
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-semibold text-[#1B2233] font-[family-name:var(--font-plus-jakarta-sans)] leading-snug">
+              <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] leading-snug">
                 {leadEvent.nama_event}
               </h2>
 
-              <p className="mt-3 text-sm sm:text-base text-[#5B6879] font-light leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-[var(--hx-ink-2)] font-light leading-relaxed">
                 {leadEvent.deskripsi}
               </p>
 
-              <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-[#5B6879]">
+              <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-[var(--hx-ink-2)]">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#17afb0]" />
-                  Tanggal: <strong className="text-[#1B2233]">{leadEvent.tanggal_pelaksanaan}</strong>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--hx-accent)]" />
+                  Tanggal: <strong className="text-[var(--hx-ink)]">{leadEvent.tanggal_pelaksanaan}</strong>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#17afb0]" />
-                  Biaya: <strong className="text-[#17afb0]">Gratis (Subsidi Program)</strong>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--hx-accent)]" />
+                  Biaya: <strong className="text-[var(--hx-accent)]">Gratis (Subsidi Program)</strong>
                 </span>
               </div>
             </div>
@@ -333,13 +330,13 @@ export default async function EventPage() {
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
               <Link
                 href={`/event/detail/${leadEvent.id_event}`}
-                className="inline-flex items-center justify-center rounded-xl bg-[#17afb0] px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-[#17afb0]/25 transition-all duration-200 hover:bg-[#118586] hover:shadow-lg whitespace-nowrap text-center"
+                className="hx-btn-primary whitespace-nowrap text-center"
               >
                 Daftar Pelatihan Sekarang
               </Link>
               <Link
                 href="/langganan"
-                className="inline-flex items-center justify-center rounded-xl border border-[#B9CDE5] bg-white/80 px-6 py-3.5 text-sm font-semibold text-[#5B6879] transition-all duration-200 hover:bg-white hover:text-[#1B2233] whitespace-nowrap text-center"
+                className="hx-btn-outline whitespace-nowrap text-center"
               >
                 Pelajari Layanan Kami
               </Link>
@@ -348,9 +345,9 @@ export default async function EventPage() {
         </section>
 
         {/* Information & Contact Lines (Helix Drift Style) */}
-        <section className="mt-16 pt-10 border-t border-[#B9CDE5]/40 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-[#5B6879]">
+        <section className="mt-16 pt-10 border-t border-[var(--hx-pastel)]/40 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-[var(--hx-ink-2)]">
           <div>
-            <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-2">
+            <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-2">
               Pusat Edukasi &amp; Penjemputan
             </span>
             <p className="leading-relaxed">
@@ -359,7 +356,7 @@ export default async function EventPage() {
           </div>
 
           <div>
-            <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-2">
+            <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-2">
               Jadwal Operasional
             </span>
             <p className="leading-relaxed">
@@ -368,14 +365,14 @@ export default async function EventPage() {
           </div>
 
           <div>
-            <span className="block text-[11px] font-semibold tracking-wider text-[#93A0B2] uppercase mb-2">
+            <span className="block text-[11px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-2">
               Pertanyaan &amp; Kerjasama
             </span>
             <p className="leading-relaxed">
               Email:{" "}
               <a
                 href="mailto:hello@wasteandwishes.id"
-                className="text-[#17afb0] hover:underline"
+                className="text-[var(--hx-accent)] hover:underline"
               >
                 hello@wasteandwishes.id
               </a>
