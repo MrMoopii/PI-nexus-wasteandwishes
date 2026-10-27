@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { users as usersTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { confirmEventRegistration } from "@/app/event/actions";
-import { DEFAULT_EVENTS } from "@/app/event/page";
+import { DEFAULT_EVENTS, isEventActive } from "@/app/event/page";
 
 export const instant = false;
 
@@ -53,7 +53,9 @@ export default async function EventCheckoutPage({
     ? ""
     : infoMessage;
 
-  const event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
+  const event = DEFAULT_EVENTS.find(
+    (candidate) => candidate.id_event === eventId && isEventActive(candidate),
+  );
   let currentUser = null;
 
   try {

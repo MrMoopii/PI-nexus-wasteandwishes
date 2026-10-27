@@ -5,55 +5,52 @@ import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
-import { DEFAULT_EVENTS } from "@/app/event/page";
+import { DEFAULT_EVENTS, isEventActive } from "@/app/event/page";
 
-const db = getDb();
-
-export async function ensureDefaultEvents() {
-  const rows: (typeof events.$inferInsert)[] = Object.values(
-    DEFAULT_EVENTS,
-  ).map((event) => ({
-    idEvent: event.id_event,
-    namaEvent: event.nama_event,
-    jenisEvent: event.jenis_event,
-    tanggalPelaksanaan: event.tanggal_pelaksanaan,
-    biayaEvent: String(event.biaya_event),
-  }));
-
-  if (!rows.length) {
-    return [] as (typeof rows)[number][];
+function parsePositiveInteger(value: unknown): number | null {
+  if (typeof value === "number") {
+    return Number.isInteger(value) && value > 0 ? value : null;
   }
 
-  await db
-    .insert(events)
-    .values(rows)
-    .onConflictDoNothing({ target: events.idEvent })
-    .returning();
+  if (typeof value === "string") {
+    const trimmed = value.trim();
 
-  return rows;
+    if (!trimmed) {
+      return null;
+    }
+
+    const parsed = Number(trimmed);
+
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return null;
+    }
+
+    return parsed;
+  }
+
+  return null;
 }
 
 async function ensureEventRecord(eventId: number) {
-  const normalizedEventId = Number(eventId) || 1;
-  const [existingEvent] = await db
-    .select()
-    .from(events)
-    .where(eq(events.idEvent, normalizedEventId))
-    .limit(1);
+  const normalizedEventId = parsePositiveInteger(eventId);
 
-  if (existingEvent) {
-    return existingEvent;
+  if (normalizedEventId === null) {
+    return null;
   }
 
-  await ensureDefaultEvents();
-
-  const [finalEvent] = await db
+  const [existingEvent] = await getDb()
     .select()
     .from(events)
     .where(eq(events.idEvent, normalizedEventId))
     .limit(1);
 
-  return finalEvent;
+  if (!existingEvent) {
+    return null;
+  }
+
+  return isEventActive(existingEvent as Record<string, unknown>)
+    ? existingEvent
+    : null;
 }
 
 function readNestedErrorValue(error: unknown, key: string): string {
@@ -111,14 +108,7 @@ export async function registerForEvent(input: { eventId: number | string }) {
   }
 
   try {
-    const resolvedEvent = (await ensureEventRecord(eventId)) ?? {
-      idEvent: DEFAULT_EVENTS[eventId]?.id_event ?? 1,
-      namaEvent: DEFAULT_EVENTS[eventId]?.nama_event ?? "Event",
-      jenisEvent: DEFAULT_EVENTS[eventId]?.jenis_event ?? "Event",
-      tanggalPelaksanaan:
-        DEFAULT_EVENTS[eventId]?.tanggal_pelaksanaan ?? "2026-10-25",
-      biayaEvent: String(DEFAULT_EVENTS[eventId]?.biaya_event ?? 0),
-    };
+    const resolvedEvent = await ensureEventRecord(eventId);
 
     if (!resolvedEvent) {
       return {
@@ -127,7 +117,7 @@ export async function registerForEvent(input: { eventId: number | string }) {
       };
     }
 
-    const [existingRegistration] = await db
+    const [existingRegistration] = await getDb()
       .select()
       .from(pendaftaranEvent)
       .where(
@@ -148,7 +138,7 @@ export async function registerForEvent(input: { eventId: number | string }) {
       };
     }
 
-    const [result] = await db
+    const [result] = await getDb()
       .insert(pendaftaranEvent)
       .values({
         eventId,
@@ -183,7 +173,7 @@ export async function registerForEvent(input: { eventId: number | string }) {
       lowerMessage.includes("pendaftaran_event");
 
     if (isDuplicateRegistration) {
-      const [existingRegistration] = await db
+      const [existingRegistration] = await getDb()
         .select()
         .from(pendaftaranEvent)
         .where(
@@ -227,8 +217,11 @@ export async function registerForEvent(input: { eventId: number | string }) {
 
 export async function confirmEventRegistration(formData: FormData) {
   const rawEventId = formData.get("id_event");
-  const eventId = typeof rawEventId === "string" ? rawEventId : "1";
-  const numericEventId = Number(eventId) || 1;
+  const numericEventId = parsePositiveInteger(rawEventId);
+
+  if (numericEventId === null) {
+    redirect(`/event?error=${encodeURIComponent("ID event tidak valid.")}`);
+  }
 
   const session = await auth();
   const userId = Number(session?.user?.idUser ?? 0);
@@ -268,7 +261,7 @@ export async function getRegistrationProof(idPendaftaran: number | string) {
     };
   }
 
-  const [row] = await db
+  const [row] = await getDb()
     .select({
       idPendaftaran: pendaftaranEvent.idPendaftaran,
       tanggalDaftar: pendaftaranEvent.tanggalDaftar,

@@ -11,9 +11,24 @@ export const metadata: Metadata = {
 };
 
 // Fallback events if database hasn't been seeded yet
+export function isEventActive(
+  event:
+    | { statusEvent?: string | null; status_event?: string | null }
+    | null
+    | undefined,
+) {
+  const value = (
+    event?.statusEvent ??
+    event?.status_event ??
+    "aktif"
+  ).toString();
+  return value.trim().toLowerCase() === "aktif";
+}
+
 export const DEFAULT_EVENTS = [
   {
     id_event: 1,
+    status_event: "aktif",
     nama_event: "Pelatihan Budidaya Maggot BSF",
     deskripsi:
       "Pelajari teknik budidaya Black Soldier Fly (BSF) dari pembibitan hingga panen larva sebagai pakan ternak berkualitas tinggi dan pengolah sampah organik tercepat.",
@@ -28,6 +43,7 @@ export const DEFAULT_EVENTS = [
   },
   {
     id_event: 2,
+    status_event: "aktif",
     nama_event: "Sosialisasi Pemilahan Limbah Dapur",
     deskripsi:
       "Panduan praktis bagi ibu rumah tangga dan pelaku UMKM dalam memilah sampah basah dan kering agar bernilai guna dan tidak mencemari lingkungan.",
@@ -42,6 +58,7 @@ export const DEFAULT_EVENTS = [
   },
   {
     id_event: 3,
+    status_event: "aktif",
     nama_event: "Aksi Hijau Gejayan Bersih",
     deskripsi:
       "Gerakan relawan lingkungan bersama komunitas Nexus membersihkan bantaran sungai dan kawasan Gejayan secara berkala.",
@@ -56,6 +73,7 @@ export const DEFAULT_EVENTS = [
   },
   {
     id_event: 4,
+    status_event: "aktif",
     nama_event: "Workshop Kasgot & Pupuk Organik",
     deskripsi:
       "Mengolah residu kasgot (bekas maggot) menjadi pupuk organik padat dan cair yang kaya nutrisi untuk tanaman dan pertanian urban.",
@@ -70,6 +88,7 @@ export const DEFAULT_EVENTS = [
   },
   {
     id_event: 5,
+    status_event: "aktif",
     nama_event: "Edukasi Sirkular Ekonomi Desa",
     deskripsi:
       "Membuka potensi ekonomi dari pengelolaan limbah berbasis komunitas menuju desa mandiri energi dan pakan berkelanjutan.",
@@ -85,7 +104,7 @@ export const DEFAULT_EVENTS = [
 ];
 
 export default async function EventPage() {
-  const events = DEFAULT_EVENTS;
+  const events = DEFAULT_EVENTS.filter((event) => isEventActive(event));
   const totalEvents = events.length;
   const leadEvent = events[0] || DEFAULT_EVENTS[0];
 
