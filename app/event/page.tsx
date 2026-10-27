@@ -1,20 +1,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getDb } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
 
 export const instant = false;
 
 export const metadata: Metadata = {
   title: "Agenda & Event - Waste & Wishes",
-  description: "Daftar kegiatan pelatihan, sosialisasi, dan aksi hijau pengelolaan limbah organik.",
+  description:
+    "Daftar kegiatan pelatihan, sosialisasi, dan aksi hijau pengelolaan limbah organik.",
 };
 
 // Fallback events if database hasn't been seeded yet
-const DEFAULT_EVENTS = [
+export function isEventActive(
+  event:
+    | { statusEvent?: string | null; status_event?: string | null }
+    | null
+    | undefined,
+) {
+  const value = (
+    event?.statusEvent ??
+    event?.status_event ??
+    "aktif"
+  ).toString();
+  return value.trim().toLowerCase() === "aktif";
+}
+
+export const DEFAULT_EVENTS = [
   {
     id_event: 1,
+    status_event: "aktif",
     nama_event: "Pelatihan Budidaya Maggot BSF",
     deskripsi:
       "Pelajari teknik budidaya Black Soldier Fly (BSF) dari pembibitan hingga panen larva sebagai pakan ternak berkualitas tinggi dan pengolah sampah organik tercepat.",
@@ -22,9 +36,14 @@ const DEFAULT_EVENTS = [
     tanggal_pelaksanaan: "25 Oktober 2026",
     lokasi: "Wedomartani, Sleman",
     kategori: "Workshop Budidaya",
+    jenis_event: "Workshop Budidaya",
+    biaya_event: 0,
+    waktu: "09.00 - 14.30 WIB",
+    kuota: "30 Peserta",
   },
   {
     id_event: 2,
+    status_event: "aktif",
     nama_event: "Sosialisasi Pemilahan Limbah Dapur",
     deskripsi:
       "Panduan praktis bagi ibu rumah tangga dan pelaku UMKM dalam memilah sampah basah dan kering agar bernilai guna dan tidak mencemari lingkungan.",
@@ -32,9 +51,14 @@ const DEFAULT_EVENTS = [
     tanggal_pelaksanaan: "02 November 2026",
     lokasi: "Gejayan, Yogyakarta",
     kategori: "Edukasi Warga",
+    jenis_event: "Edukasi Warga",
+    biaya_event: 0,
+    waktu: "08.30 - 11.30 WIB",
+    kuota: "50 Peserta",
   },
   {
     id_event: 3,
+    status_event: "aktif",
     nama_event: "Aksi Hijau Gejayan Bersih",
     deskripsi:
       "Gerakan relawan lingkungan bersama komunitas Nexus membersihkan bantaran sungai dan kawasan Gejayan secara berkala.",
@@ -42,9 +66,14 @@ const DEFAULT_EVENTS = [
     tanggal_pelaksanaan: "15 November 2026",
     lokasi: "Kawasan Gejayan",
     kategori: "Aksi Relawan",
+    jenis_event: "Aksi Relawan",
+    biaya_event: 0,
+    waktu: "06.30 - 10.00 WIB",
+    kuota: "100 Relawan",
   },
   {
     id_event: 4,
+    status_event: "aktif",
     nama_event: "Workshop Kasgot & Pupuk Organik",
     deskripsi:
       "Mengolah residu kasgot (bekas maggot) menjadi pupuk organik padat dan cair yang kaya nutrisi untuk tanaman dan pertanian urban.",
@@ -52,9 +81,14 @@ const DEFAULT_EVENTS = [
     tanggal_pelaksanaan: "28 November 2026",
     lokasi: "Kranggan, Sleman",
     kategori: "Pertanian Urban",
+    jenis_event: "Pertanian Urban",
+    biaya_event: 0,
+    waktu: "09.00 - 13.00 WIB",
+    kuota: "25 Peserta",
   },
   {
     id_event: 5,
+    status_event: "aktif",
     nama_event: "Edukasi Sirkular Ekonomi Desa",
     deskripsi:
       "Membuka potensi ekonomi dari pengelolaan limbah berbasis komunitas menuju desa mandiri energi dan pakan berkelanjutan.",
@@ -62,35 +96,15 @@ const DEFAULT_EVENTS = [
     tanggal_pelaksanaan: "10 Desember 2026",
     lokasi: "Sleman, D.I. Yogyakarta",
     kategori: "Seminar Komunitas",
+    jenis_event: "Seminar Komunitas",
+    biaya_event: 0,
+    waktu: "09.30 - 12.30 WIB",
+    kuota: "60 Peserta",
   },
 ];
 
 export default async function EventPage() {
-  let events = DEFAULT_EVENTS;
-
-  try {
-    const dbEvents = await getDb().select().from(eventsTable);
-    if (dbEvents && dbEvents.length > 0) {
-      events = dbEvents.map((e, index) => {
-        const fallback =
-          DEFAULT_EVENTS.find((d) => d.id_event === e.idEvent) ||
-          DEFAULT_EVENTS[index % DEFAULT_EVENTS.length];
-        return {
-          id_event: e.idEvent,
-          nama_event: e.namaEvent,
-          deskripsi: fallback.deskripsi,
-          gambar: fallback.gambar,
-          tanggal_pelaksanaan:
-            e.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
-          lokasi: fallback.lokasi,
-          kategori: fallback.kategori,
-        };
-      });
-    }
-  } catch {
-    events = DEFAULT_EVENTS;
-  }
-
+  const events = DEFAULT_EVENTS.filter((event) => isEventActive(event));
   const totalEvents = events.length;
   const leadEvent = events[0] || DEFAULT_EVENTS[0];
 
@@ -119,8 +133,9 @@ export default async function EventPage() {
                 Daftar Kegiatan &amp; Aksi Hijau
               </h1>
               <p className="mt-3 max-w-2xl text-base sm:text-lg text-[var(--hx-ink-2)] font-light leading-relaxed">
-                Tingkatkan kesadaran ekologis dan keterampilan pengolahan sampah organik
-                melalui serangkaian agenda pelatihan praktis, workshop maggot BSF, dan gerakan kerelawanan.
+                Tingkatkan kesadaran ekologis dan keterampilan pengolahan sampah
+                organik melalui serangkaian agenda pelatihan praktis, workshop
+                maggot BSF, dan gerakan kerelawanan.
               </p>
             </div>
 
@@ -183,10 +198,7 @@ export default async function EventPage() {
               const totalNo = String(totalEvents).padStart(2, "0");
 
               return (
-                <article
-                  key={event.id_event}
-                  className="hx-card group"
-                >
+                <article key={event.id_event} className="hx-card group">
                   {/* Plate Header Info */}
                   <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[var(--hx-sunk)]/60 text-xs">
                     <div className="flex items-center gap-2">
@@ -258,7 +270,9 @@ export default async function EventPage() {
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        <span className="truncate">{event.lokasi || "Wedomartani & Gejayan"}</span>
+                        <span className="truncate">
+                          {event.lokasi || "Wedomartani & Gejayan"}
+                        </span>
                       </span>
 
                       <span className="font-semibold text-[var(--hx-accent)] shrink-0">
@@ -319,11 +333,17 @@ export default async function EventPage() {
               <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-[var(--hx-ink-2)]">
                 <span className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--hx-accent)]" />
-                  Tanggal: <strong className="text-[var(--hx-ink)]">{leadEvent.tanggal_pelaksanaan}</strong>
+                  Tanggal:{" "}
+                  <strong className="text-[var(--hx-ink)]">
+                    {leadEvent.tanggal_pelaksanaan}
+                  </strong>
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--hx-accent)]" />
-                  Biaya: <strong className="text-[var(--hx-accent)]">Gratis (Subsidi Program)</strong>
+                  Biaya:{" "}
+                  <strong className="text-[var(--hx-accent)]">
+                    Gratis (Subsidi Program)
+                  </strong>
                 </span>
               </div>
             </div>
@@ -352,7 +372,8 @@ export default async function EventPage() {
               Pusat Edukasi &amp; Penjemputan
             </span>
             <p className="leading-relaxed">
-              Dusun Wedomartani &amp; seputaran Gejayan, Sleman, Daerah Istimewa Yogyakarta.
+              Dusun Wedomartani &amp; seputaran Gejayan, Sleman, Daerah Istimewa
+              Yogyakarta.
             </p>
           </div>
 
@@ -361,7 +382,8 @@ export default async function EventPage() {
               Jadwal Operasional
             </span>
             <p className="leading-relaxed">
-              Senin – Sabtu, 08.00 – 17.00 WIB. Pelatihan lapangan diadakan sesuai jadwal publikasi.
+              Senin – Sabtu, 08.00 – 17.00 WIB. Pelatihan lapangan diadakan
+              sesuai jadwal publikasi.
             </p>
           </div>
 
