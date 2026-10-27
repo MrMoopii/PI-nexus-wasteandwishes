@@ -10,59 +10,6 @@ import { connection } from "next/server";
 
 export const instant = false;
 
-const DEFAULT_EVENTS: Record<
-  number,
-  {
-    id_event: number;
-    nama_event: string;
-    gambar: string;
-    tanggal_pelaksanaan?: string;
-    lokasi?: string;
-    kategori?: string;
-  }
-> = {
-  1: {
-    id_event: 1,
-    nama_event: "Pelatihan Budidaya Maggot BSF",
-    gambar: "1.jpg",
-    tanggal_pelaksanaan: "25 Oktober 2026",
-    lokasi: "Wedomartani, Sleman",
-    kategori: "Workshop Budidaya",
-  },
-  2: {
-    id_event: 2,
-    nama_event: "Sosialisasi Pemilahan Limbah Dapur",
-    gambar: "2.jpg",
-    tanggal_pelaksanaan: "02 November 2026",
-    lokasi: "Gejayan, Yogyakarta",
-    kategori: "Edukasi Warga",
-  },
-  3: {
-    id_event: 3,
-    nama_event: "Aksi Hijau Gejayan Bersih",
-    gambar: "3.jpg",
-    tanggal_pelaksanaan: "15 November 2026",
-    lokasi: "Kawasan Gejayan",
-    kategori: "Aksi Relawan",
-  },
-  4: {
-    id_event: 4,
-    nama_event: "Workshop Kasgot & Pupuk Organik",
-    gambar: "4.jpg",
-    tanggal_pelaksanaan: "28 November 2026",
-    lokasi: "Kranggan, Sleman",
-    kategori: "Pertanian Urban",
-  },
-  5: {
-    id_event: 5,
-    nama_event: "Edukasi Sirkular Ekonomi Desa",
-    gambar: "5.jpg",
-    tanggal_pelaksanaan: "10 Desember 2026",
-    lokasi: "Sleman, D.I. Yogyakarta",
-    kategori: "Seminar Komunitas",
-  },
-};
-
 export default async function EventCheckoutPage({
   params,
 }: {
