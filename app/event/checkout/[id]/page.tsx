@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatTanggal } from "@/lib/format-tanggal";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; // Pastikan usersTable di-import
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { connection } from "next/server";
 
 export const instant = false;
 
@@ -74,44 +76,40 @@ export default async function EventCheckoutPage({
   }
 
   const resolvedParams = await params;
-  const eventId = parseInt(resolvedParams.id, 10) || 1;
+  const idEvent = Number(resolvedParams.id);
+  if (!Number.isInteger(idEvent) || idEvent <= 0) {
+    notFound();
+  }
 
-  let event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
   let currentUser = null;
 
-  try {
-    // 1. Ambil data Event dari Database
-    const [dbEvent] = await getDb()
-      .select()
-      .from(eventsTable)
-      .where(eq(eventsTable.idEvent, eventId))
-      .limit(1);
+  await connection();
 
-    if (dbEvent) {
-      const fallback = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
-      event = {
-        id_event: dbEvent.idEvent,
-        nama_event: dbEvent.namaEvent,
-        gambar: fallback.gambar,
-        tanggal_pelaksanaan:
-          dbEvent.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
-        lokasi: fallback.lokasi,
-        kategori: fallback.kategori,
-      };
-    }
+  // 1. Ambil data Event dari Database
+  const [event] = await getDb()
+    .select()
+    .from(eventsTable)
+    .where(
+      and(
+        eq(eventsTable.idEvent, idEvent),
+        eq(eventsTable.statusEvent, "aktif"),
+      ),
+    )
+    .limit(1);
 
-    // 2. Ambil data User dari Database berdasarkan email dari session
-    const [dbUser] = await getDb()
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, session.user.email))
-      .limit(1);
+  // 2. Ambil data User dari Database berdasarkan email dari session
+  const [user] = await getDb()
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, session.user.email))
+    .limit(1);
 
-    if (dbUser) {
-      currentUser = dbUser;
-    }
-  } catch (error) {
-    console.error("Database error:", error);
+  if (user) {
+    currentUser = user;
+  }
+
+  if (!event) {
+    notFound();
   }
 
   if (!event) {
@@ -123,7 +121,7 @@ export default async function EventCheckoutPage({
     ? new Date(currentUser.tanggalLahir).toISOString().split("T")[0]
     : "";
 
-  const plateNo = String(event.id_event).padStart(2, "0");
+  const plateNo = String(event.idEvent).padStart(2, "0");
 
   const newLocal = "text-(--hx-ink-3)";
   return (
@@ -139,7 +137,7 @@ export default async function EventCheckoutPage({
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href={`/event/detail/${event.id_event}`}
+            href={`/event/detail/${event.idEvent}`}
             className="inline-flex items-center gap-2 text-xs font-semibold text-(--hx-ink-2) hover:text-(--hx-accent) transition-colors"
           >
             <svg
@@ -173,8 +171,8 @@ export default async function EventCheckoutPage({
             <div className="rounded-2xl border border-(--hx-pastel)/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <div className="relative aspect-16/10 w-full rounded-xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/40 mb-5">
                 <Image
-                  src={`/img/event/${event.gambar}`}
-                  alt={event.nama_event}
+                  src={`/img/event/${event.gambarUrl}`}
+                  alt={event.namaEvent}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 40vw"
@@ -191,14 +189,15 @@ export default async function EventCheckoutPage({
                 Agenda Terpilih
               </span>
               <h2 className="text-xl font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-snug">
-                {event.nama_event}
+                {event.namaEvent}
               </h2>
 
               <div className="mt-4 pt-4 border-t border-(--hx-sunk)/60 space-y-2 text-xs text-(--hx-ink-2)">
                 <div className="flex items-center justify-between">
                   <span className="text-(--hx-ink-3)">Tanggal:</span>
                   <span className="font-medium text-(--hx-ink)">
-                    {event.tanggal_pelaksanaan || "Sesuai Jadwal Publikasi"}
+                    {formatTanggal(event.tanggalPelaksanaan) ||
+                      "Sesuai Jadwal Publikasi"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -253,7 +252,7 @@ export default async function EventCheckoutPage({
                 method="POST"
                 className="space-y-5"
               >
-                <input type="hidden" name="id_event" value={event.id_event} />
+                <input type="hidden" name="id_event" value={event.idEvent} />
                 {currentUser && (
                   <input
                     type="hidden"

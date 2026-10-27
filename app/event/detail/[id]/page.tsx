@@ -1,88 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatTanggal, formatWaktu } from "@/lib/format-tanggal";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { events as eventsTable } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { connection } from "next/server";
 
 export const instant = false;
-
-// Fallback lookup
-const DEFAULT_EVENTS: Record<
-  number,
-  {
-    id_event: number;
-    nama_event: string;
-    deskripsi: string;
-    gambar: string;
-    tanggal_pelaksanaan: string;
-    lokasi?: string;
-    kategori?: string;
-    waktu?: string;
-    kuota?: string;
-  }
-> = {
-  1: {
-    id_event: 1,
-    nama_event: "Pelatihan Budidaya Maggot BSF",
-    deskripsi:
-      "Pelajari teknik budidaya Black Soldier Fly (BSF) dari pembibitan hingga panen larva sebagai pakan ternak berkualitas tinggi dan pengolah sampah organik tercepat.",
-    gambar: "1.jpg",
-    tanggal_pelaksanaan: "25 Oktober 2026",
-    lokasi: "Wedomartani, Sleman, D.I. Yogyakarta",
-    kategori: "Workshop Budidaya",
-    waktu: "09.00 - 14.30 WIB",
-    kuota: "30 Peserta",
-  },
-  2: {
-    id_event: 2,
-    nama_event: "Sosialisasi Pemilahan Limbah Dapur",
-    deskripsi:
-      "Panduan praktis bagi ibu rumah tangga dan pelaku UMKM dalam memilah sampah basah dan kering agar bernilai guna dan tidak mencemari lingkungan.",
-    gambar: "2.jpg",
-    tanggal_pelaksanaan: "02 November 2026",
-    lokasi: "Balai RW Gejayan, Yogyakarta",
-    kategori: "Edukasi Warga",
-    waktu: "08.30 - 11.30 WIB",
-    kuota: "50 Peserta",
-  },
-  3: {
-    id_event: 3,
-    nama_event: "Aksi Hijau Gejayan Bersih",
-    deskripsi:
-      "Gerakan relawan lingkungan bersama komunitas Nexus membersihkan bantaran sungai dan kawasan Gejayan secara berkala.",
-    gambar: "3.jpg",
-    tanggal_pelaksanaan: "15 November 2026",
-    lokasi: "Kawasan Gejayan & Bantaran Sungai",
-    kategori: "Aksi Relawan",
-    waktu: "06.30 - 10.00 WIB",
-    kuota: "100 Relawan",
-  },
-  4: {
-    id_event: 4,
-    nama_event: "Workshop Kasgot & Pupuk Organik",
-    deskripsi:
-      "Mengolah residu kasgot (bekas maggot) menjadi pupuk organik padat dan cair yang kaya nutrisi untuk tanaman dan pertanian urban.",
-    gambar: "4.jpg",
-    tanggal_pelaksanaan: "28 November 2026",
-    lokasi: "Kranggan, Sleman, D.I. Yogyakarta",
-    kategori: "Pertanian Urban",
-    waktu: "09.00 - 13.00 WIB",
-    kuota: "25 Peserta",
-  },
-  5: {
-    id_event: 5,
-    nama_event: "Edukasi Sirkular Ekonomi Desa",
-    deskripsi:
-      "Membuka potensi ekonomi dari pengelolaan limbah berbasis komunitas menuju desa mandiri energi dan pakan berkelanjutan.",
-    gambar: "5.jpg",
-    tanggal_pelaksanaan: "10 Desember 2026",
-    lokasi: "Aula Balai Desa, Sleman",
-    kategori: "Seminar Komunitas",
-    waktu: "09.30 - 12.30 WIB",
-    kuota: "60 Peserta",
-  },
-};
 
 export default async function EventDetailPage({
   params,
@@ -90,41 +15,30 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const eventId = parseInt(resolvedParams.id, 10) || 1;
+  const idEvent = Number(resolvedParams.id);
 
-  let event = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
-
-  try {
-    const [dbEvent] = await getDb()
-      .select()
-      .from(eventsTable)
-      .where(eq(eventsTable.idEvent, eventId))
-      .limit(1);
-
-    if (dbEvent) {
-      const fallback = DEFAULT_EVENTS[eventId] || DEFAULT_EVENTS[1];
-      event = {
-        id_event: dbEvent.idEvent,
-        nama_event: dbEvent.namaEvent,
-        deskripsi: fallback.deskripsi,
-        gambar: fallback.gambar,
-        tanggal_pelaksanaan:
-          dbEvent.tanggalPelaksanaan || fallback.tanggal_pelaksanaan,
-        lokasi: fallback.lokasi,
-        kategori: fallback.kategori,
-        waktu: fallback.waktu,
-        kuota: fallback.kuota,
-      };
-    }
-  } catch {
-    // Keep fallback
-  }
-
-  if (!event) {
+  if (!Number.isInteger(idEvent) || idEvent <= 0) {
     notFound();
   }
 
-  const plateNo = String(event.id_event).padStart(2, "0");
+  await connection();
+
+  const [eventDipilih] = await getDb()
+    .select()
+    .from(eventsTable)
+    .where(
+      and(
+        eq(eventsTable.idEvent, idEvent),
+        eq(eventsTable.statusEvent, "aktif"),
+      ),
+    )
+    .limit(1);
+
+  if (!eventDipilih) {
+    notFound();
+  }
+
+  const plateNo = String(eventDipilih.idEvent).padStart(2, "0");
 
   return (
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
@@ -161,7 +75,7 @@ export default async function EventDetailPage({
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-(--hx-accent)" />
             <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase">
-              Plate {plateNo} / 05
+              Plate {plateNo}
             </span>
           </div>
         </div>
@@ -172,8 +86,8 @@ export default async function EventDetailPage({
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="relative aspect-16/11 w-full rounded-2xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
               <Image
-                src={`/img/event/${event.gambar}`}
-                alt={event.nama_event}
+                src={`/img/event/${eventDipilih.gambarUrl}`}
+                alt={eventDipilih.namaEvent}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 42vw"
@@ -184,7 +98,7 @@ export default async function EventDetailPage({
 
               {/* Tag pill on image */}
               <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-(--hx-accent) uppercase tracking-wider shadow-sm">
-                {event.kategori || "Workshop"}
+                {eventDipilih.jenisEvent}
               </div>
 
               <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-(--hx-accent) text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
@@ -213,7 +127,7 @@ export default async function EventDetailPage({
               </p>
 
               <Link
-                href={`/event/checkout/${event.id_event}`}
+                href={`/event/checkout/${eventDipilih.idEvent}`}
                 className="hx-btn-primary w-full"
               >
                 <span>Daftar Sekarang (Gratis)</span>
@@ -255,10 +169,10 @@ export default async function EventDetailPage({
             {/* Title & Category */}
             <div>
               <span className="inline-block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-2">
-                {event.kategori || "Program Edukasi Lingkungan"}
+                {eventDipilih.jenisEvent}
               </span>
               <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-tight">
-                {event.nama_event}
+                {eventDipilih.namaEvent}
               </h1>
             </div>
 
@@ -269,7 +183,7 @@ export default async function EventDetailPage({
                   Tanggal Pelaksanaan
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.tanggal_pelaksanaan}
+                  {formatTanggal(eventDipilih.tanggalPelaksanaan)}
                 </p>
               </div>
 
@@ -278,7 +192,10 @@ export default async function EventDetailPage({
                   Waktu &amp; Sesi
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.waktu || "09.00 - 13.00 WIB"}
+                  {formatWaktu(
+                    eventDipilih.waktuMulai,
+                    eventDipilih.waktuSelesai,
+                  )}
                 </p>
               </div>
 
@@ -287,7 +204,7 @@ export default async function EventDetailPage({
                   Lokasi Pertemuan
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.lokasi || "Wedomartani & Gejayan, Sleman"}
+                  {eventDipilih.lokasi || "Lokasi acara menyusul"}
                 </p>
               </div>
 
@@ -296,7 +213,7 @@ export default async function EventDetailPage({
                   Kuota Peserta
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.kuota || "30 Peserta (Terbuka)"}
+                  {eventDipilih.kuotaPeserta || "Tidak ada batasan kuota"}
                 </p>
               </div>
             </div>
@@ -307,7 +224,7 @@ export default async function EventDetailPage({
                 Deskripsi &amp; Gambaran Acara
               </span>
               <p className="text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
-                {event.deskripsi}
+                {eventDipilih.deskripsi || "Tidak ada deskripsi acara"}
               </p>
 
               <hr className="my-5 border-(--hx-sunk)/80" />

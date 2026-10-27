@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
+import { formatWaktu } from "@/lib/format-tanggal";
 
 export default async function AdminEventPage({
   searchParams,
@@ -158,8 +159,7 @@ export default async function AdminEventPage({
                         {String(event.tanggalPelaksanaan)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {event.waktuMulai || "00:00"} -{" "}
-                        {event.waktuSelesai || "Selesai"}
+                        {formatWaktu(event.waktuMulai, event.waktuSelesai)}
                       </p>
                     </div>
 
