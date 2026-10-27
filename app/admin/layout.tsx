@@ -64,7 +64,7 @@ export default function AdminLayout({
     >
       {/* Sidebar (Dark Theme) */}
       <aside className="admin-sidebar flex w-64 shrink-0 flex-col bg-[#273142] text-slate-300 transition-all">
-        <div className="flex h-[72px] items-center gap-3 px-6">
+        <div className="flex h-18 items-center gap-3 px-6">
           <Image
             src="/icon/waste-and-wishes-logo.png"
             alt="Waste and Wishes"
@@ -102,7 +102,7 @@ export default function AdminLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Navbar */}
         <header
-          className={`admin-header flex h-[72px] shrink-0 items-center justify-end gap-5 border-b px-6 shadow-sm z-10 transition-colors ${darkMode ? "border-slate-700 bg-gray-900" : "border-slate-100 bg-white"}`}
+          className={`admin-header flex h-18 shrink-0 items-center justify-end gap-5 border-b px-6 shadow-sm z-10 transition-colors ${darkMode ? "border-slate-700 bg-gray-900" : "border-slate-100 bg-white"}`}
         >
           <div className="flex items-center gap-5 text-slate-500">
             <button

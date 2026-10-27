@@ -127,7 +127,7 @@ export default async function EventDetailPage({
   const plateNo = String(event.id_event).padStart(2, "0");
 
   return (
-    <div className="relative min-h-screen bg-[var(--hx-canvas)] text-[var(--hx-ink)] font-[family-name:var(--font-inter)] selection:bg-[var(--hx-accent)]/20 selection:text-[var(--hx-accent-dark)]">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Ambient gradient washes matching Helix Drift */}
       <div aria-hidden="true" className="hx-ambient-wash">
         <div className="hx-ambient-blob-1" />
@@ -140,7 +140,7 @@ export default async function EventDetailPage({
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/event"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--hx-ink-2)] hover:text-[var(--hx-accent)] transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-(--hx-ink-2) hover:text-(--hx-accent) transition-colors"
           >
             <svg
               className="h-4 w-4"
@@ -159,8 +159,8 @@ export default async function EventDetailPage({
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-[var(--hx-accent)]" />
-            <span className="text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-ink-3)] uppercase">
+            <span className="inline-block h-2 w-2 rounded-full bg-(--hx-accent)" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase">
               Plate {plateNo} / 05
             </span>
           </div>
@@ -170,7 +170,7 @@ export default async function EventDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column (5 Cols): Static Image Plate & Quick Action */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-            <div className="relative aspect-[16/11] w-full rounded-2xl overflow-hidden bg-[var(--hx-sunk)] border border-[var(--hx-pastel)]/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
+            <div className="relative aspect-16/11 w-full rounded-2xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
               <Image
                 src={`/img/event/${event.gambar}`}
                 alt={event.nama_event}
@@ -183,29 +183,33 @@ export default async function EventDetailPage({
               <div className="hx-rim-highlight" />
 
               {/* Tag pill on image */}
-              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-[var(--hx-accent)] uppercase tracking-wider shadow-sm">
+              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-(--hx-accent) uppercase tracking-wider shadow-sm">
                 {event.kategori || "Workshop"}
               </div>
 
-              <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-[var(--hx-accent)] text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
+              <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-(--hx-accent) text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
                 Gratis
               </div>
             </div>
 
             {/* Registration Action Card */}
-            <div className="rounded-2xl border border-[var(--hx-pastel)]/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+            <div className="rounded-2xl border border-(--hx-pastel)/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <div className="flex items-baseline justify-between mb-3">
-                <span className="text-xs uppercase tracking-wider text-[var(--hx-ink-3)] font-semibold">
+                <span className="text-xs uppercase tracking-wider text-(--hx-ink-3) font-semibold">
                   Biaya Kepesertaan
                 </span>
-                <span className="text-2xl font-bold text-[var(--hx-accent)] font-[family-name:var(--font-plus-jakarta-sans)]">
-                  Rp 0 <span className="text-xs font-normal text-[var(--hx-ink-2)]">(Gratis)</span>
+                <span className="text-2xl font-bold text-(--hx-accent) font-(family-name:--font-plus-jakarta-sans)">
+                  Rp 0{" "}
+                  <span className="text-xs font-normal text-(--hx-ink-2)">
+                    (Gratis)
+                  </span>
                 </span>
               </div>
 
-              <p className="text-xs text-[var(--hx-ink-2)] font-light leading-relaxed mb-5">
-                Kegiatan didanai melalui inisiatif keberlanjutan Waste &amp; Wishes.
-                Setiap peserta akan mendapatkan sertifikat digital dan modul praktik.
+              <p className="text-xs text-(--hx-ink-2) font-light leading-relaxed mb-5">
+                Kegiatan didanai melalui inisiatif keberlanjutan Waste &amp;
+                Wishes. Setiap peserta akan mendapatkan sertifikat digital dan
+                modul praktik.
               </p>
 
               <Link
@@ -229,17 +233,17 @@ export default async function EventDetailPage({
               </Link>
 
               {/* Key perks */}
-              <div className="mt-5 pt-4 border-t border-[var(--hx-sunk)]/60 space-y-2 text-xs text-[var(--hx-ink-2)]">
+              <div className="mt-5 pt-4 border-t border-(--hx-sunk)/60 space-y-2 text-xs text-(--hx-ink-2)">
                 <div className="flex items-center gap-2">
-                  <span className="text-[var(--hx-accent)]">✓</span>
+                  <span className="text-(--hx-accent)">✓</span>
                   <span>Materi panduan &amp; starter kit</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[var(--hx-accent)]">✓</span>
+                  <span className="text-(--hx-accent)">✓</span>
                   <span>Sertifikat keikutsertaan resmi</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[var(--hx-accent)]">✓</span>
+                  <span className="text-(--hx-accent)">✓</span>
                   <span>Sesi tanya-jawab langsung bersama mentor</span>
                 </div>
               </div>
@@ -250,93 +254,114 @@ export default async function EventDetailPage({
           <div className="lg:col-span-7 flex flex-col gap-6">
             {/* Title & Category */}
             <div>
-              <span className="inline-block text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-accent)] uppercase mb-2">
+              <span className="inline-block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-2">
                 {event.kategori || "Program Edukasi Lingkungan"}
               </span>
-              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-tight">
                 {event.nama_event}
               </h1>
             </div>
 
             {/* Quick Metadata Grid (Helix Drift Facts style) */}
-            <div className="grid grid-cols-2 gap-px bg-[var(--hx-pastel)]/40 rounded-xl overflow-hidden border border-[var(--hx-pastel)]/40 shadow-sm">
-              <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4">
-                <span className="block text-[10px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
+            <div className="grid grid-cols-2 gap-px bg-(--hx-pastel)/40 rounded-xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
+              <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-(--hx-ink-3) uppercase mb-1">
                   Tanggal Pelaksanaan
                 </span>
-                <p className="text-sm sm:text-base font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
                   {event.tanggal_pelaksanaan}
                 </p>
               </div>
 
-              <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4">
-                <span className="block text-[10px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
+              <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-(--hx-ink-3) uppercase mb-1">
                   Waktu &amp; Sesi
                 </span>
-                <p className="text-sm sm:text-base font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
                   {event.waktu || "09.00 - 13.00 WIB"}
                 </p>
               </div>
 
-              <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4">
-                <span className="block text-[10px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
+              <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-(--hx-ink-3) uppercase mb-1">
                   Lokasi Pertemuan
                 </span>
-                <p className="text-sm sm:text-base font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
                   {event.lokasi || "Wedomartani & Gejayan, Sleman"}
                 </p>
               </div>
 
-              <div className="bg-[var(--hx-canvas)]/90 backdrop-blur-sm p-4">
-                <span className="block text-[10px] font-semibold tracking-wider text-[var(--hx-ink-3)] uppercase mb-1">
+              <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-4">
+                <span className="block text-[10px] font-semibold tracking-wider text-(--hx-ink-3) uppercase mb-1">
                   Kuota Peserta
                 </span>
-                <p className="text-sm sm:text-base font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
                   {event.kuota || "30 Peserta (Terbuka)"}
                 </p>
               </div>
             </div>
 
             {/* Description Sheet */}
-            <div className="rounded-2xl border border-[var(--hx-pastel)]/50 bg-white/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
-              <span className="block text-[11px] font-semibold tracking-[0.2em] text-[var(--hx-ink-3)] uppercase mb-3">
+            <div className="rounded-2xl border border-(--hx-pastel)/50 bg-white/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+              <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-3">
                 Deskripsi &amp; Gambaran Acara
               </span>
-              <p className="text-sm sm:text-base text-[var(--hx-ink-2)] font-light leading-relaxed">
+              <p className="text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
                 {event.deskripsi}
               </p>
 
-              <hr className="my-5 border-[var(--hx-sunk)]/80" />
+              <hr className="my-5 border-(--hx-sunk)/80" />
 
-              <h3 className="text-sm font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] mb-3">
+              <h3 className="text-sm font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-3">
                 Agenda Kegiatan
               </h3>
-              <ul className="space-y-2 text-xs sm:text-sm text-[var(--hx-ink-2)]">
+              <ul className="space-y-2 text-xs sm:text-sm text-(--hx-ink-2)">
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">01.</span>
-                  <span>Registrasi ulang peserta dan pembagian modul materi pengantar.</span>
+                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                    01.
+                  </span>
+                  <span>
+                    Registrasi ulang peserta dan pembagian modul materi
+                    pengantar.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">02.</span>
-                  <span>Pemaparan materi inti dan demonstrasi praktik oleh fasilitator.</span>
+                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                    02.
+                  </span>
+                  <span>
+                    Pemaparan materi inti dan demonstrasi praktik oleh
+                    fasilitator.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">03.</span>
-                  <span>Praktik langsung per kelompok serta diskusi studi kasus.</span>
+                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                    03.
+                  </span>
+                  <span>
+                    Praktik langsung per kelompok serta diskusi studi kasus.
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-[var(--hx-accent)] font-semibold shrink-0">04.</span>
-                  <span>Sesi tanya-jawab interaktif dan penyerahan starter kit kepada peserta.</span>
+                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                    04.
+                  </span>
+                  <span>
+                    Sesi tanya-jawab interaktif dan penyerahan starter kit
+                    kepada peserta.
+                  </span>
                 </li>
               </ul>
             </div>
 
             {/* Important Notes */}
-            <div className="rounded-2xl border border-[var(--hx-pastel)]/40 bg-[#E8F4F4]/60 p-5 text-xs text-[var(--hx-ink-2)] leading-relaxed">
-              <strong className="text-[var(--hx-accent)] font-semibold block mb-1">
+            <div className="rounded-2xl border border-(--hx-pastel)/40 bg-[#E8F4F4]/60 p-5 text-xs text-(--hx-ink-2) leading-relaxed">
+              <strong className="text-(--hx-accent) font-semibold block mb-1">
                 Catatan Kehadiran
               </strong>
-              Peserta diharapkan hadir 15 menit sebelum kegiatan dimulai dan membawa alat tulis pribadi serta tumbler minum demi mendukung gerakan minim sampah.
+              Peserta diharapkan hadir 15 menit sebelum kegiatan dimulai dan
+              membawa alat tulis pribadi serta tumbler minum demi mendukung
+              gerakan minim sampah.
             </div>
           </div>
         </div>

@@ -16,7 +16,9 @@ export default async function EditEventPage({
   if (!eventId || isNaN(eventId)) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-xl font-bold text-red-600">ID Event tidak valid.</h1>
+        <h1 className="text-xl font-bold text-red-600">
+          ID Event tidak valid.
+        </h1>
         <Link href="/admin/events" className="text-blue-600 mt-4 inline-block">
           Kembali ke Dashboard
         </Link>
@@ -90,9 +92,7 @@ export default async function EditEventPage({
         >
           ← Batal
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Edit Event
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
@@ -205,7 +205,9 @@ export default async function EditEventPage({
           </div>
 
           <div className="border-t border-gray-200 pt-6 mt-8 flex items-center justify-end gap-4">
-            <label className="text-sm font-medium text-gray-700">Status Event:</label>
+            <label className="text-sm font-medium text-gray-700">
+              Status Event:
+            </label>
             <select
               name="statusEvent"
               defaultValue={existingEvent.statusEvent}
