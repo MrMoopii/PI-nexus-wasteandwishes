@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 import Credentials from "next-auth/providers/credentials";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -7,6 +8,7 @@ import bcrypt from "bcryptjs";
 import Google from "next-auth/providers/google";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   session: {
     strategy: "jwt",
   },
@@ -55,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ user, token, account }) {
       if (account?.provider === "google" && token.email) {
         const [row] = await getDb()
@@ -72,13 +75,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.peran = user.peran;
       }
       return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.idUser = token.idUser as string;
-        session.user.peran = token.peran as string;
-      }
-      return session;
     },
     async signIn({ user, account, profile }) {
       if (account?.provider !== "google") {
@@ -110,7 +106,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: {
-    signIn: "/auth/login",
+    ...authConfig.pages,
     error: "/auth/login",
   },
 });
