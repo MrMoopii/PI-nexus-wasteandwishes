@@ -144,7 +144,7 @@ export default async function EventPage() {
                       </div>
 
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#E8F4F4] text-(--hx-accent)">
-                        {event.jenisEvent || "Workshop"
+                        {event.jenisEvent || "Workshop"}
                       </span>
                     </div>
 
@@ -256,7 +256,7 @@ export default async function EventPage() {
                 </div>
 
                 <h2 className="text-2xl sm:text-3xl font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-snug">
-                  {leadEvent?.namaEvent}
+                  {leadEvent.namaEvent}
                 </h2>
 
                 <p className="mt-3 text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
@@ -268,7 +268,7 @@ export default async function EventPage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-(--hx-accent)" />
                     Tanggal:{" "}
                     <strong className="text-(--hx-ink)">
-                      {leadEvent?.tanggalPelaksanaan}
+                      {leadEvent.tanggalPelaksanaan}
                     </strong>
                   </span>
                   <span className="flex items-center gap-1.5">
@@ -283,7 +283,7 @@ export default async function EventPage() {
 
               <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
                 <Link
-                  href={`/event/detail/${leadEvent?.idEvent}`}
+                  href={`/event/detail/${leadEvent.idEvent}`}
                   className="hx-btn-primary whitespace-nowrap text-center"
                 >
                   Daftar Pelatihan Sekarang
@@ -298,61 +298,6 @@ export default async function EventPage() {
             </div>
           </section>
         )}
-
-        <section className="relative overflow-hidden rounded-3xl border border-(--hx-pastel)/60 bg-linear-to-br from-white/95 via-(--hx-canvas)/90 to-(--hx-sunk)/60 p-8 sm:p-10 shadow-[0_12px_40px_rgb(27,34,51,0.06)] backdrop-blur-md">
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-(--hx-accent) text-white">
-                  Pilihan Utama
-                </span>
-                <span className="text-xs text-(--hx-ink-3) font-mono">
-                  Bulan Ini
-                </span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-snug">
-                {leadEvent?.namaEvent}
-              </h2>
-
-              <p className="mt-3 text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
-                {leadEvent.deskripsi}
-              </p>
-
-              <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-(--hx-ink-2)">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-(--hx-accent)" />
-                  Tanggal:{" "}
-                  <strong className="text-(--hx-ink)">
-                    {leadEvent?.tanggalPelaksanaan}
-                  </strong>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-(--hx-accent)" />
-                  Biaya:{" "}
-                  <strong className="text-(--hx-accent)">
-                    Gratis (Subsidi Program)
-                  </strong>
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-              <Link
-                href={`/event/detail/${leadEvent?.idEvent}`}
-                className="hx-btn-primary whitespace-nowrap text-center"
-              >
-                Daftar Pelatihan Sekarang
-              </Link>
-              <Link
-                href="/langganan"
-                className="hx-btn-outline whitespace-nowrap text-center"
-              >
-                Pelajari Layanan Kami
-              </Link>
-            </div>
-          </div>
-        </section>
 
         {/* Information & Contact Lines (Helix Drift Style) */}
         <section className="mt-16 pt-10 border-t border-(--hx-pastel)/40 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-(--hx-ink-2)">
