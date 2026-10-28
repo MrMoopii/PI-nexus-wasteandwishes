@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import GambarEvent from "@/components/GambarEvent";
 import { formatTanggal, formatWaktu } from "@/lib/format-tanggal";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
@@ -85,13 +85,12 @@ export default async function EventDetailPage({
           {/* Left Column (5 Cols): Static Image Plate & Quick Action */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="relative aspect-16/11 w-full rounded-2xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
-              <Image
-                src={`/img/event/${eventDipilih.gambarUrl}`}
+              <GambarEvent
+                src={eventDipilih.gambarUrl}
                 alt={eventDipilih.namaEvent}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 42vw"
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                preload
               />
               {/* Inner subtle rim highlight matching template */}
               <div className="hx-rim-highlight" />
