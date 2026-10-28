@@ -5,7 +5,6 @@ import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
-import { DEFAULT_EVENTS, isEventActive } from "@/app/event/page";
 
 function parsePositiveInteger(value: unknown): number | null {
   if (typeof value === "number") {
@@ -41,16 +40,15 @@ async function ensureEventRecord(eventId: number) {
   const [existingEvent] = await getDb()
     .select()
     .from(events)
-    .where(eq(events.idEvent, normalizedEventId))
+    .where(
+      and(
+        eq(events.idEvent, normalizedEventId),
+        eq(events.statusEvent, "aktif"),
+      ),
+    )
     .limit(1);
 
-  if (!existingEvent) {
-    return null;
-  }
-
-  return isEventActive(existingEvent as Record<string, unknown>)
-    ? existingEvent
-    : null;
+  return existingEvent ?? null;
 }
 
 function readNestedErrorValue(error: unknown, key: string): string {
@@ -190,7 +188,6 @@ export async function registerForEvent(input: { eventId: number | string }) {
           message: "Anda sudah terdaftar pada event ini.",
           idPendaftaran: existingRegistration.idPendaftaran,
           eventId,
-          eventName: DEFAULT_EVENTS[eventId]?.nama_event ?? "Event",
         };
       }
 
