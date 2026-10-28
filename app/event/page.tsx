@@ -33,6 +33,21 @@ export default async function EventPage() {
     gagalMuat = true;
   }
 
+// Fallback events if database hasn't been seeded yet
+export function isEventActive(
+  event:
+    | { statusEvent?: string | null; status_event?: string | null }
+    | null
+    | undefined,
+) {
+  const value = (
+    event?.statusEvent ??
+    event?.status_event ??
+    "aktif"
+  ).toString();
+  return value.trim().toLowerCase() === "aktif";
+}
+
   const totalEvents = events.length;
   const leadEvent = events[0];
 
@@ -145,6 +160,17 @@ export default async function EventPage() {
 
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#E8F4F4] text-(--hx-accent)">
                         {event.jenisEvent || "Workshop"}
+              return (
+                <article key={event.idEvent} className="hx-card group">
+                  {/* Plate Header Info */}
+                  <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[var(--hx-sunk)]/60 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-[var(--hx-accent)] font-[family-name:var(--font-plus-jakarta-sans)]">
+                        {plateNo}
+                      </span>
+                      <span className="h-3 w-px bg-[var(--hx-pastel)]" />
+                      <span className="text-[var(--hx-ink-3)] font-mono tracking-wider">
+                        {totalNo}
                       </span>
                     </div>
 
@@ -164,6 +190,47 @@ export default async function EventPage() {
                       <div className="absolute bottom-3 left-3 px-3 py-1 rounded-md bg-white/90 backdrop-blur-md text-[11px] font-medium text-(--hx-ink) shadow-sm">
                         📅 {formatTanggal(event.tanggalPelaksanaan)}
                       </div>
+                    {/* Free Badge */}
+                    <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-[var(--hx-accent)] text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                      Gratis
+                    </div>
+                  </div>
+
+                  {/* Content Info */}
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-lg font-semibold text-[var(--hx-ink)] font-[family-name:var(--font-plus-jakarta-sans)] group-hover:text-[var(--hx-accent)] transition-colors leading-snug line-clamp-2">
+                      {event.namaEvent}
+                    </h3>
+
+                    <p className="mt-2.5 text-sm text-[var(--hx-ink-2)] font-light leading-relaxed line-clamp-3 flex-1">
+                      {event.deskripsi}
+                    </p>
+
+                    <div className="mt-4 pt-4 border-t border-[var(--hx-sunk)]/60 flex items-center justify-between text-xs text-[var(--hx-ink-3)]">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <svg
+                          className="h-3.5 w-3.5 shrink-0 text-[var(--hx-accent)]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        <span className="truncate">
+                          {event.lokasi || "Wedomartani & Gejayan"}
+                        </span>
+                      </span>
 
                       {/* Free Badge */}
                       <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-(--hx-accent) text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">

@@ -7,13 +7,21 @@ import { getDb } from "@/lib/db";
 import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; // Pastikan usersTable di-import
 import { and, eq } from "drizzle-orm";
 import { connection } from "next/server";
+import { confirmEventRegistration } from "@/app/event/actions";
+import { isEventActive } from "@/app/event/page";
 
 export const instant = false;
 
 export default async function EventCheckoutPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    message?: string;
+    proofId?: string;
+  }>;
 }) {
   const session = await auth();
 
@@ -54,10 +62,29 @@ export default async function EventCheckoutPage({
   if (user) {
     currentUser = user;
   }
+  //
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const rawErrorMessage =
+    typeof resolvedSearchParams.error === "string"
+      ? decodeURIComponent(resolvedSearchParams.error)
+      : "";
+  const infoMessage =
+    typeof resolvedSearchParams.message === "string"
+      ? decodeURIComponent(resolvedSearchParams.message)
+      : "";
+  const proofId =
+    typeof resolvedSearchParams.proofId === "string"
+      ? resolvedSearchParams.proofId
+      : "";
 
-  if (!event) {
-    notFound();
-  }
+  const errorMessage = rawErrorMessage.includes(
+    "Sudah terdaftar pada event ini.",
+  )
+    ? ""
+    : rawErrorMessage;
+  const bannerMessage = infoMessage.includes("Sudah terdaftar pada event ini.")
+    ? ""
+    : infoMessage;
 
   if (!event) {
     notFound();
@@ -199,6 +226,37 @@ export default async function EventCheckoutPage({
                 method="POST"
                 className="space-y-5"
               >
+                <input type="hidden" name="id_event" value={event.idEvent} />
+              {errorMessage && (
+                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+
+              {!errorMessage && !bannerMessage && proofId && (
+                <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="flex items-center gap-2 font-semibold">
+                        <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                        Sudah terdaftar
+                      </p>
+                      <p className="mt-1 text-sm">
+                        Anda sudah terdaftar pada event ini.
+                      </p>
+                    </div>
+
+                    <Link
+                      href={`/event/bukti/${proofId}`}
+                      className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                    >
+                      Lihat Bukti
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              <form action={confirmEventRegistration} className="space-y-5">
                 <input type="hidden" name="id_event" value={event.idEvent} />
                 {currentUser && (
                   <input

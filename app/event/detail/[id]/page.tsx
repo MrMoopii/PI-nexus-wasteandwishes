@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { events as eventsTable } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { connection } from "next/server";
+import { isEventActive } from "@/app/event/page";
 
 export const instant = false;
 
