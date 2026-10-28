@@ -33,21 +33,6 @@ export default async function EventPage() {
     gagalMuat = true;
   }
 
-// Fallback events if database hasn't been seeded yet
-export function isEventActive(
-  event:
-    | { statusEvent?: string | null; status_event?: string | null }
-    | null
-    | undefined,
-) {
-  const value = (
-    event?.statusEvent ??
-    event?.status_event ??
-    "aktif"
-  ).toString();
-  return value.trim().toLowerCase() === "aktif";
-}
-
   const totalEvents = events.length;
   const leadEvent = events[0];
 
