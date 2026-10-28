@@ -8,7 +8,6 @@ import { events as eventsTable, users as usersTable } from "@/lib/db/schema"; //
 import { and, eq } from "drizzle-orm";
 import { connection } from "next/server";
 import { confirmEventRegistration } from "@/app/event/actions";
-import { isEventActive } from "@/app/event/page";
 
 export const instant = false;
 
