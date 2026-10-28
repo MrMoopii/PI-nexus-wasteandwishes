@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import GambarEvent from "@/components/GambarEvent";
 import { formatTanggal } from "@/lib/format-tanggal";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -40,7 +40,7 @@ export default async function EventCheckoutPage({
   await connection();
 
   // 1. Ambil data Event dari Database
-  const [event] = await getDb()
+  const [eventDipilih] = await getDb()
     .select()
     .from(eventsTable)
     .where(
@@ -85,7 +85,7 @@ export default async function EventCheckoutPage({
     ? ""
     : infoMessage;
 
-  if (!event) {
+  if (!eventDipilih) {
     notFound();
   }
 
@@ -94,7 +94,7 @@ export default async function EventCheckoutPage({
     ? new Date(currentUser.tanggalLahir).toISOString().split("T")[0]
     : "";
 
-  const plateNo = String(event.idEvent).padStart(2, "0");
+  const plateNo = String(eventDipilih.idEvent).padStart(2, "0");
 
   const newLocal = "text-(--hx-ink-3)";
   return (
@@ -110,7 +110,7 @@ export default async function EventCheckoutPage({
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href={`/event/detail/${event.idEvent}`}
+            href={`/event/detail/${eventDipilih.idEvent}`}
             className="inline-flex items-center gap-2 text-xs font-semibold text-(--hx-ink-2) hover:text-(--hx-accent) transition-colors"
           >
             <svg
@@ -143,13 +143,12 @@ export default async function EventCheckoutPage({
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="rounded-2xl border border-(--hx-pastel)/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <div className="relative aspect-16/10 w-full rounded-xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/40 mb-5">
-                <Image
-                  src={`/img/event/${event.gambarUrl}`}
-                  alt={event.namaEvent}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover"
+                <GambarEvent
+                  src={eventDipilih.gambarUrl}
+                  alt={eventDipilih.namaEvent}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  preload
                 />
                 <div className="hx-rim-highlight" />
 
@@ -162,21 +161,21 @@ export default async function EventCheckoutPage({
                 Agenda Terpilih
               </span>
               <h2 className="text-xl font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-snug">
-                {event.namaEvent}
+                {eventDipilih.namaEvent}
               </h2>
 
               <div className="mt-4 pt-4 border-t border-(--hx-sunk)/60 space-y-2 text-xs text-(--hx-ink-2)">
                 <div className="flex items-center justify-between">
                   <span className="text-(--hx-ink-3)">Tanggal:</span>
                   <span className="font-medium text-(--hx-ink)">
-                    {formatTanggal(event.tanggalPelaksanaan) ||
+                    {formatTanggal(eventDipilih.tanggalPelaksanaan) ||
                       "Sesuai Jadwal Publikasi"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className={newLocal}>Lokasi:</span>
                   <span className="font-medium text-(--hx-ink)">
-                    {event.lokasi || "Wedomartani & Gejayan, Sleman"}
+                    {eventDipilih.lokasi || "Wedomartani & Gejayan, Sleman"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -250,7 +249,11 @@ export default async function EventCheckoutPage({
               )}
 
               <form action={confirmEventRegistration} className="space-y-5">
-                <input type="hidden" name="id_event" value={event.idEvent} />
+                <input
+                  type="hidden"
+                  name="id_event"
+                  value={eventDipilih.idEvent}
+                />
                 {currentUser && (
                   <input
                     type="hidden"
