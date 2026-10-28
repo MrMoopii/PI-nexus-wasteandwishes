@@ -1,7 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatTanggal, formatWaktu } from "@/lib/format-tanggal";
 import { notFound } from "next/navigation";
-import { DEFAULT_EVENTS, isEventActive } from "@/app/event/page";
+import { getDb } from "@/lib/db";
+import { events as eventsTable } from "@/lib/db/schema";
+import { and, eq } from "drizzle-orm";
+import { connection } from "next/server";
 
 export const instant = false;
 
@@ -11,17 +15,30 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const eventId = parseInt(resolvedParams.id, 10) || 1;
+  const idEvent = Number(resolvedParams.id);
 
-  const event = DEFAULT_EVENTS.find(
-    (candidate) => candidate.id_event === eventId && isEventActive(candidate),
-  );
-
-  if (!event) {
+  if (!Number.isInteger(idEvent) || idEvent <= 0) {
     notFound();
   }
 
-  const plateNo = String(event.id_event).padStart(2, "0");
+  await connection();
+
+  const [eventDipilih] = await getDb()
+    .select()
+    .from(eventsTable)
+    .where(
+      and(
+        eq(eventsTable.idEvent, idEvent),
+        eq(eventsTable.statusEvent, "aktif"),
+      ),
+    )
+    .limit(1);
+
+  if (!eventDipilih) {
+    notFound();
+  }
+
+  const plateNo = String(eventDipilih.idEvent).padStart(2, "0");
 
   return (
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
@@ -58,7 +75,7 @@ export default async function EventDetailPage({
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-(--hx-accent)" />
             <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase">
-              Plate {plateNo} / 05
+              Plate {plateNo}
             </span>
           </div>
         </div>
@@ -69,8 +86,8 @@ export default async function EventDetailPage({
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="relative aspect-16/11 w-full rounded-2xl overflow-hidden bg-(--hx-sunk) border border-(--hx-pastel)/60 shadow-[0_16px_40px_rgb(27,34,51,0.08)]">
               <Image
-                src={`/img/event/${event.gambar}`}
-                alt={event.nama_event}
+                src={`/img/event/${eventDipilih.gambarUrl}`}
+                alt={eventDipilih.namaEvent}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 42vw"
@@ -81,7 +98,7 @@ export default async function EventDetailPage({
 
               {/* Tag pill on image */}
               <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-(--hx-accent) uppercase tracking-wider shadow-sm">
-                {event.kategori || "Workshop"}
+                {eventDipilih.jenisEvent}
               </div>
 
               <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-(--hx-accent) text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
@@ -110,7 +127,7 @@ export default async function EventDetailPage({
               </p>
 
               <Link
-                href={`/event/checkout/${event.id_event}`}
+                href={`/event/checkout/${eventDipilih.idEvent}`}
                 className="hx-btn-primary w-full"
               >
                 <span>Daftar Sekarang (Gratis)</span>
@@ -152,10 +169,10 @@ export default async function EventDetailPage({
             {/* Title & Category */}
             <div>
               <span className="inline-block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-2">
-                {event.kategori || "Program Edukasi Lingkungan"}
+                {eventDipilih.jenisEvent}
               </span>
               <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-tight">
-                {event.nama_event}
+                {eventDipilih.namaEvent}
               </h1>
             </div>
 
@@ -166,7 +183,7 @@ export default async function EventDetailPage({
                   Tanggal Pelaksanaan
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.tanggal_pelaksanaan}
+                  {formatTanggal(eventDipilih.tanggalPelaksanaan)}
                 </p>
               </div>
 
@@ -175,7 +192,10 @@ export default async function EventDetailPage({
                   Waktu &amp; Sesi
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.waktu || "09.00 - 13.00 WIB"}
+                  {formatWaktu(
+                    eventDipilih.waktuMulai,
+                    eventDipilih.waktuSelesai,
+                  )}
                 </p>
               </div>
 
@@ -184,7 +204,7 @@ export default async function EventDetailPage({
                   Lokasi Pertemuan
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.lokasi || "Wedomartani & Gejayan, Sleman"}
+                  {eventDipilih.lokasi || "Lokasi acara menyusul"}
                 </p>
               </div>
 
@@ -193,7 +213,7 @@ export default async function EventDetailPage({
                   Kuota Peserta
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-                  {event.kuota || "30 Peserta (Terbuka)"}
+                  {eventDipilih.kuotaPeserta || "Tidak ada batasan kuota"}
                 </p>
               </div>
             </div>
@@ -204,7 +224,7 @@ export default async function EventDetailPage({
                 Deskripsi &amp; Gambaran Acara
               </span>
               <p className="text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
-                {event.deskripsi}
+                {eventDipilih.deskripsi || "Tidak ada deskripsi acara"}
               </p>
 
               <hr className="my-5 border-(--hx-sunk)/80" />

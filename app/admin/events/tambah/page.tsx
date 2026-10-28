@@ -20,17 +20,19 @@ export default function TambahEventPage() {
     const gambarUrl = formData.get("gambarUrl") as string;
 
     // Memasukkan data ke tabel events menggunakan Drizzle ORM
-    await getDb().insert(events).values({
-      namaEvent,
-      jenisEvent,
-      tanggalPelaksanaan,
-      waktuMulai: waktuMulai || null,
-      waktuSelesai: waktuSelesai || null,
-      lokasi,
-      biayaEvent: biayaEvent || "0",
-      statusEvent,
-      gambarUrl: gambarUrl || null,
-    });
+    await getDb()
+      .insert(events)
+      .values({
+        namaEvent,
+        jenisEvent,
+        tanggalPelaksanaan,
+        waktuMulai: waktuMulai || null,
+        waktuSelesai: waktuSelesai || null,
+        lokasi,
+        biayaEvent: biayaEvent || "0",
+        statusEvent,
+        gambarUrl: gambarUrl || null,
+      });
 
     // Mengarahkan user kembali ke halaman daftar event setelah sukses
     redirect("/admin/events");
@@ -39,8 +41,8 @@ export default function TambahEventPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <Link 
-          href="/admin/events" 
+        <Link
+          href="/admin/events"
           className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
         >
           ← Kembali
@@ -51,7 +53,6 @@ export default function TambahEventPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
         {/* Form menggunakan action yang mengarah ke Server Action */}
         <form action={simpanEvent} className="space-y-6">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Nama Event */}
             <div className="md:col-span-2">
@@ -159,15 +160,16 @@ export default function TambahEventPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-600"
               />
               <p className="text-xs text-gray-500 mt-2">
-                *Sementara gunakan URL eksternal (misal dari Google Drive/Imgur). Fitur upload file lokal memerlukan cloud storage.
+                *Sementara gunakan URL eksternal (misal dari Google
+                Drive/Imgur). Fitur upload file lokal memerlukan cloud storage.
               </p>
             </div>
           </div>
 
           <div className="border-t border-gray-200 pt-6 mt-8 flex items-center justify-end gap-4">
             {/* Pilihan untuk langsung aktif atau simpan sebagai draft */}
-            <select 
-              name="statusEvent" 
+            <select
+              name="statusEvent"
               className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-sm font-medium text-gray-700"
             >
               <option value="draft">Simpan sebagai Draft</option>

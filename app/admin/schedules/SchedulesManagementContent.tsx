@@ -83,9 +83,13 @@ export default function SchedulesManagementContent() {
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.totalJadwal}
               </p>
-              <p className="mt-1 text-xs text-gray-500">Seluruh jadwal pengambilan</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Seluruh jadwal pengambilan
+              </p>
             </div>
-            <span className="rounded-md bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800">Semua</span>
+            <span className="rounded-md bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800">
+              Semua
+            </span>
           </div>
         </div>
 
@@ -98,7 +102,9 @@ export default function SchedulesManagementContent() {
               </p>
               <p className="mt-1 text-xs text-gray-500">Pengambilan berkala</p>
             </div>
-            <span className="rounded-md bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800">Berkala</span>
+            <span className="rounded-md bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800">
+              Berkala
+            </span>
           </div>
         </div>
 
@@ -111,9 +117,13 @@ export default function SchedulesManagementContent() {
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.janjianCount}
               </p>
-              <p className="mt-1 text-xs text-gray-500">Pengambilan sesuai permintaan</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Pengambilan sesuai permintaan
+              </p>
             </div>
-            <span className="rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">Sesuai permintaan</span>
+            <span className="rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+              Sesuai permintaan
+            </span>
           </div>
         </div>
 
@@ -126,9 +136,13 @@ export default function SchedulesManagementContent() {
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 {stats.totalWaste.toFixed(1)} kg
               </p>
-              <p className="mt-1 text-xs text-gray-500">Akumulasi sampah terkelola</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Akumulasi sampah terkelola
+              </p>
             </div>
-            <span className="rounded-md bg-green-50 px-3 py-2 text-xs font-medium text-green-800">Terkelola</span>
+            <span className="rounded-md bg-green-50 px-3 py-2 text-xs font-medium text-green-800">
+              Terkelola
+            </span>
           </div>
         </div>
       </div>
@@ -253,8 +267,13 @@ export default function SchedulesManagementContent() {
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     <div className="flex flex-col items-center">
-                      <p className="font-medium text-gray-700">Belum ada jadwal</p>
-                      <p className="mt-1 text-sm text-gray-500">Ubah kata kunci atau jenis jadwal untuk melihat hasil lain.</p>
+                      <p className="font-medium text-gray-700">
+                        Belum ada jadwal
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Ubah kata kunci atau jenis jadwal untuk melihat hasil
+                        lain.
+                      </p>
                     </div>
                   </td>
                 </tr>
