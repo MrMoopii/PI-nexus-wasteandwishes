@@ -254,13 +254,6 @@ export default async function EventCheckoutPage({
                   name="id_event"
                   value={eventDipilih.idEvent}
                 />
-                {currentUser && (
-                  <input
-                    type="hidden"
-                    name="id_user"
-                    value={currentUser.idUser}
-                  />
-                )}
 
                 <div>
                   <label
