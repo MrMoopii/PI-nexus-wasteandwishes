@@ -124,13 +124,6 @@ export default async function EventRegistrationProofPage({
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <a
-          href="/event"
-          className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-teal-500 hover:text-teal-700"
-        >
-          ← Kembali ke Event
-        </a>
-
         <PrintProofButton />
       </div>
     </main>

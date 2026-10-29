@@ -80,7 +80,9 @@ function AnimatedCounter({
             if (start === null) start = timestamp;
             const progress = Math.min((timestamp - start) / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
-            const nextValue = Math.round(startValue + (value - startValue) * eased);
+            const nextValue = Math.round(
+              startValue + (value - startValue) * eased,
+            );
             setCount(nextValue);
 
             if (progress < 1) {
@@ -90,7 +92,7 @@ function AnimatedCounter({
           requestAnimationFrame(animate);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     observer.observe(node);
@@ -127,7 +129,9 @@ function EventSlider() {
 
   useEffect(() => {
     const STEP = 0.34;
-    const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const REDUCED = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const N = PLATES.length;
 
     if (
@@ -235,12 +239,14 @@ function EventSlider() {
         const op = Math.max(0.14, 1 - 0.34 * a);
         const sat = 0.28 + 0.72 / (1 + 0.9 * a);
         const bl =
-          a < 1.6 || window.innerWidth < 900 ? 0 : Math.min(2.2, (a - 1.6) * 1.1);
+          a < 1.6 || window.innerWidth < 900
+            ? 0
+            : Math.min(2.2, (a - 1.6) * 1.1);
 
         p.el.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(
-          2
+          2,
         )}px,${y.toFixed(2)}px,0) rotateY(${rotY.toFixed(
-          2
+          2,
         )}deg) rotateZ(${rotZ.toFixed(2)}deg) scale(${sc.toFixed(4)})`;
         p.el.style.opacity = op.toFixed(3);
         p.el.style.zIndex = String(Math.round(1000 - a * 10));
@@ -302,14 +308,17 @@ function EventSlider() {
       window.clearTimeout(swapTimer);
       capEl.classList.add("hx-swap");
 
-      swapTimer = window.setTimeout(() => {
-        capNo.textContent = String(i + 1).padStart(2, "0");
-        capTitle.textContent = pl.title;
-        capDesc.textContent = pl.desc;
-        // Tipografi murni Helix Drift tanpa ikon/emoji
-        capMeta.innerHTML = `<span>${pl.alt}</span><span>${pl.month}</span><span>${pl.stock}</span>`;
-        capEl.classList.remove("hx-swap");
-      }, REDUCED ? 0 : 160);
+      swapTimer = window.setTimeout(
+        () => {
+          capNo.textContent = String(i + 1).padStart(2, "0");
+          capTitle.textContent = pl.title;
+          capDesc.textContent = pl.desc;
+          // Tipografi murni Helix Drift tanpa ikon/emoji
+          capMeta.innerHTML = `<span>${pl.alt}</span><span>${pl.month}</span><span>${pl.stock}</span>`;
+          capEl.classList.remove("hx-swap");
+        },
+        REDUCED ? 0 : 160,
+      );
 
       scrub.setAttribute("aria-valuenow", String(i + 1));
       scrub.setAttribute("aria-valuetext", `${i + 1} dari ${N}, ${pl.title}`);
@@ -342,7 +351,8 @@ function EventSlider() {
       if (!scrubbing) return;
       scrubbing = false;
       try {
-        if (e?.pointerId !== undefined) scrub.releasePointerCapture(e.pointerId);
+        if (e?.pointerId !== undefined)
+          scrub.releasePointerCapture(e.pointerId);
       } catch {}
       target = Math.round(target);
       kick();
@@ -408,7 +418,8 @@ function EventSlider() {
       down = false;
       stage.classList.remove("grabbing");
       try {
-        if (e?.pointerId !== undefined) stage.releasePointerCapture(e.pointerId);
+        if (e?.pointerId !== undefined)
+          stage.releasePointerCapture(e.pointerId);
       } catch {}
       const flick = Math.max(-2.2, Math.min(2.2, -vel * 0.34));
       target = Math.round(target + flick);
@@ -474,7 +485,8 @@ function EventSlider() {
           Galeri &amp; Event Terbaru
         </h2>
         <p className="mt-3 text-base text-(--hx-ink-2) leading-relaxed">
-          Geser atau seret gambar ke kiri dan kanan untuk melihat dokumentasi aksi nyata kami bersama komunitas.
+          Geser atau seret gambar ke kiri dan kanan untuk melihat dokumentasi
+          aksi nyata kami bersama komunitas.
         </p>
         <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
       </div>
@@ -516,17 +528,11 @@ function EventSlider() {
             01
           </span>
           <span className="hx-cap-rule" />
-          <h3
-            className="hx-cap-title text-(--hx-ink)"
-            ref={capTitleRef}
-          >
+          <h3 className="hx-cap-title text-(--hx-ink)" ref={capTitleRef}>
             {PLATES[0].title}
           </h3>
         </div>
-        <p
-          className="hx-cap-desc"
-          ref={capDescRef}
-        >
+        <p className="hx-cap-desc" ref={capDescRef}>
           {PLATES[0].desc}
         </p>
         <div className="hx-cap-meta" ref={capMetaRef}>
@@ -556,10 +562,7 @@ function EventSlider() {
             <i />
           </div>
         </div>
-        <div
-          className="hx-scrub-label"
-          ref={scrubLabRef}
-        >
+        <div className="hx-scrub-label" ref={scrubLabRef}>
           01 / 0{PLATES.length}
         </div>
       </div>
@@ -624,11 +627,12 @@ export default function Home() {
               </h1>
 
               <p className="text-base md:text-lg text-(--hx-ink-2) font-light mb-8 leading-relaxed max-w-xl">
-                Waste &amp; Wishes hadir sebagai inisiatif nyata pengelolaan limbah
-                organik rumah tangga dan UMKM di wilayah Gejayan serta Wedomartani.
-                Melalui teknologi biokonversi maggot BSF (Black Soldier Fly), kami
-                mengubah masalah sampah menjadi pakan ternak berprotein tinggi dan
-                pupuk organik berkualitas demi bumi yang lebih lestari.
+                Waste &amp; Wishes hadir sebagai inisiatif nyata pengelolaan
+                limbah organik rumah tangga dan UMKM di wilayah Gejayan serta
+                Wedomartani. Melalui teknologi biokonversi maggot BSF (Black
+                Soldier Fly), kami mengubah masalah sampah menjadi pakan ternak
+                berprotein tinggi dan pupuk organik berkualitas demi bumi yang
+                lebih lestari.
               </p>
 
               {/* Tombol Helix Drift Style (Pill, Uppercase, Flat Architectural) */}
@@ -659,9 +663,10 @@ export default function Home() {
                 </h3>
                 <p className="text-(--hx-ink-2) text-sm font-light leading-relaxed mb-6">
                   Setiap kilogram sampah organik yang disetorkan akan langsung
-                  diurai tuntas oleh pasukan maggot BSF. Proses alami ini memangkas
-                  produksi gas metana berbahaya di TPA sekaligus menghasilkan pupuk
-                  kasgot bernutrisi dan pakan ternak mandiri berdaya saing tinggi.
+                  diurai tuntas oleh pasukan maggot BSF. Proses alami ini
+                  memangkas produksi gas metana berbahaya di TPA sekaligus
+                  menghasilkan pupuk kasgot bernutrisi dan pakan ternak mandiri
+                  berdaya saing tinggi.
                 </p>
                 <div className="rounded-lg bg-(--hx-canvas)/90 border border-(--hx-pastel)/50 px-4 py-2.5 text-xs text-(--hx-ink-2) font-medium inline-block">
                   Cakupan Wilayah: Wedomartani, Gejayan &amp; Sekitarnya
@@ -693,8 +698,9 @@ export default function Home() {
                 Layanan Utama Kami
               </h2>
               <p className="mt-3 text-base text-(--hx-ink-2) leading-relaxed">
-                Solusi terintegrasi dari Waste &amp; Wishes untuk menuntaskan krisis
-                sampah organik dan menumbuhkan dampak ekonomi sirkular masyarakat.
+                Solusi terintegrasi dari Waste &amp; Wishes untuk menuntaskan
+                krisis sampah organik dan menumbuhkan dampak ekonomi sirkular
+                masyarakat.
               </p>
               <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
             </div>
@@ -717,17 +723,25 @@ export default function Home() {
                     Penjemputan Sampah Organik
                   </h3>
                   <p className="text-sm leading-relaxed text-(--hx-ink-2) font-light mb-6">
-                    Layanan penjemputan terjadwal langsung dari depan pintu rumah
-                    tangga, cafe, restoran, dan UMKM. Cukup pilah sampah dapur
-                    Anda, armada kami akan menjemputnya secara berkala dengan
-                    wadah bersih berstandar sanitasi.
+                    Layanan penjemputan terjadwal langsung dari depan pintu
+                    rumah tangga, cafe, restoran, dan UMKM. Cukup pilah sampah
+                    dapur Anda, armada kami akan menjemputnya secara berkala
+                    dengan wadah bersih berstandar sanitasi.
                   </p>
 
                   {/* Fitur Layanan Tanpa Ikon */}
                   <ul className="space-y-2 mb-8 text-xs text-(--hx-ink-2) border-t border-(--hx-pastel)/30 pt-4">
-                    <li>— Wadah ember khusus terstandar kedap bau &amp; anti bocor</li>
-                    <li>— Jadwal penjemputan teratur &amp; terintegrasi sistem digital</li>
-                    <li>— Laporan berkala volume sampah terkelola &amp; reduksi emisi</li>
+                    <li>
+                      — Wadah ember khusus terstandar kedap bau &amp; anti bocor
+                    </li>
+                    <li>
+                      — Jadwal penjemputan teratur &amp; terintegrasi sistem
+                      digital
+                    </li>
+                    <li>
+                      — Laporan berkala volume sampah terkelola &amp; reduksi
+                      emisi
+                    </li>
                   </ul>
                 </div>
 
@@ -765,9 +779,17 @@ export default function Home() {
 
                   {/* Fitur Layanan Tanpa Ikon */}
                   <ul className="space-y-2 mb-8 text-xs text-(--hx-ink-2) border-t border-(--hx-pastel)/30 pt-4">
-                    <li>— Bimbingan teknis budidaya maggot dari telur sampai panen</li>
-                    <li>— Panduan praktis pemilahan sampah organik langsung dari sumber</li>
-                    <li>— Fasilitasi starter kit edukasi &amp; e-sertifikat kegiatan resmi</li>
+                    <li>
+                      — Bimbingan teknis budidaya maggot dari telur sampai panen
+                    </li>
+                    <li>
+                      — Panduan praktis pemilahan sampah organik langsung dari
+                      sumber
+                    </li>
+                    <li>
+                      — Fasilitasi starter kit edukasi &amp; e-sertifikat
+                      kegiatan resmi
+                    </li>
                   </ul>
                 </div>
 
