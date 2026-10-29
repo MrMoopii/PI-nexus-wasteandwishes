@@ -5,7 +5,12 @@ export const authConfig = {
     signIn: "/auth/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
+      if (request.headers.has("next-action")) {
+        return true;
+      }
+
+      const { nextUrl } = request;
       const isLoggedIn = !!auth?.user;
       const isAdmin = auth?.user?.peran === "admin";
       const isOnAuth =

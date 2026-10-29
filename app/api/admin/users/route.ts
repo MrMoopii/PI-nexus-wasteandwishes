@@ -6,9 +6,10 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 export async function GET(request: Request) {
+  // Check apakah user adalah admin
   const cek = await requireAdmin();
   if (!cek.ok) {
-    return NextResponse.json({ error: "…" }, { status: cek.status });
+    return NextResponse.json({ error: cek.pesan }, { status: cek.status });
   }
 
   // Ensure dynamic rendering
