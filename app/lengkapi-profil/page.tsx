@@ -33,6 +33,10 @@ async function ProfileGate() {
     redirect("/auth/login");
   }
 
+  if (row.peran === "admin") {
+    redirect("/admin");
+  }
+
   if (isProfilLengkap(row)) {
     redirect("/");
   }

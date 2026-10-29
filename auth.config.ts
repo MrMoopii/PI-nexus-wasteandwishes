@@ -1,5 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
-import { SESSION_IDLE_TIMEOUT_MS } from "@/lib/session";
+import { hitungIdle } from "@/lib/session";
 
 export const authConfig = {
   pages: {
@@ -15,11 +15,7 @@ export const authConfig = {
 
       const isLoggedIn = !!auth?.user;
       const isAdmin = auth?.user?.peran === "admin";
-      const lastActivityAt = auth?.user?.lastActivityAt;
-      const isIdle =
-        typeof lastActivityAt !== "number" ||
-        Date.now() - lastActivityAt >= SESSION_IDLE_TIMEOUT_MS;
-
+      const isIdle = hitungIdle(auth?.user?.lastActivityAt);
       const isOnAuth =
         nextUrl.pathname.startsWith("/auth/login") ||
         nextUrl.pathname.startsWith("/auth/register");
@@ -68,11 +64,10 @@ export const authConfig = {
       if (session.user) {
         session.user.idUser = token.idUser as string;
         session.user.peran = token.peran as string;
-      }
-      if (session.user && typeof token.lastActivityAt === "number") {
-        session.user.lastActivityAt = token.lastActivityAt;
-        session.user.isIdle =
-          Date.now() - token.lastActivityAt >= SESSION_IDLE_TIMEOUT_MS;
+        session.user.isIdle = hitungIdle(token.lastActivityAt);
+        if (typeof token.lastActivityAt === "number") {
+          session.user.lastActivityAt = token.lastActivityAt;
+        }
       }
       return session;
     },

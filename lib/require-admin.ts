@@ -14,6 +14,14 @@ export async function requireAdmin(): Promise<HasilCekAdmin> {
   if (!session?.user)
     return { ok: false, status: 401, pesan: "Silakan login terlebih dahulu." };
 
+  if (session.user.isIdle) {
+    return {
+      ok: false,
+      status: 401,
+      pesan: "Sesi berakhir karena tidak aktif.",
+    };
+  }
+
   const idUser = Number(session?.user?.idUser);
   if (!(Number.isInteger(idUser) && idUser > 0))
     return { ok: false, status: 401, pesan: "Silakan login terlebih dahulu." };
