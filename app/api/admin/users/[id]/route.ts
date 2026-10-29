@@ -66,7 +66,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   // Check apakah user adalah admin
   const cek = await requireAdmin();
   if (!cek.ok) {
-    return NextResponse.json({ error: 401 | 403 }, { status: cek.status });
+    return NextResponse.json({ error: cek.pesan }, { status: cek.status });
   }
 
   const id = Number((await context.params).id);
