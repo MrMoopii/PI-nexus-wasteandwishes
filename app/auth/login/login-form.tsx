@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
+const LAST_ACTIVITY_KEY = "waste-wishes:last-activity";
+
 const pesanError: Record<string, string> = {
   EmailSudahTerdaftar:
     "Email ini sudah terdaftar dengan password. Silakan masuk dengan email dan password.",
@@ -21,8 +23,10 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
+  const idleExpired = searchParams.get("reason") === "idle";
   const pesan =
     error ||
+    (idleExpired ? "Sesi Anda berakhir setelah 30 menit tidak aktif. Silakan masuk kembali." : "") ||
     (urlError
       ? (pesanError[urlError] ?? "Terjadi kesalahan. Silakan coba lagi.")
       : "");
@@ -31,6 +35,7 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
 
     try {
       const result = await signIn("credentials", {
@@ -42,7 +47,9 @@ export default function LoginForm() {
       if (result?.error) {
         setError(pesanError[result.error] ?? "Email atau password salah.");
       } else {
-        router.push("/");
+        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        const data = response.ok ? await response.json() : null;
+        router.push(data?.user?.peran === "admin" ? "/admin" : "/");
         router.refresh();
       }
     } catch {
@@ -54,6 +61,7 @@ export default function LoginForm() {
 
   async function handleGoogleLogin() {
     setLoading(true);
+    window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
     await signIn("google", { redirectTo: "/lengkapi-profil" });
   }
 

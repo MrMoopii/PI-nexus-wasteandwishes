@@ -100,6 +100,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return "/auth/login?error=EmailSudahTerdaftar";
       }
 
+      if (row?.peran === "admin") {
+        return "/admin";
+      }
+
       if (!row) {
         await getDb().insert(users).values({
           email: email,
