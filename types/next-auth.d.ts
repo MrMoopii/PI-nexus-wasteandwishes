@@ -10,6 +10,8 @@ declare module "next-auth" {
     user: {
       idUser: string;
       peran: string;
+      lastActivityAt?: number;
+      isIdle?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -18,5 +20,6 @@ declare module "@auth/core/jwt" {
   interface JWT {
     idUser: string;
     peran: string;
+    lastActivityAt?: number;
   }
 }

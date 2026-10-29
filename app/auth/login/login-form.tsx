@@ -1,7 +1,7 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { signIn, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -24,6 +24,15 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
   const idleExpired = searchParams.get("reason") === "idle";
+
+  useEffect(() => {
+    if (!idleExpired) return;
+    void signOut({ redirect: false }).then(() => {
+      window.localStorage.removeItem(LAST_ACTIVITY_KEY);
+      router.refresh();
+    });
+  }, [idleExpired, router]);
+
   const pesan =
     error ||
     (idleExpired ? "Sesi Anda berakhir setelah 30 menit tidak aktif. Silakan masuk kembali." : "") ||
@@ -35,7 +44,6 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
 
     try {
       const result = await signIn("credentials", {
@@ -47,6 +55,7 @@ export default function LoginForm() {
       if (result?.error) {
         setError(pesanError[result.error] ?? "Email atau password salah.");
       } else {
+        window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
         const response = await fetch("/api/auth/me", { cache: "no-store" });
         const data = response.ok ? await response.json() : null;
         router.push(data?.user?.peran === "admin" ? "/admin" : "/");
