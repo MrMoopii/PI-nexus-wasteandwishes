@@ -986,6 +986,12 @@ body.away .hx-panel {
   color-scheme: dark;
 }
 
+html[data-admin-theme="dark"] .admin-shell {
+  background-color: #111827;
+  color: #e5e7eb;
+  color-scheme: dark;
+}
+
 .admin-theme-dark main {
   color: #e5e7eb;
 }
@@ -1205,6 +1211,12 @@ body.away .hx-panel {
   --admin-ink: #f3f4f6;
   --admin-ink-2: #cbd5e1;
   --admin-accent: #96b1d0;
+  background-image:
+    radial-gradient(900px 520px at 0% 0%, rgb(74 110 150 / 14%), transparent 65%),
+    radial-gradient(800px 500px at 100% 100%, rgb(39 52 73 / 28%), transparent 65%);
+}
+
+html[data-admin-theme="dark"] .admin-shell {
   background-image:
     radial-gradient(900px 520px at 0% 0%, rgb(74 110 150 / 14%), transparent 65%),
     radial-gradient(800px 500px at 100% 100%, rgb(39 52 73 / 28%), transparent 65%);
