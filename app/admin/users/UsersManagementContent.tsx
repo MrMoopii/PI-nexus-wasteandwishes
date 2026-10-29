@@ -36,6 +36,7 @@ export default function UsersManagementContent() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [actionError, setActionError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [gagalMuat, setGagalMuat] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -50,6 +51,7 @@ export default function UsersManagementContent() {
           fetch(`/api/admin/users?${params}`, { signal: controller.signal }),
           fetch("/api/admin/users/stats", { signal: controller.signal }),
         ]);
+
         if (!usersRes.ok || !statsRes.ok)
           throw new Error("Data pengguna gagal dimuat");
         const usersData = await usersRes.json();
@@ -59,6 +61,7 @@ export default function UsersManagementContent() {
       } catch (error) {
         if (!controller.signal.aborted)
           console.error("Error fetching data:", error);
+        setGagalMuat(true);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -331,7 +334,24 @@ export default function UsersManagementContent() {
                   </td>
                 </tr>
               ))}
-              {userList.length === 0 && (
+              {gagalMuat && (
+                <tr>
+                  <td
+                    colSpan={11}
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
+                    <div className="flex flex-col items-center">
+                      <p className="font-medium text-gray-700">
+                        Gagal memuat data pengguna
+                      </p>
+                      <p className="mt-1 text-sm">
+                        Ubah kata kunci atau filter untuk melihat hasil lain.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {userList.length === 0 && !gagalMuat && (
                 <tr>
                   <td
                     colSpan={11}
