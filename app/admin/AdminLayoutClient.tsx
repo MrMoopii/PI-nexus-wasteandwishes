@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import AdminNav, { NavLinks } from "./AdminNav";
@@ -123,7 +124,7 @@ export default function AdminLayoutClient({
         </Suspense>
 
         <div className="border-t border-slate-700/50 p-4">
-          <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-white/5 cursor-pointer">
+          <div className="flex items-center gap-3 rounded-lg p-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
               {(user.name || user.email || "A").slice(0, 2).toUpperCase()}
             </span>
@@ -134,6 +135,13 @@ export default function AdminLayoutClient({
               <p className="text-xs text-slate-400 capitalize">{user.peran}</p>
             </div>
           </div>
+          <Link
+            href="/admin/logout"
+            className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-red-500/10 hover:text-red-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400"
+          >
+            <span aria-hidden="true">↪</span>
+            Keluar
+          </Link>
         </div>
       </aside>
 
