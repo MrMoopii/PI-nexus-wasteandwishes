@@ -882,6 +882,17 @@ body.away .hx-panel {
   filter: blur(64px);
 }
 
+/* ── Subtle Dot Grid Pattern ── */
+.hx-dot-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(147, 160, 178, 0.3) 1.25px, transparent 1.25px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 22%, black 35%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 22%, black 35%, transparent 95%);
+}
+
 /* ── Event Plate Card ── */
 .hx-card {
   position: relative;

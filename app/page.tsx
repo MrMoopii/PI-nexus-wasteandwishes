@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 /* ─── Plate data dokumentasi & event ── */
 const PLATES = [
@@ -46,6 +47,9 @@ const PLATES = [
     stock: "Festival",
   },
 ];
+
+/* ─── Hero Background Image (Bumi Hijau) ─── */
+const HERO_BG_IMAGE = "/background/background.jpg";
 
 /* ─── Komponen Statistik Animasi Angka ─── */
 interface AnimatedCounterProps {
@@ -283,14 +287,30 @@ function EventSlider() {
       }
     }
 
+    /* ── Autoplay: geser otomatis setiap 30 detik ── */
+    const AUTO_MS = 10000;
+    let autoTimer = 0;
+
+    function startAuto() {
+      window.clearInterval(autoTimer);
+      if (REDUCED) return;
+      autoTimer = window.setInterval(() => {
+        if (document.hidden) return;
+        target = Math.round(target) + 1;
+        kick();
+      }, AUTO_MS);
+    }
+
     stepPrevRef.current = () => {
       target = Math.round(target) - 1;
       kick();
+      startAuto();
     };
 
     stepNextRef.current = () => {
       target = Math.round(target) + 1;
       kick();
+      startAuto();
     };
 
     let swapTimer = 0;
@@ -349,6 +369,7 @@ function EventSlider() {
     };
 
     const onScrubDown = (e: PointerEvent) => {
+      startAuto();
       scrubbing = true;
       try {
         scrub.setPointerCapture(e.pointerId);
@@ -376,6 +397,7 @@ function EventSlider() {
     let moved = false;
 
     const onDown = (e: PointerEvent) => {
+      startAuto();
       down = true;
       moved = false;
       startX = lastX = e.clientX;
@@ -425,6 +447,7 @@ function EventSlider() {
     plates.forEach((p, i) => {
       p.el.addEventListener("click", () => {
         if (moved) return;
+        startAuto();
         const d = ((i - pos + N / 2 + N * 2) % N) - N / 2;
         if (Math.abs(d) < 0.5) {
           p.el.classList.add("press");
@@ -449,8 +472,10 @@ function EventSlider() {
 
     setCaption(0);
     render();
+    startAuto();
 
     return () => {
+      window.clearInterval(autoTimer);
       cancelAnimationFrame(raf);
       window.clearTimeout(swapTimer);
       window.clearTimeout(rt);
@@ -599,11 +624,35 @@ function EventSlider() {
 export default function Home() {
   return (
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
-      {/* Ambient gradient washes matching Helix Drift (identik dengan app/event/page) */}
-      <div aria-hidden="true" className="hx-ambient-wash">
-        <div className="hx-ambient-blob-1" />
-        <div className="hx-ambient-blob-2" />
-        <div className="hx-ambient-blob-3" />
+      {/* ── Background Image Layer (Bumi Hijau + Blur Halus) ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-0 right-0 h-[720px] md:h-[820px] overflow-hidden select-none -z-0"
+      >
+        {/* Gambar bumi: hue-rotate mengubah biru → hijau, blur tipis */}
+        <Image
+          src={HERO_BG_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center scale-110 opacity-60"
+          style={{ filter: "hue-rotate(-80deg) saturate(1.25) blur(3px)" }}
+        />
+
+        {/* Tint hijau tosca agar warna konsisten dengan brand (--hx-accent) */}
+        <div className="absolute inset-0 bg-(--hx-accent)/20 mix-blend-color" />
+
+        {/* Wash lembut supaya teks tetap terbaca */}
+        <div className="absolute inset-0 bg-(--hx-canvas)/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-(--hx-canvas)/50 to-(--hx-canvas)" />
+        <div className="absolute inset-0 bg-gradient-to-r from-(--hx-canvas)/80 via-(--hx-canvas)/30 to-transparent" />
+
+        {/* Ambient Blobs & Dot Grid */}
+        <div className="hx-ambient-blob-1 opacity-40" />
+        <div className="hx-ambient-blob-2 opacity-30" />
+        <div className="hx-ambient-blob-3 opacity-30" />
+        <div className="hx-dot-grid opacity-20" />
       </div>
 
       <div className="relative z-10">
@@ -648,9 +697,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Kolom Kanan: Kartu Sorotan Fitur (Gaya Helix Drift Card) */}
-            <div>
-              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+            {/* Kolom Kanan: Kartu Sorotan Fitur (Frosted Glass di atas Background Gambar) */}
+            <div className="relative">
+              {/* Glow Aksen Tosca di Belakang Kartu */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-3 sm:-inset-6 rounded-3xl bg-gradient-to-tr from-(--hx-accent)/25 via-(--hx-pastel)/30 to-transparent blur-2xl -z-10"
+              />
+
+              <div className="relative rounded-2xl border border-white/70 bg-white/80 p-8 shadow-[0_16px_40px_rgba(27,34,51,0.06)] backdrop-blur-md">
                 <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                   Biokonversi Alami
                 </span>
