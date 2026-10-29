@@ -7,10 +7,12 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import Google from "next-auth/providers/google";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   session: {
     strategy: "jwt",
+    // The JWT must remain readable so middleware can enforce the shorter idle timeout.
+    maxAge: 30 * 24 * 60 * 60,
   },
   providers: [
     Google({
@@ -58,7 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ user, token, account }) {
+    async jwt({ user, token, account, trigger }) {
       if (account?.provider === "google" && token.email) {
         const [row] = await getDb()
           .select()
@@ -73,6 +75,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       } else if (user) {
         token.idUser = user.id;
         token.peran = user.peran;
+      }
+      if (user || trigger === "update") {
+        token.lastActivityAt = Date.now();
       }
       return token;
     },

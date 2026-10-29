@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 
 export default async function Header() {
   const session = await auth();
-  const loggedIn = !!session?.user;
+  const loggedIn = !!session?.user && !session.user.isIdle;
   const username = session?.user?.name ?? "Pengguna";
 
   return (

@@ -1,9 +1,11 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { signIn, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+
+const LAST_ACTIVITY_KEY = "waste-wishes:last-activity";
 
 const pesanError: Record<string, string> = {
   EmailSudahTerdaftar:
@@ -22,8 +24,19 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
+  const idleExpired = searchParams.get("reason") === "idle";
+
+  useEffect(() => {
+    if (!idleExpired) return;
+    void signOut({ redirect: false }).then(() => {
+      window.localStorage.removeItem(LAST_ACTIVITY_KEY);
+      router.refresh();
+    });
+  }, [idleExpired, router]);
+
   const pesan =
     error ||
+    (idleExpired ? "Sesi Anda berakhir setelah 30 menit tidak aktif. Silakan masuk kembali." : "") ||
     (urlError
       ? (pesanError[urlError] ?? "Terjadi kesalahan. Silakan coba lagi.")
       : "");
@@ -45,7 +58,10 @@ export default function LoginForm() {
           pesanError[result.error] ?? "Terjadi kesalahan. Silakan coba lagi.",
         );
       } else {
-        router.push("/");
+        window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        const data = response.ok ? await response.json() : null;
+        router.push(data?.user?.peran === "admin" ? "/admin" : "/");
         router.refresh();
       }
     } catch {
@@ -57,6 +73,7 @@ export default function LoginForm() {
 
   async function handleGoogleLogin() {
     setLoading(true);
+    window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
     await signIn("google", { redirectTo: "/lengkapi-profil" });
   }
 

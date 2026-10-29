@@ -161,7 +161,7 @@ export default async function EventPage() {
 
                       {/* Badge Date */}
                       <div className="absolute bottom-3 left-3 px-3 py-1 rounded-md bg-white/90 backdrop-blur-md text-[11px] font-medium text-(--hx-ink) shadow-sm">
-                        📅 {formatTanggal(event.tanggalPelaksanaan)}
+                          {formatTanggal(event.tanggalPelaksanaan)}
                       </div>
 
                       {/* Free Badge */}

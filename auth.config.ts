@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { SESSION_IDLE_TIMEOUT_MS } from "@/lib/session";
 
 export const authConfig = {
   pages: {
@@ -6,13 +7,19 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request }) {
+      const { nextUrl } = request;
+
       if (request.headers.has("next-action")) {
         return true;
       }
 
-      const { nextUrl } = request;
       const isLoggedIn = !!auth?.user;
       const isAdmin = auth?.user?.peran === "admin";
+      const lastActivityAt = auth?.user?.lastActivityAt;
+      const isIdle =
+        typeof lastActivityAt !== "number" ||
+        Date.now() - lastActivityAt >= SESSION_IDLE_TIMEOUT_MS;
+
       const isOnAuth =
         nextUrl.pathname.startsWith("/auth/login") ||
         nextUrl.pathname.startsWith("/auth/register");
@@ -24,28 +31,48 @@ export const authConfig = {
 
       // Akses halaman /langganan, /event, /profil harus login terlebih dahulu
       if (isOnProtected) {
-        if (isLoggedIn) return true;
+        if (isLoggedIn && !isIdle) return true;
+        if (isLoggedIn && isIdle) {
+          return Response.redirect(new URL("/auth/login?reason=idle", nextUrl));
+        }
         return false;
       }
 
       // Akses halaman /admin harus login sebagai admin
       if (isOnAdmin) {
         if (!isLoggedIn) return false;
+        if (isIdle)
+          return Response.redirect(new URL("/auth/login?reason=idle", nextUrl));
         if (!isAdmin) return Response.redirect(new URL("/", nextUrl));
         return true;
       }
 
       // Jika sudah berhasil login/register di arahkan ke halaman root
-      if (isOnAuth && isLoggedIn) {
+      if (isOnAuth && isLoggedIn && !isIdle) {
         return Response.redirect(new URL("/", nextUrl));
       }
 
       return true;
     },
-    async session({ session, token }) {
-      if (token && session.user) {
+    jwt({ token, user, trigger }) {
+      if (user) {
+        token.idUser = user.id;
+        token.peran = user.peran;
+        token.lastActivityAt = Date.now();
+      } else if (trigger === "update") {
+        token.lastActivityAt = Date.now();
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) {
         session.user.idUser = token.idUser as string;
         session.user.peran = token.peran as string;
+      }
+      if (session.user && typeof token.lastActivityAt === "number") {
+        session.user.lastActivityAt = token.lastActivityAt;
+        session.user.isIdle =
+          Date.now() - token.lastActivityAt >= SESSION_IDLE_TIMEOUT_MS;
       }
       return session;
     },
