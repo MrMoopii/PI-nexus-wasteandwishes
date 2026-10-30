@@ -53,7 +53,7 @@ export default async function Header() {
               {/* Tambahan tombol Toko */}
               <Link
                 className="px-3 py-2 transition-colors hover:text-waste"
-                href="/toko"
+                href="/Store"
               >
                 Toko
               </Link>
