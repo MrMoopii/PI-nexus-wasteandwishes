@@ -57,6 +57,13 @@ export default async function Header() {
               >
                 Daftar Event
               </Link>
+              {/* Tambahan tombol Toko */}
+              <Link
+                className="px-3 py-2 transition-colors hover:text-waste"
+                href="/Store"
+              >
+                Toko
+              </Link>
             </>
           )}
           {!loggedIn ? (
