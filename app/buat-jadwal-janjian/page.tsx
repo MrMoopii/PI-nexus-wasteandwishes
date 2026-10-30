@@ -31,7 +31,7 @@ export default async function LanggananPage({
           className="mb-6 flex overflow-x-auto border-b border-gray-200"
         >
           <Link
-            href="/langganan"
+            href="/buat-jadwal-janjian"
             aria-current="page"
             className="whitespace-nowrap border-b-2 border-blue-600 px-6 py-4 text-sm font-medium text-blue-600"
           >
