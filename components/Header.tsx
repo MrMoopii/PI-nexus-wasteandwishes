@@ -13,7 +13,7 @@ export default async function Header() {
       <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-4 px-3 py-5">
         <Link
           href="/"
-          className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px]"
+          className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px] font-(family-name:--font-plus-jakarta-sans)"
         >
           <Image
             src="/icon/waste-and-wishes-logo.png"
@@ -24,7 +24,7 @@ export default async function Header() {
           />
           Waste <span className="text-teal-400">&</span> Wishes
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold text-gray-400 md:text-xl">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold text-gray-400 md:text-xl font-(family-name:--font-plus-jakarta-sans)">
           <Link
             className="px-3 py-2 transition-colors hover:text-waste"
             href="/"
