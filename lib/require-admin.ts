@@ -2,31 +2,18 @@ import type { Session } from "next-auth";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "./auth";
+import { requireLogin } from "./require-login";
 
 type HasilCekAdmin =
-  | { ok: true; session: Session }
+  | { ok: true; session: Session; idUser: number }
   | { ok: false; status: 401 | 403; pesan: string };
 
 export async function requireAdmin(): Promise<HasilCekAdmin> {
-  const session = await auth();
+  const cek = await requireLogin();
 
-  if (!session?.user)
-    return { ok: false, status: 401, pesan: "Silakan login terlebih dahulu." };
+  if (!cek.ok) return cek;
 
-  if (session.user.isIdle) {
-    return {
-      ok: false,
-      status: 401,
-      pesan: "Sesi berakhir karena tidak aktif.",
-    };
-  }
-
-  const idUser = Number(session?.user?.idUser);
-  if (!(Number.isInteger(idUser) && idUser > 0))
-    return { ok: false, status: 401, pesan: "Silakan login terlebih dahulu." };
-
-  const isAdminOnSession = session.user.peran === "admin";
+  const isAdminOnSession = cek.session.user.peran === "admin";
 
   if (!isAdminOnSession)
     return { ok: false, status: 403, pesan: "Akses khusus admin." };
@@ -34,11 +21,11 @@ export async function requireAdmin(): Promise<HasilCekAdmin> {
   const [adminOnDb] = await getDb()
     .select({ idUser: users.idUser })
     .from(users)
-    .where(and(eq(users.peran, "admin"), eq(users.idUser, idUser)))
+    .where(and(eq(users.peran, "admin"), eq(users.idUser, cek.idUser)))
     .limit(1);
 
   if (!adminOnDb)
     return { ok: false, status: 403, pesan: "Akses khusus admin." };
 
-  return { ok: true, session: session };
+  return { ok: true, session: cek.session, idUser: cek.idUser };
 }

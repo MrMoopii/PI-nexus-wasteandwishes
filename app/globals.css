@@ -887,10 +887,21 @@ body.away .hx-panel {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(147, 160, 178, 0.3) 1.25px, transparent 1.25px);
+  background-image: radial-gradient(
+    rgba(147, 160, 178, 0.3) 1.25px,
+    transparent 1.25px
+  );
   background-size: 26px 26px;
-  mask-image: radial-gradient(ellipse 75% 60% at 50% 22%, black 35%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 22%, black 35%, transparent 95%);
+  mask-image: radial-gradient(
+    ellipse 75% 60% at 50% 22%,
+    black 35%,
+    transparent 95%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 60% at 50% 22%,
+    black 35%,
+    transparent 95%
+  );
 }
 
 /* ── Event Plate Card ── */
@@ -1174,8 +1185,16 @@ html[data-admin-theme="dark"] .admin-shell {
   font-family: "Albert Sans", system-ui, sans-serif;
   font-weight: 300;
   background-image:
-    radial-gradient(1000px 560px at 0% 0%, rgb(185 205 229 / 35%), transparent 65%),
-    radial-gradient(900px 520px at 100% 100%, rgb(221 231 242 / 55%), transparent 65%);
+    radial-gradient(
+      1000px 560px at 0% 0%,
+      rgb(185 205 229 / 35%),
+      transparent 65%
+    ),
+    radial-gradient(
+      900px 520px at 100% 100%,
+      rgb(221 231 242 / 55%),
+      transparent 65%
+    );
 }
 
 .admin-shell .admin-sidebar {
@@ -1223,14 +1242,30 @@ html[data-admin-theme="dark"] .admin-shell {
   --admin-ink-2: #cbd5e1;
   --admin-accent: #96b1d0;
   background-image:
-    radial-gradient(900px 520px at 0% 0%, rgb(74 110 150 / 14%), transparent 65%),
-    radial-gradient(800px 500px at 100% 100%, rgb(39 52 73 / 28%), transparent 65%);
+    radial-gradient(
+      900px 520px at 0% 0%,
+      rgb(74 110 150 / 14%),
+      transparent 65%
+    ),
+    radial-gradient(
+      800px 500px at 100% 100%,
+      rgb(39 52 73 / 28%),
+      transparent 65%
+    );
 }
 
 html[data-admin-theme="dark"] .admin-shell {
   background-image:
-    radial-gradient(900px 520px at 0% 0%, rgb(74 110 150 / 14%), transparent 65%),
-    radial-gradient(800px 500px at 100% 100%, rgb(39 52 73 / 28%), transparent 65%);
+    radial-gradient(
+      900px 520px at 0% 0%,
+      rgb(74 110 150 / 14%),
+      transparent 65%
+    ),
+    radial-gradient(
+      800px 500px at 100% 100%,
+      rgb(39 52 73 / 28%),
+      transparent 65%
+    );
 }
 
 .admin-theme-dark .admin-header {

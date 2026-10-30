@@ -21,11 +21,12 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/auth/register");
       const isOnProtected =
         nextUrl.pathname.startsWith("/langganan") ||
+        nextUrl.pathname.startsWith("/buat-jadwal-janjian") ||
         nextUrl.pathname.startsWith("/event") ||
         nextUrl.pathname.startsWith("/profil");
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
 
-      // Akses halaman /langganan, /event, /profil harus login terlebih dahulu
+      // Akses halaman langganan, jadwal janjian, event, dan profil perlu login
       if (isOnProtected) {
         if (isLoggedIn && !isIdle) return true;
         if (isLoggedIn && isIdle) {

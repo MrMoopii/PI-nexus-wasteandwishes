@@ -32,7 +32,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     keteranganTujuan.trim().length <= 500;
 
   if (!(hariValid && jamValid && tujuanValid)) {
-    redirect("/langganan?status=input-tidak-valid");
+    redirect("/buat-jadwal-janjian?status=input-tidak-valid");
   }
 
   const [langgananAktif] = await getDb()
@@ -47,7 +47,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     .limit(1);
 
   if (!langgananAktif) {
-    redirect("/langganan?status=langganan-tidak-aktif");
+    redirect("/buat-jadwal-janjian?status=langganan-tidak-aktif");
   }
 
   await getDb().execute(sql`
@@ -66,5 +66,5 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     FROM jadwal_baru
   `);
 
-  redirect("/langganan?status=permintaan-terkirim");
+  redirect("/buat-jadwal-janjian?status=permintaan-terkirim");
 }

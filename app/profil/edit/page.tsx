@@ -23,7 +23,16 @@ async function EditProfilContent() {
   }
 
   const [user] = await getDb()
-    .select()
+    .select({
+      username: users.username,
+      namaPelanggan: users.namaPelanggan,
+      peran: users.peran,
+      email: users.email,
+      nomorTelp: users.nomorTelp,
+      tanggalLahir: users.tanggalLahir,
+      createdAt: users.createdAt,
+      alamat: users.alamat,
+    })
     .from(users)
     .where(eq(users.idUser, idUser))
     .limit(1);
