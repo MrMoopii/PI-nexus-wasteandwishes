@@ -70,7 +70,7 @@ async function ProfilContent() {
           <div className="mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#96B1D0]/40 bg-white text-5xl font-light text-[#4A6E96] shadow-[0_6px_18px_-6px_rgba(27,34,51,0.3)]">
             {user.username?.slice(0, 1).toUpperCase() || "P"}
           </div>
-          <h1 className="font-serif text-4xl font-light tracking-tight text-[#1B2233]">
+          <h1 className="font-(family-name:--font-plus-jakarta-sans) text-4xl font-light tracking-tight text-[#1B2233]">
             {user.namaPelanggan || user.username || "Pengguna"}
           </h1>
           <p className="mt-2 text-sm uppercase tracking-[0.16em] text-[#93A0B2]">
@@ -88,7 +88,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Username
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.username || "-"}
               </dd>
             </div>
@@ -97,7 +97,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Nama Lengkap
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.namaPelanggan || "-"}
               </dd>
             </div>
@@ -106,7 +106,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Email
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.email}
               </dd>
             </div>
@@ -115,7 +115,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Nomor Telepon
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.nomorTelp || "-"}
               </dd>
             </div>
