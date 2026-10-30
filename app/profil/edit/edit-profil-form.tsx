@@ -82,7 +82,7 @@ export default function EditProfilForm({
 
       <div className="relative z-10 mx-auto max-w-[620px] px-5 py-12 sm:py-20">
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-4xl font-light tracking-tight text-[#1B2233]">
+          <h1 className="font-(family-name:--font-plus-jakarta-sans) text-4xl font-light tracking-tight text-[#1B2233]">
             Edit Profil
           </h1>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-[#5B6879]">
