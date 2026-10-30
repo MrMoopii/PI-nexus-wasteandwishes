@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/require-admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
@@ -7,6 +8,10 @@ export default function TambahEventPage() {
   // Server Action: Fungsi ini akan dieksekusi di server saat form di-submit
   async function simpanEvent(formData: FormData) {
     "use server";
+
+    // Check apakah user adalah admin
+    const cek = await requireAdmin();
+    if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
 
     // Mengambil data dari input form
     const namaEvent = formData.get("namaEvent") as string;

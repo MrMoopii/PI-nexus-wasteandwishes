@@ -12,7 +12,8 @@ const pesanError: Record<string, string> = {
     "Email ini sudah terdaftar dengan password. Silakan masuk dengan email dan password.",
   AccessDenied:
     "Akses ditolak. Pastikan email Google Anda sudah terverifikasi.",
-  CredentialsSignin: "Email atau password salah.",
+  CredentialsSignin:
+    "Email atau password salah. Jika Anda mendaftar dengan Google, gunakan tombol Lanjutkan dengan Google. Belum punya akun? Daftar terlebih dahulu.",
 };
 
 export default function LoginForm() {
@@ -53,7 +54,9 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError(pesanError[result.error] ?? "Email atau password salah.");
+        setError(
+          pesanError[result.error] ?? "Terjadi kesalahan. Silakan coba lagi.",
+        );
       } else {
         window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
         const response = await fetch("/api/auth/me", { cache: "no-store" });

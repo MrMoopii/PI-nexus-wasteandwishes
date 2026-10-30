@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/require-admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -50,10 +51,16 @@ export default async function EditEventPage({
 
   async function updateEvent(formData: FormData) {
     "use server";
+
+    // Check apakah user adalah admin
+    const cek = await requireAdmin();
+    if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
+
     const id = Number(formData.get("idEvent"));
     if (!id || isNaN(id)) {
       throw new Error("ID Event tidak valid untuk proses update.");
     }
+
     const namaEvent = formData.get("namaEvent") as string;
     const jenisEvent = formData.get("jenisEvent") as string;
     const tanggalPelaksanaan = formData.get("tanggalPelaksanaan") as string;
