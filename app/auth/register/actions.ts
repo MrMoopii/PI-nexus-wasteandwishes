@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -32,32 +32,32 @@ export async function register(formData: {
 
   try {
     // Check if email already exists
-    const [existingUser] = await db
+    const [checkEmailTerpakai] = await getDb()
       .select()
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
 
-    if (existingUser) {
+    if (checkEmailTerpakai) {
       return { error: "Email sudah terdaftar" };
     }
 
     // Check if username already exists
-    const [existingUsername] = await db
+    const [existingUsername] = await getDb()
       .select()
       .from(users)
       .where(eq(users.username, username))
       .limit(1);
 
     if (existingUsername) {
-      return { error: "Nama pengguna sudah digunakan" };
+      return { error: "Username sudah dipakai!" };
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Insert new user
-    await db.insert(users).values({
+    await getDb().insert(users).values({
       username: username,
       namaPelanggan: namaPelanggan,
       peran: "user",

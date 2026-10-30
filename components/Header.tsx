@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 
 export default async function Header() {
   const session = await auth();
-  const loggedIn = !!session?.user;
+  const loggedIn = !!session?.user && !session.user.isIdle;
   const username = session?.user?.name ?? "Pengguna";
 
   return (
@@ -19,7 +19,7 @@ export default async function Header() {
             alt="Waste and Wishes logo"
             width={35}
             height={35}
-            className="h-8.75 w-auto"
+            className="h-auto w-auto"
           />
           Waste <span className="text-teal-400">&</span> Wishes
         </Link>

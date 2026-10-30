@@ -1,79 +1,89 @@
-import { auth } from "@/lib/auth";
-import { db, users } from "@/lib/db";
-import { and, eq, ilike, or, sql } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/require-admin";
+import { getDb } from "@/lib/db";
+import { users, dataLangganan } from "@/lib/db/schema";
+import { asc, count, eq, sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 
-const MAX_PAGE_SIZE = 100;
-
-/** Return a paginated user list for the admin user table. */
-export async function GET(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-  if (session.user.peran !== "admin") {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+export async function GET(request: Request) {
+  // Check apakah user adalah admin
+  const cek = await requireAdmin();
+  if (!cek.ok) {
+    return NextResponse.json({ error: cek.pesan }, { status: cek.status });
   }
 
-  const params = request.nextUrl.searchParams;
-  const pageParam = Number(params.get("page") ?? "1");
-  const pageSizeParam = Number(params.get("pageSize") ?? "10");
-  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const pageSize =
-    Number.isInteger(pageSizeParam) && pageSizeParam > 0
-      ? Math.min(pageSizeParam, MAX_PAGE_SIZE)
-      : 10;
-  const search = params.get("search")?.trim();
-  const searchFilter = search
-    ? or(
-        ilike(users.username, `%${search}%`),
-        ilike(users.namaPelanggan, `%${search}%`),
-        ilike(users.email, `%${search}%`),
-        ilike(users.nomorTelp, `%${search}%`),
-      )
-    : undefined;
-  // Admin accounts may access this endpoint, but the table lists regular users only.
-  const where = searchFilter
-    ? and(eq(users.peran, "user"), searchFilter)
-    : eq(users.peran, "user");
-
+  // Ensure dynamic rendering
+  const h = await headers();
+  h.get("x-vercel-ip-city");
   try {
-    const [items, [totalResult]] = await Promise.all([
-      db
-        .select({
-          idUser: users.idUser,
-          username: users.username,
-          namaPelanggan: users.namaPelanggan,
-          peran: users.peran,
-          email: users.email,
-          nomorTelp: users.nomorTelp,
-          alamat: users.alamat,
-          tanggalLahir: users.tanggalLahir,
-          createdAt: users.createdAt,
-        })
-        .from(users)
-        .where(where)
-        .orderBy(users.idUser)
-        .limit(pageSize)
-        .offset((page - 1) * pageSize),
-      db.select({ total: sql<number>`count(*)::int` }).from(users).where(where),
-    ]);
-    const total = totalResult?.total ?? 0;
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const role = searchParams.get("role") || "";
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    let whereCondition;
+
+    if (search && role) {
+      const searchLower = search.toLowerCase();
+      whereCondition = sql`(${users.namaPelanggan} ILIKE ${`%${searchLower}%`} OR ${users.email} ILIKE ${`%${searchLower}%`}) AND ${users.peran} = ${role}`;
+    } else if (search) {
+      const searchLower = search.toLowerCase();
+      whereCondition = sql`${users.namaPelanggan} ILIKE ${`%${searchLower}%`} OR ${users.email} ILIKE ${`%${searchLower}%`}`;
+    } else if (role) {
+      whereCondition = eq(users.peran, role);
+    }
+
+    const [totalResult] = await getDb()
+      .select({ count: count() })
+      .from(users)
+      .where(whereCondition);
+
+    const userList = await getDb()
+      .select({
+        id: users.idUser,
+        namaPelanggan: users.namaPelanggan,
+        username: users.username,
+        email: users.email,
+        peran: users.peran,
+        nomorTelp: users.nomorTelp,
+        alamat: users.alamat,
+        tanggalLahir: users.tanggalLahir,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(whereCondition)
+      .orderBy(asc(users.idUser))
+      .limit(limit)
+      .offset(offset);
+
+    // Get subscription status for each user
+    const usersWithSubscription = await Promise.all(
+      userList.map(async (user) => {
+        const [subscription] = await getDb()
+          .select()
+          .from(dataLangganan)
+          .where(eq(dataLangganan.userId, user.id))
+          .limit(1);
+        return {
+          ...user,
+          statusLangganan:
+            subscription?.statusLangganan || "tidak_berlangganan",
+        };
+      }),
+    );
 
     return NextResponse.json({
-      data: items,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
+      users: usersWithSubscription,
+      total: Number(totalResult.count) || 0,
+      totalPages: Math.ceil((Number(totalResult.count) || 0) / limit),
     });
   } catch (error) {
-    console.error("Failed to list admin users:", error);
+    console.error("Error fetching users:", error);
     return NextResponse.json(
-      { message: "Gagal mengambil daftar pengguna" },
+      { error: "Failed to fetch users" },
       { status: 500 },
     );
   }

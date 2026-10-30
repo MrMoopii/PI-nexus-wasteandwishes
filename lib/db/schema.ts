@@ -15,14 +15,14 @@ export const users = pgTable(
   "users",
   {
     idUser: integer("id_user").primaryKey().generatedAlwaysAsIdentity(),
-    username: text("username").notNull(),
-    namaPelanggan: text("nama_pelanggan").notNull(),
+    username: text("username"),
+    namaPelanggan: text("nama_pelanggan"),
     peran: text("peran").notNull().default("user"),
-    password: text("password").notNull(),
+    password: text("password"),
     email: text("email").notNull(),
-    nomorTelp: text("nomor_telp").notNull(),
-    alamat: text("alamat").notNull(),
-    tanggalLahir: date("tanggal_lahir").notNull(),
+    nomorTelp: text("nomor_telp"),
+    alamat: text("alamat"),
+    tanggalLahir: date("tanggal_lahir"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -40,7 +40,14 @@ export const events = pgTable("events", {
   idEvent: integer("id_event").primaryKey().generatedAlwaysAsIdentity(),
   namaEvent: text("nama_event").notNull(),
   jenisEvent: text("jenis_event").notNull(),
+  deskripsi: text("deskripsi"),
+  kuotaPeserta: integer("kuota_peserta").notNull().default(0),
   tanggalPelaksanaan: date("tanggal_pelaksanaan").notNull(),
+  waktuMulai: time("waktu_mulai"),
+  waktuSelesai: time("waktu_selesai"),
+  lokasi: text("lokasi"),
+  gambarUrl: text("gambar_url"),
+  statusEvent: text("status_event").notNull().default("draft"),
   biayaEvent: numeric("biaya_event", { precision: 12, scale: 2 })
     .notNull()
     .default("0"),
