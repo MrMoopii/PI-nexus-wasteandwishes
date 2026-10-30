@@ -9,29 +9,29 @@ export default async function Header() {
 
   return (
     <header className="bg-gray-900 text-white shadow">
-      <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-4 px-3 py-5">
+      <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:px-6 lg:flex-nowrap lg:gap-6 lg:py-5">
         <Link
           href="/"
-          className="flex items-center gap-3 text-[1.95rem] font-extrabold tracking-[.5px]"
+          className="flex shrink-0 items-center gap-2 whitespace-nowrap text-lg font-extrabold tracking-[.5px] sm:gap-2.5 sm:text-xl lg:text-[1.55rem]"
         >
           <Image
             src="/icon/waste-and-wishes-logo.png"
             alt="Waste and Wishes logo"
-            width={35}
-            height={35}
+            width={30}
+            height={30}
             className="h-auto w-auto"
           />
           Waste <span className="text-teal-400">&</span> Wishes
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold text-gray-400 md:text-xl">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-1 gap-y-1 text-sm font-semibold text-gray-400 sm:gap-x-2 sm:text-base lg:flex-nowrap lg:gap-x-3 lg:text-lg xl:text-xl">
           <Link
-            className="px-3 py-2 transition-colors hover:text-waste"
+            className="whitespace-nowrap rounded-md px-2 py-2 transition-colors hover:text-waste sm:px-3"
             href="/"
           >
             Beranda
           </Link>
           <Link
-            className="px-3 py-2 transition-colors hover:text-waste"
+            className="whitespace-nowrap rounded-md px-2 py-2 transition-colors hover:text-waste sm:px-3"
             href="/about"
           >
             Tentang Kami
@@ -39,13 +39,19 @@ export default async function Header() {
           {loggedIn && (
             <>
               <Link
-                className="px-3 py-2 transition-colors hover:text-waste"
+                className="whitespace-nowrap rounded-md px-2 py-2 transition-colors hover:text-waste sm:px-3"
                 href="/langganan"
               >
                 Langganan
               </Link>
               <Link
-                className="px-3 py-2 transition-colors hover:text-waste"
+                className="whitespace-nowrap rounded-md px-2 py-2 transition-colors hover:text-waste sm:px-3"
+                href="/buat-jadwal-janjian"
+              >
+                Jadwal Janjian
+              </Link>
+              <Link
+                className="whitespace-nowrap rounded-md px-2 py-2 transition-colors hover:text-waste sm:px-3"
                 href="/event"
               >
                 Daftar Event
@@ -56,13 +62,13 @@ export default async function Header() {
             <>
               <Link
                 href="/auth/login"
-                className="rounded-lg border border-white/60 px-5 py-2 text-base font-semibold text-white transition hover:border-waste hover:text-waste"
+                className="whitespace-nowrap rounded-lg border border-white/60 px-3 py-2 text-sm font-semibold text-white transition hover:border-waste hover:text-waste sm:px-5 sm:text-base"
               >
                 Masuk
               </Link>
               <Link
                 href="/auth/register"
-                className="rounded-lg bg-waste px-5 py-2 text-base font-semibold text-white transition hover:bg-waste-dark"
+                className="whitespace-nowrap rounded-lg bg-waste px-3 py-2 text-sm font-semibold text-white transition hover:bg-waste-dark sm:px-5 sm:text-base"
               >
                 Daftar
               </Link>
