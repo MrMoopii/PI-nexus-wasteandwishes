@@ -14,7 +14,7 @@ function AnimatedCounter({
   value,
   suffix = "",
   duration = 1400,
-  className = "text-2xl md:text-3xl font-light text-(--hx-ink) font-(family-name:--font-newsreader)",
+  className = "text-2xl md:text-3xl font-light text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)",
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const hasAnimated = useRef(false);
@@ -76,7 +76,7 @@ export default function Home() {
           <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-4">
             Tentang Kami
           </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader) mb-6 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-6 leading-tight">
             Waste &amp; Wishes
           </h1>
           <p className="text-base md:text-lg text-(--hx-ink-2) font-light leading-relaxed max-w-2xl mx-auto">
@@ -105,7 +105,7 @@ export default function Home() {
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Cerita Kami
               </span>
-              <h2 className="text-2xl md:text-3xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader) mb-6 leading-snug">
+              <h2 className="text-2xl md:text-3xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-6 leading-snug">
                 Mengubah sampah organik menjadi berkah nyata
               </h2>
               <div className="space-y-4 text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
@@ -126,7 +126,7 @@ export default function Home() {
             <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
               Tiga Pilar Kami
             </span>
-            <h2 className="text-3xl md:text-4xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader)">
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
               Mengapa Waste &amp; Wishes?
             </h2>
             <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
@@ -190,7 +190,7 @@ export default function Home() {
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Visi
               </span>
-              <h3 className="text-2xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader) mb-4 leading-snug">
+              <h3 className="text-2xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-4 leading-snug">
                 Pionir Pengelolaan Sampah Organik
               </h3>
               <p className="text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
@@ -203,7 +203,7 @@ export default function Home() {
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Misi
               </span>
-              <h3 className="text-2xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader) mb-4 leading-snug">
+              <h3 className="text-2xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-4 leading-snug">
                 Langkah Konkret Kami
               </h3>
               <ul className="space-y-3 text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
@@ -257,7 +257,7 @@ export default function Home() {
         {/* CTA Section */}
         <section className="container mx-auto px-4 py-16 md:py-20 max-w-4xl text-center">
           <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-10 md:p-14 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
-            <h2 className="text-3xl md:text-4xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-newsreader) mb-4 leading-snug">
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-4 leading-snug">
               Mari Bergabung Bersama Kami
             </h2>
             <p className="text-base text-(--hx-ink-2) font-light leading-relaxed max-w-xl mx-auto mb-8">
