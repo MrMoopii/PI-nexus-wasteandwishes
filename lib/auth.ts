@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 import Credentials from "next-auth/providers/credentials";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -7,6 +8,7 @@ import bcrypt from "bcryptjs";
 import Google from "next-auth/providers/google";
 
 export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
+  ...authConfig,
   session: {
     strategy: "jwt",
     // The JWT must remain readable so middleware can enforce the shorter idle timeout.
@@ -57,6 +59,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ user, token, account, trigger }) {
       if (account?.provider === "google" && token.email) {
         const [row] = await getDb()
@@ -78,14 +81,6 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.idUser = token.idUser as string;
-        session.user.peran = token.peran as string;
-        session.user.lastActivityAt = token.lastActivityAt as number;
-      }
-      return session;
-    },
     async signIn({ user, account, profile }) {
       if (account?.provider !== "google") {
         return true;
@@ -106,10 +101,6 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         return "/auth/login?error=EmailSudahTerdaftar";
       }
 
-      if (row?.peran === "admin") {
-        return "/admin";
-      }
-
       if (!row) {
         await getDb().insert(users).values({
           email: email,
@@ -120,7 +111,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     },
   },
   pages: {
-    signIn: "/auth/login",
+    ...authConfig.pages,
     error: "/auth/login",
   },
 });

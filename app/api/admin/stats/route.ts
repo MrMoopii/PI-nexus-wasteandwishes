@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/require-admin";
 import { getDb } from "@/lib/db";
 import {
   users,
@@ -10,6 +11,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 export async function GET() {
+  // Check apakah user adalah admin
+  const cek = await requireAdmin();
+  if (!cek.ok) {
+    return NextResponse.json({ error: cek.pesan }, { status: cek.status });
+  }
+
   // Ensure dynamic rendering
   const h = await headers();
   h.get("x-vercel-ip-city");
