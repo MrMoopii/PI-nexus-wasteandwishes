@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Sebelum menulis atau mengubah kode di repo ini, baca **`CONTRIBUTING.md`** sampai habis dan ikuti aturannya, terutama:
 
-- Bagian 7 (autentikasi dan hak akses): setiap Server Action wajib memeriksa sesi di baris pertamanya, setiap route `app/api/admin/*` wajib memanggil `requireAdmin()`, dan `idUser` selalu dibaca dari sesi, tidak pernah dari form.
+- Bagian 7 (autentikasi dan hak akses): setiap Server Action wajib memanggil `requireLogin()` (pengguna) atau `requireAdmin()` (admin) di baris pertamanya, setiap route `app/api/admin/*` wajib memanggil `requireAdmin()`, dan `idUser` selalu dibaca dari sesi, tidak pernah dari form.
 - Bagian 8 (jebakan Next.js 16 dan Cache Components).
 - Bagian 9 (standar kode) dan bagian 11 (aturan untuk agent): jangan membuat kode "asal jalan" dengan `any`, data contoh, nilai cadangan palsu, atau `catch` kosong.
 

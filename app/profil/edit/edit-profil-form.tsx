@@ -80,7 +80,7 @@ export default function EditProfilForm({
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-[620px] px-5 py-12 sm:py-20">
+      <div className="relative z-10 mx-auto max-w-155 px-5 py-12 sm:py-20">
         <div className="mb-8 text-center">
           <h1 className="font-(family-name:--font-plus-jakarta-sans) text-4xl font-light tracking-tight text-[#1B2233]">
             Edit Profil

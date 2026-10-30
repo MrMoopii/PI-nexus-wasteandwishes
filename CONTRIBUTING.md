@@ -201,25 +201,38 @@ Proyek ini memakai Auth.js `5.0.0-beta.32` dengan sesi JWT. Jangan mengubah vers
 
 ### 7.1 Tiga lapis penjagaan
 
-| Lapis                     | Berkas                     | Menjaga                                                            |
-| ------------------------- | -------------------------- | ------------------------------------------------------------------ |
-| Middleware `authorized()` | `auth.config.ts`           | Navigasi **halaman** (`/admin`, `/event`, `/profil`, `/langganan`) |
-| `requireAdmin()`          | `lib/require-admin.ts`     | Route `app/api/admin/*` dan Server Action admin                    |
-| Cek sesi di Server Action | masing-masing `actions.ts` | Server Action pengguna                                             |
+| Lapis                     | Berkas                 | Menjaga                                                                            |
+| ------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| Middleware `authorized()` | `auth.config.ts`       | Navigasi **halaman** (`/admin`, `/event`, `/profil`, `/langganan`)                 |
+| `requireLogin()`          | `lib/require-login.ts` | Server Action pengguna (dan route API pengguna jika nanti ada)                     |
+| `requireAdmin()`          | `lib/require-admin.ts` | Route `app/api/admin/*` dan Server Action admin. Dibangun di atas `requireLogin()` |
+
+`requireLogin()` memeriksa sesi ada, sesi tidak idle, dan `idUser` valid, lalu mengembalikan `idUser` sebagai **angka**. `requireAdmin()` memanggil `requireLogin()` terlebih dahulu, lalu menambahkan pengecekan peran (di sesi dan di database). Jadi aturan "siapa yang dianggap login" hanya ditulis di satu tempat. Jika aturan itu berubah, ubah `requireLogin()` saja.
 
 Middleware **tidak** menjaga route API dan **tidak** menjaga Server Action. Server Action dipanggil lewat POST dengan header `Next-Action` dan bisa dikirim ke URL halaman mana pun, sehingga middleware sengaja meloloskannya. Pengecekan di browser (misalnya `fetch("/api/auth/me")` di layout admin) hanya mengatur tampilan, **bukan** pengaman.
 
 ### 7.2 Aturan wajib
 
-1. **Setiap Server Action wajib memeriksa sesi di baris pertamanya**, tepat setelah `"use server"`. Server Action admin memanggil `requireAdmin()`. Jika gagal, gunakan `redirect()` (jangan `return NextResponse`, karena `<form action={…}>` hanya menerima fungsi yang tidak mengembalikan nilai):
-   ```ts
-   async function simpanEvent(formData: FormData) {
-     "use server";
-     const cek = await requireAdmin();
-     if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
-     // ...
-   }
-   ```
+1. **Setiap Server Action wajib memeriksa sesi di baris pertamanya**, tepat setelah `"use server"`. Server Action pengguna memanggil `requireLogin()`, Server Action admin memanggil `requireAdmin()`. Jangan menulis pengecekan `await auth()` dan `Number(session.user.idUser)` sendiri. Cara menangani kegagalan bergantung pada cara Server Action itu dipanggil:
+   - **Dipasang langsung di `<form action={…}>`**: gunakan `redirect()`. Jangan `return` objek atau `NextResponse`, karena `action` hanya menerima fungsi yang tidak mengembalikan nilai.
+     ```ts
+     async function simpanEvent(formData: FormData) {
+       "use server";
+       const cek = await requireAdmin();
+       if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
+       // ...
+     }
+     ```
+   - **Dipanggil dari komponen klien yang membaca hasilnya** (misalnya `const result = await updateProfil(…)` lalu menampilkan `result.error`): kembalikan pesannya dalam bentuk yang dibaca form.
+     ```ts
+     export async function updateProfil(props: { … }) {
+       const cek = await requireLogin();
+       if (!cek.ok) return { error: cek.pesan };
+       const idUser = cek.idUser; // sudah berupa number dan sudah divalidasi
+       // ...
+     }
+     ```
+   - Beri nama hasilnya `cek` (bukan `session`), karena isinya hasil pemeriksaan. Sesi aslinya ada di `cek.session`.
 2. **Setiap route baru di `app/api/admin/` wajib memanggil `requireAdmin()` di awal handler**:
    ```ts
    const cek = await requireAdmin();
@@ -242,7 +255,8 @@ Middleware **tidak** menjaga route API dan **tidak** menjaga Server Action. Serv
 - Spread `...` hanya menyalin satu lapis. Menulis `callbacks: { … }` tanpa `...authConfig.callbacks` akan **menghapus** callback dari `auth.config.ts`. Jangan menulis callback `session` kedua di `lib/auth.ts`.
 - `peran` disimpan di token saat login. Perubahan peran di database baru terbaca middleware setelah login ulang. `requireAdmin()` mengecek ulang peran ke database.
 - Aturan sesi idle dihitung dengan `hitungIdle()` di `lib/session.ts`, dan batas waktunya `SESSION_IDLE_TIMEOUT_MS` di file yang sama. Jangan menulis ulang rumus idle di tempat lain.
-- Tipe tambahan sesi (`idUser`, `peran`, dan lainnya) ada di `types/next-auth.d.ts`. `idUser` di sesi bertipe **string**; ubah dengan `Number(...)` sebelum dipakai di query.
+- Tipe tambahan sesi (`idUser`, `peran`, `isIdle`, dan lainnya) ada di `types/next-auth.d.ts`. `idUser` di sesi bertipe **string**. Di Server Action dan route, pakai `cek.idUser` dari `requireLogin()` atau `requireAdmin()`, yang sudah berupa angka dan sudah divalidasi. Di halaman (Server Component), ubah dengan `Number(...)` lalu validasi dengan pola di bagian 9.3.
+- `session.user.isIdle` selalu bernilai `true` atau `false` (diisi callback `session` lewat `hitungIdle()`). Tulis pengecekannya tanpa `!`: `if (session.user.isIdle) { …tolak… }`.
 
 ## 8. Next.js 16 dan Cache Components: jebakan yang sudah pernah terjadi
 
@@ -268,6 +282,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
   | ---------------------------------- | ---------------------------------------------------------------------- |
   | Format tanggal, jam, rentang waktu | `formatTanggal`, `formatJam`, `formatWaktu` di `lib/format-tanggal.ts` |
   | Validasi profil dan kelengkapannya | `lib/validasi-profil.ts`                                               |
+  | Cek login                          | `requireLogin()` di `lib/require-login.ts`                             |
   | Cek admin                          | `requireAdmin()` di `lib/require-admin.ts`                             |
   | Aturan sesi idle                   | `hitungIdle()` di `lib/session.ts`                                     |
   | Gambar event dari URL              | `components/GambarEvent.tsx`                                           |
@@ -286,7 +301,17 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
 - **Hasil query selalu array.** Ambil satu baris dengan `const [baris] = await …limit(1)`, lalu cek `if (!baris)`.
 - **Kolom yang boleh kosong bernilai `null`, bukan tidak ada.** Beri teks pengganti yang jujur (`event.lokasi || "Lokasi menyusul"`), jangan menebak data. Untuk kolom angka, `0` juga falsy; cek `=== null` jika `0` bermakna.
 - **Kolom `numeric` (misalnya `biayaEvent`) dikembalikan sebagai string.** Ubah dengan `Number(...)` sebelum dibandingkan.
-- **Kolom `date` berupa string `"YYYY-MM-DD"`**, dan kolom `time` berupa `"HH:MM:SS"`. Gunakan fungsi di `lib/format-tanggal.ts`, karena pemformatan tanggal tanpa zona waktu UTC bisa bergeser satu hari antara laptop (WIB) dan Vercel (UTC).
+- **Bentuk nilai berbeda menurut tipe kolom:**
+
+  | Tipe kolom di skema                | Nilai dari Drizzle                 | Cara memformat                                                 |
+  | ---------------------------------- | ---------------------------------- | -------------------------------------------------------------- |
+  | `date` (misalnya `tanggalLahir`)   | string `"YYYY-MM-DD"`              | `formatTanggal(...)` dari `lib/format-tanggal.ts`              |
+  | `time` (misalnya `waktuMulai`)     | string `"HH:MM:SS"`                | `formatJam(...)` atau `formatWaktu(...)`                       |
+  | `timestamp` (misalnya `createdAt`) | objek `Date` (titik waktu lengkap) | `toLocaleDateString("id-ID", { …, timeZone: "Asia/Jakarta" })` |
+
+  `formatTanggal` sengaja memakai UTC untuk kolom `date`, supaya tanggal tidak bergeser satu hari antara laptop (WIB) dan Vercel (UTC). Jangan mengirim hasil `toISOString()` dari kolom `timestamp` ke `formatTanggal`, karena hasilnya "Invalid Date". Kolom `timestamp` justru perlu zona waktu Indonesia, karena akun yang dibuat pukul 06.00 WIB masih bertanggal sehari sebelumnya di UTC.
+
+- **Kolom `date` yang boleh kosong ditangani di tempat pemanggilan**: `user.tanggalLahir ? formatTanggal(user.tanggalLahir) : "-"`. Jangan memakai `toString()` atau `String(...)` untuk menghilangkan garis merah, karena `null` akan menjadi teks `"null"` dan tampil sebagai "Invalid Date".
 - **Begitu data ada di database, hapus data contoh.** Jangan mencampur nilai dari database dengan nilai tulisan tangan (pernah: nama event dari database, tetapi gambar dan lokasi dari data contoh). Teks yang bergantung pada data, seperti "Gratis", dibaca dari kolomnya (`biayaEvent`), bukan ditulis tetap.
 - **Nama kunci JSON di API mengikuti nama kolom di skema** (misalnya `namaPelanggan`). Hasil `fetch()` di komponen klien tidak bertipe, jadi TypeScript tidak akan memberi tahu jika nama di API dan di halaman berbeda. Ubah API dan halaman pemakainya dalam PR yang sama, lalu buka halamannya di browser.
 
@@ -312,7 +337,8 @@ Folder yang halamannya membaca database sebaiknya punya `error.tsx` (wajib `"use
 - [ ] Tidak ada sisa penanda konflik, blok ganda, `console.log`, atau placeholder.
 - [ ] `pnpm lint` dan `pnpm build` berhasil di laptop.
 - [ ] Fitur sudah dicoba di browser dengan `pnpm dev`, termasuk keadaan kosong, gagal, dan ID yang tidak valid.
-- [ ] Setiap Server Action dan route `/api/admin/*` baru memeriksa sesi atau peran di awal.
+- [ ] Setiap Server Action memanggil `requireLogin()` (pengguna) atau `requireAdmin()` (admin) di awal, dan setiap route `/api/admin/*` memanggil `requireAdmin()`.
+- [ ] Setiap syarat penolakan sudah ditelusuri dengan pengguna yang sah (sesi aktif, ID valid) dan pengguna yang sah lolos. Bug syarat terbalik (`!` atau De Morgan) tidak selalu ketahuan lewat pengujian biasa.
 - [ ] Tidak ada `idUser` yang dibaca dari form atau URL.
 - [ ] Jika mengubah skema: file migrasi ikut di-commit, kolom yang berubah disebut di deskripsi PR, dan tim diingatkan menjalankan `pnpm db:migrate`.
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari dan perubahannya disebut di deskripsi PR.

@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
@@ -20,12 +20,9 @@ export async function updateProfil(props: {
   alamat: string;
   tanggalLahir: string;
 }) {
-  const session = await auth();
-  const idUser = Number(session?.user?.idUser);
-
-  if (!idUser) {
-    return { error: "Sesi tidak valid, silakan masuk lagi." };
-  }
+  const cek = await requireLogin();
+  if (!cek.ok) return { error: cek.pesan };
+  const idUser = cek.idUser;
 
   const username = props.username.trim();
   const namaPelanggan = props.namaPelanggan.trim();
