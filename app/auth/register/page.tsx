@@ -2,11 +2,12 @@
 
 import { register } from "./actions";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setName] = useState("");
   const [namaPelanggan, setNamaPelanggan] = useState("");
   const [email, setEmail] = useState("");
@@ -48,7 +49,12 @@ export default function RegisterPage() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/auth/login?registered=true");
+        const callbackUrl = searchParams.get("callbackUrl");
+        if (callbackUrl && callbackUrl.startsWith("/")) {
+          router.push(`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+        } else {
+          router.push("/auth/login?registered=true");
+        }
       }
     } catch (err) {
       setError("Terjadi kesalahan. Silakan coba lagi.");
