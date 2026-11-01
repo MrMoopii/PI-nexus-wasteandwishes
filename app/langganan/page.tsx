@@ -92,7 +92,7 @@ async function LanggananContent() {
   const totalPengambilan = DUMMY_RIWAYAT.length;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F4F7FA]">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#F4F7FA] font-(family-name:--font-plus-jakarta-sans)">
       {/* ── Ambient Background (konsisten dengan halaman Profil & Beranda) ── */}
       <div
         className="pointer-events-none fixed inset-0 z-0"

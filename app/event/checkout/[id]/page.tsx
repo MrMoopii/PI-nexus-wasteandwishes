@@ -98,7 +98,7 @@ export default async function EventCheckoutPage({
 
   const newLocal = "text-(--hx-ink-3)";
   return (
-    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Ambient gradient washes matching Helix Drift */}
       <div aria-hidden="true" className="hx-ambient-wash">
         <div className="hx-ambient-blob-1" />

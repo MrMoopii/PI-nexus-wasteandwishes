@@ -626,7 +626,7 @@ function EventSlider() {
 /* ─── Halaman Utama (Home Page) ─── */
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
       {/* ── Background Image Layer (Bumi Hijau + Blur Halus) ── */}
       <div
         aria-hidden="true"
