@@ -88,8 +88,8 @@ export default function Header() {
               </Link>
               {/* Tambahan tombol Toko */}
               <Link
-                className={`whitespace-nowrap rounded-md px-2 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:text-waste sm:px-3 ${isActive("/Store") ? "text-waste border-b-2 border-waste scale-105" : ""}`}
-                href="/Store"
+                className={`whitespace-nowrap rounded-md px-2 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:text-waste sm:px-3 ${isActive("/store") ? "text-waste border-b-2 border-waste scale-105" : ""}`}
+                href="/store"
               >
                 Toko
               </Link>

@@ -35,7 +35,9 @@ function AnimatedCounter({
             if (start === null) start = timestamp;
             const progress = Math.min((timestamp - start) / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
-            const nextValue = Math.round(startValue + (value - startValue) * eased);
+            const nextValue = Math.round(
+              startValue + (value - startValue) * eased,
+            );
             setCount(nextValue);
 
             if (progress < 1) {
@@ -45,7 +47,7 @@ function AnimatedCounter({
           requestAnimationFrame(animate);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     observer.observe(node);
@@ -62,7 +64,7 @@ function AnimatedCounter({
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
       {/* Ambient gradient washes matching Helix Drift */}
       <div aria-hidden="true" className="hx-ambient-wash">
         <div className="hx-ambient-blob-1" />
@@ -80,7 +82,9 @@ export default function Home() {
             Waste &amp; Wishes
           </h1>
           <p className="text-base md:text-lg text-(--hx-ink-2) font-light leading-relaxed max-w-2xl mx-auto">
-            Platform pengelolaan sampah organik terintegrasi yang mewujudkan lingkungan bersih dan ekonomi sirkular melalui biokonversi maggot BSF.
+            Platform pengelolaan sampah organik terintegrasi yang mewujudkan
+            lingkungan bersih dan ekonomi sirkular melalui biokonversi maggot
+            BSF.
           </p>
           <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-6" />
         </section>
@@ -110,10 +114,19 @@ export default function Home() {
               </h2>
               <div className="space-y-4 text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
                 <p>
-                  Waste &amp; Wishes lahir dari keresahan melihat krisis pengelolaan sampah organik di wilayah Gejayan dan Wedomartani. Banyak rumah tangga dan UMKM masih bingung mengelola limbah dapur mereka, sementara sampah organik terus menumpuk di Tempat Pembuangan Akhir dan menghasilkan gas metana berbahaya.
+                  Waste &amp; Wishes lahir dari keresahan melihat krisis
+                  pengelolaan sampah organik di wilayah Gejayan dan Wedomartani.
+                  Banyak rumah tangga dan UMKM masih bingung mengelola limbah
+                  dapur mereka, sementara sampah organik terus menumpuk di
+                  Tempat Pembuangan Akhir dan menghasilkan gas metana berbahaya.
                 </p>
                 <p>
-                  Kami percaya bahwa sampah organik bukanlah akhir, melainkan awal dari rantai nilai baru. Melalui teknologi biokonversi maggot Black Soldier Fly (BSF), kami mengubah limbah dapur menjadi pakan ternak berprotein tinggi dan pupuk organik berkualitas. Setiap kilogram sampah yang terkelola adalah langkah kecil menuju bumi yang lebih lestari.
+                  Kami percaya bahwa sampah organik bukanlah akhir, melainkan
+                  awal dari rantai nilai baru. Melalui teknologi biokonversi
+                  maggot Black Soldier Fly (BSF), kami mengubah limbah dapur
+                  menjadi pakan ternak berprotein tinggi dan pupuk organik
+                  berkualitas. Setiap kilogram sampah yang terkelola adalah
+                  langkah kecil menuju bumi yang lebih lestari.
                 </p>
               </div>
             </div>
@@ -142,7 +155,9 @@ export default function Home() {
                 Krisis Pengelolaan
               </h3>
               <p className="text-sm leading-relaxed text-(--hx-ink-2) font-light">
-                Masyarakat masih bingung mengelola sampah dapur dan organik. Kami hadir dengan teknologi informasi terintegrasi sebagai solusi pengelolaan yang efektif dan terukur.
+                Masyarakat masih bingung mengelola sampah dapur dan organik.
+                Kami hadir dengan teknologi informasi terintegrasi sebagai
+                solusi pengelolaan yang efektif dan terukur.
               </p>
             </div>
 
@@ -155,7 +170,9 @@ export default function Home() {
                 Ekonomi Sirkular
               </h3>
               <p className="text-sm leading-relaxed text-(--hx-ink-2) font-light">
-                Peluang besar bagi penyedia layanan budidaya maggot BSF untuk membantu masyarakat sekaligus menciptakan nilai ekonomi dari limbah organik.
+                Peluang besar bagi penyedia layanan budidaya maggot BSF untuk
+                membantu masyarakat sekaligus menciptakan nilai ekonomi dari
+                limbah organik.
               </p>
             </div>
 
@@ -169,13 +186,18 @@ export default function Home() {
               </h3>
               <div className="text-sm leading-relaxed text-(--hx-ink-2) font-light space-y-2">
                 <p className="border-l-2 border-(--hx-accent)/30 pl-3">
-                  <span className="font-medium text-(--hx-ink)">Edukasi:</span> Mengubah pola pikir dari membuang menjadi menyediakan bahan baku.
+                  <span className="font-medium text-(--hx-ink)">Edukasi:</span>{" "}
+                  Mengubah pola pikir dari membuang menjadi menyediakan bahan
+                  baku.
                 </p>
                 <p className="border-l-2 border-(--hx-accent)/30 pl-3">
-                  <span className="font-medium text-(--hx-ink)">Standar:</span> Panduan praktis memilah sampah dapur yang mudah diikuti.
+                  <span className="font-medium text-(--hx-ink)">Standar:</span>{" "}
+                  Panduan praktis memilah sampah dapur yang mudah diikuti.
                 </p>
                 <p className="border-l-2 border-(--hx-accent)/30 pl-3">
-                  <span className="font-medium text-(--hx-ink)">Jaringan:</span> Menghubungkan rumah tangga dan penyedia secara <i>real-time</i>.
+                  <span className="font-medium text-(--hx-ink)">Jaringan:</span>{" "}
+                  Menghubungkan rumah tangga dan penyedia secara{" "}
+                  <i>real-time</i>.
                 </p>
               </div>
             </div>
@@ -194,7 +216,9 @@ export default function Home() {
                 Pionir Pengelolaan Sampah Organik
               </h3>
               <p className="text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
-                Menjadi pionir platform pengelolaan sampah organik terintegrasi yang mewujudkan lingkungan bersih, sehat, dan mendukung ekonomi sirkular melalui maggot BSF di Indonesia.
+                Menjadi pionir platform pengelolaan sampah organik terintegrasi
+                yang mewujudkan lingkungan bersih, sehat, dan mendukung ekonomi
+                sirkular melalui maggot BSF di Indonesia.
               </p>
             </div>
 
@@ -209,15 +233,24 @@ export default function Home() {
               <ul className="space-y-3 text-(--hx-ink-2) text-[15px] leading-relaxed font-light">
                 <li className="flex items-start gap-3">
                   <span className="block w-1.5 h-1.5 rounded-full bg-(--hx-accent) mt-2 flex-shrink-0" />
-                  <span>Mengedukasi masyarakat secara berkelanjutan tentang pengolahan limbah organik</span>
+                  <span>
+                    Mengedukasi masyarakat secara berkelanjutan tentang
+                    pengolahan limbah organik
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="block w-1.5 h-1.5 rounded-full bg-(--hx-accent) mt-2 flex-shrink-0" />
-                  <span>Membangun jaringan <i>real-time</i> antara masyarakat dan penyedia layanan</span>
+                  <span>
+                    Membangun jaringan <i>real-time</i> antara masyarakat dan
+                    penyedia layanan
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="block w-1.5 h-1.5 rounded-full bg-(--hx-accent) mt-2 flex-shrink-0" />
-                  <span>Mengefisiensikan pendataan dan penjemputan sampah terjadwal berbasis teknologi</span>
+                  <span>
+                    Mengefisiensikan pendataan dan penjemputan sampah terjadwal
+                    berbasis teknologi
+                  </span>
                 </li>
               </ul>
             </div>
@@ -261,7 +294,8 @@ export default function Home() {
               Mari Bergabung Bersama Kami
             </h2>
             <p className="text-base text-(--hx-ink-2) font-light leading-relaxed max-w-xl mx-auto mb-8">
-              Jadilah bagian dari gerakan ekonomi sirkular dan bantu wujudkan lingkungan yang lebih bersih untuk generasi mendatang.
+              Jadilah bagian dari gerakan ekonomi sirkular dan bantu wujudkan
+              lingkungan yang lebih bersih untuk generasi mendatang.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a

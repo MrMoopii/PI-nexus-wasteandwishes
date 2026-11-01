@@ -37,7 +37,7 @@ export default async function EventPage() {
   const leadEvent = events[0];
 
   return (
-    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Ambient gradient washes matching Helix Drift */}
       <div aria-hidden="true" className="hx-ambient-wash">
         <div className="hx-ambient-blob-1" />
@@ -138,7 +138,7 @@ export default async function EventPage() {
                           {plateNo}
                         </span>
                         <span className="h-3 w-px bg-(--hx-pastel)" />
-                        <span className="text-(--hx-ink-3) font-mono tracking-wider">
+                        <span className="text-(--hx-ink-3) font-(family-name:--font-plus-jakarta-sans) tabular-nums tracking-wider">
                           {totalNo}
                         </span>
                       </div>
@@ -161,7 +161,7 @@ export default async function EventPage() {
 
                       {/* Badge Date */}
                       <div className="absolute bottom-3 left-3 px-3 py-1 rounded-md bg-white/90 backdrop-blur-md text-[11px] font-medium text-(--hx-ink) shadow-sm">
-                          {formatTanggal(event.tanggalPelaksanaan)}
+                        {formatTanggal(event.tanggalPelaksanaan)}
                       </div>
 
                       {/* Free Badge */}
@@ -249,7 +249,7 @@ export default async function EventPage() {
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-(--hx-accent) text-white">
                     Pilihan Utama
                   </span>
-                  <span className="text-xs text-(--hx-ink-3) font-mono">
+                  <span className="text-xs text-(--hx-ink-3) font-(family-name:--font-plus-jakarta-sans)">
                     Bulan Ini
                   </span>
                 </div>
