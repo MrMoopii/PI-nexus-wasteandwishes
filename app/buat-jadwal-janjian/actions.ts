@@ -20,12 +20,12 @@ export async function ajukanJadwalJanjian(formData: FormData) {
 
   const hariValid =
     typeof hariPengambilan === "string" &&
-    ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"].includes(
+    ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"].includes(
       hariPengambilan,
     );
   const jamValid =
     typeof jamPengambilan === "string" &&
-    /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(jamPengambilan);
+    /^(?:0[89]|1[0-4]):[0-5]\d$|^15:00$/.test(jamPengambilan);
   const tujuanValid =
     typeof keteranganTujuan === "string" &&
     keteranganTujuan.trim().length >= 5 &&

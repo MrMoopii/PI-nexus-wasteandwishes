@@ -125,19 +125,33 @@ async function JadwalJanjianContent() {
                 className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900"
               >
                 <option value="" disabled>Pilih hari</option>
-                {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"].map((hari) => (
+                {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"].map((hari) => (
                   <option key={hari} value={hari}>{hari}</option>
                 ))}
               </select>
             </label>
             <label className="block text-sm font-medium text-gray-700">
               Jam pengambilan
-              <input
+              <select
                 name="jamPengambilan"
-                type="time"
                 required
+                defaultValue=""
                 className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-              />
+              >
+                <option value="" disabled>Pilih jam</option>
+                {Array.from({ length: 29 }, (_, index) => {
+                  const totalMinutes = 8 * 60 + index * 15;
+                  const jam = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+                  const menit = String(totalMinutes % 60).padStart(2, "0");
+                  const waktu = `${jam}:${menit}`;
+
+                  return (
+                    <option key={waktu} value={waktu}>
+                      {waktu}
+                    </option>
+                  );
+                })}
+              </select>
             </label>
             <label className="block text-sm font-medium text-gray-700 sm:col-span-2">
               Keterangan tujuan
