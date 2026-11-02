@@ -18,7 +18,7 @@ export default async function Header() {
           <NavLink href="/langganan">Langganan</NavLink>
           <NavLink href="/buat-jadwal-janjian">Jadwal Janjian</NavLink>
           <NavLink href="/event">Daftar Event</NavLink>
-          <NavLink href="/Store">Toko</NavLink>
+          <NavLink href="/store">Toko</NavLink>
         </>
       )}
       {!loggedIn ? (

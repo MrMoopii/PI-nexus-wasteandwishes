@@ -41,7 +41,7 @@ export default async function EventDetailPage({
   const plateNo = String(eventDipilih.idEvent).padStart(2, "0");
 
   return (
-    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Ambient gradient washes matching Helix Drift */}
       <div aria-hidden="true" className="hx-ambient-wash">
         <div className="hx-ambient-blob-1" />
@@ -233,7 +233,7 @@ export default async function EventDetailPage({
               </h3>
               <ul className="space-y-2 text-xs sm:text-sm text-(--hx-ink-2)">
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                  <span className="font-(family-name:--font-plus-jakarta-sans) tabular-nums text-(--hx-accent) font-semibold shrink-0">
                     01.
                   </span>
                   <span>
@@ -242,7 +242,7 @@ export default async function EventDetailPage({
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                  <span className="font-(family-name:--font-plus-jakarta-sans) tabular-nums text-(--hx-accent) font-semibold shrink-0">
                     02.
                   </span>
                   <span>
@@ -251,7 +251,7 @@ export default async function EventDetailPage({
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                  <span className="font-(family-name:--font-plus-jakarta-sans) tabular-nums text-(--hx-accent) font-semibold shrink-0">
                     03.
                   </span>
                   <span>
@@ -259,7 +259,7 @@ export default async function EventDetailPage({
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="font-mono text-(--hx-accent) font-semibold shrink-0">
+                  <span className="font-(family-name:--font-plus-jakarta-sans) tabular-nums text-(--hx-accent) font-semibold shrink-0">
                     04.
                   </span>
                   <span>

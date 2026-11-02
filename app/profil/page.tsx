@@ -124,7 +124,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Tanggal Lahir
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.tanggalLahir ? formatTanggal(user.tanggalLahir) : ""}
               </dd>
             </div>
@@ -133,7 +133,7 @@ async function ProfilContent() {
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Bergabung
               </dt>
-              <dd className="font-serif text-lg font-light text-[#1B2233]">
+              <dd className="font-(family-name:--font-plus-jakarta-sans) text-lg font-light text-[#1B2233]">
                 {user.createdAt.toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
