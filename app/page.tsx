@@ -1,50 +1,16 @@
 import Image from "next/image";
-import { connection } from "next/server";
-import { asc, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
-import { formatTanggal } from "@/lib/format-tanggal";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import EventSlider, { type SliderEvent } from "@/components/EventSlider";
+import EventSliderServer from "@/components/event-slider/EventSliderServer";
+import { Suspense } from "react";
+import EventSliderKerangka from "@/components/event-slider/EventSliderKerangka";
+import EventSlider from "@/components/event-slider/EventSlider";
 
 /* ─── Hero Background Image (Bumi Hijau) ─── */
 const HERO_BG_IMAGE = "/background/background.jpg";
 
 /* ─── Halaman Utama (Home Page) ─── */
 export default async function Home() {
-  // Ambil event aktif dari database (sama seperti app/event/page.tsx)
-  await connection();
 
-  let sliderEvents: SliderEvent[] = [];
-  try {
-    const rows = await getDb()
-      .select()
-      .from(eventsTable)
-      .where(eq(eventsTable.statusEvent, "aktif"))
-      .orderBy(asc(eventsTable.tanggalPelaksanaan))
-      .limit(8); // batasi jumlah gambar di slider
-
-    sliderEvents = rows.map((e) => {
-      const deskripsi = e.deskripsi ?? "";
-      return {
-        id: e.idEvent,
-        judul: e.namaEvent,
-        deskripsi:
-          deskripsi.length > 140 ? `${deskripsi.slice(0, 140).trimEnd()}…` : deskripsi,
-        gambarUrl: e.gambarUrl ?? null,
-        lokasi: e.lokasi || "Lokasi menyusul",
-        tanggal: formatTanggal(e.tanggalPelaksanaan),
-        jenis: e.jenisEvent || "Workshop",
-      };
-    });
-  } catch (error) {
-    console.error("Error fetching events for home slider", error);
-  }
-
-  // Status login (sama dengan logika di Header)
-  const session = await auth();
-  const loggedIn = !!session?.user && !session.user.isIdle;
 
   return (
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
@@ -58,7 +24,7 @@ export default async function Home() {
           src={HERO_BG_IMAGE}
           alt=""
           fill
-          priority
+          preload
           sizes="100vw"
           className="object-cover object-center scale-110 opacity-60"
           style={{ filter: "hue-rotate(-80deg) saturate(1.25) blur(3px)" }}
@@ -155,7 +121,8 @@ export default async function Home() {
         {/* ══════════════════════════════════════════════════════════════
             2. BAGIAN TENGAH (Event Slider): Komponen Galeri Helix Drift
            ══════════════════════════════════════════════════════════════ */}
-        <EventSlider events={sliderEvents} loggedIn={loggedIn} />
+        {/* <EventSlider events={sliderEvents} loggedIn={loggedIn} /> */}
+        <Suspense fallback={<EventSliderKerangka/>} ><EventSliderServer /></Suspense>
 
         {/* ══════════════════════════════════════════════════════════════
             3. BAGIAN BAWAH: Layanan Utama Kami & Statistik
