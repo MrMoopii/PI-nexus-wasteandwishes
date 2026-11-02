@@ -43,7 +43,7 @@ async function ProfilContent() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F4F7FA]">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas)">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
@@ -84,7 +84,7 @@ async function ProfilContent() {
           </span>
 
           <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-[rgba(150,177,208,0.35)] bg-[rgba(150,177,208,0.35)]">
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Username
               </dt>
@@ -93,7 +93,7 @@ async function ProfilContent() {
               </dd>
             </div>
 
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Nama Lengkap
               </dt>
@@ -102,7 +102,7 @@ async function ProfilContent() {
               </dd>
             </div>
 
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Email
               </dt>
@@ -111,7 +111,7 @@ async function ProfilContent() {
               </dd>
             </div>
 
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Nomor Telepon
               </dt>
@@ -120,7 +120,7 @@ async function ProfilContent() {
               </dd>
             </div>
 
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Tanggal Lahir
               </dt>
@@ -129,7 +129,7 @@ async function ProfilContent() {
               </dd>
             </div>
 
-            <div className="bg-[#F4F7FA] p-4">
+            <div className="bg-(--hx-canvas) p-4">
               <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                 Bergabung
               </dt>

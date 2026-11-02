@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f4f7fa;
   --foreground: #171717;
   --color-waste: #17afb0;
   --color-waste-dark: #118586;
@@ -31,11 +31,31 @@
   --font-display: var(--font-plus-jakarta-sans);
 }
 
+html,
+body {
+  background-color: var(--hx-canvas);
+}
+
 /* ── Base Typography ── */
 body {
-  background: var(--background);
+  background-image:
+    radial-gradient(
+      120vw 90vh at 8% -10%,
+      rgba(185, 205, 229, 0.55),
+      transparent 62%
+    ),
+    radial-gradient(
+      110vw 80vh at 98% 108%,
+      rgba(221, 231, 242, 0.85),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #f4f7fa 0%, #edf3f9 100%);
   color: var(--foreground);
   font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+}
+
+main {
+  background: transparent;
 }
 
 @media print {

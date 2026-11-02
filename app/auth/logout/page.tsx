@@ -17,7 +17,7 @@ export default function LogoutPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-(--hx-canvas) px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
           Keluar dari Akun
