@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import Header from "@/components/Header";
+import HeaderKerangka from "@/components/header/HeaderKerangka";
+import Header from "@/components/header/Header";
 import Footer from "@/components/Footer";
 import HideOnAdmin from "@/components/HideOnAdmin";
 import SessionIdleTimeout from "@/components/SessionIdleTimeout";
@@ -30,8 +31,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-transparent">
         <SessionIdleTimeout />
-        <HideOnAdmin>
-          <Suspense fallback={<div className="h-19 bg-gray-900" />}>
+        <HideOnAdmin fallback={<HeaderKerangka />}>
+          <Suspense fallback={<HeaderKerangka />}>
             <Header />
           </Suspense>
         </HideOnAdmin>
