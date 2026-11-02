@@ -59,9 +59,16 @@ export default function LoginForm() {
         );
       } else {
         window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+        const callbackUrl = searchParams.get("callbackUrl");
         const response = await fetch("/api/auth/me", { cache: "no-store" });
         const data = response.ok ? await response.json() : null;
-        router.push(data?.user?.peran === "admin" ? "/admin" : "/");
+        const target =
+          callbackUrl && callbackUrl.startsWith("/")
+            ? callbackUrl
+            : data?.user?.peran === "admin"
+              ? "/admin"
+              : "/";
+        router.push(target);
         router.refresh();
       }
     } catch {
