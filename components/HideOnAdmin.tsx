@@ -15,11 +15,13 @@ function HideOnAdminContent({ children }: { children: React.ReactNode }) {
 // 2. Komponen utama yang dibungkus dengan Suspense
 export default function HideOnAdmin({
   children,
+  fallback = null,
 }: {
   children: React.ReactNode;
+  fallback?: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={fallback}>
       <HideOnAdminContent>{children}</HideOnAdminContent>
     </Suspense>
   );
