@@ -28,14 +28,14 @@ export default function RootLayout({
       lang="id"
       className={`${plusJakartaSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-transparent">
         <SessionIdleTimeout />
         <HideOnAdmin>
           <Suspense fallback={<div className="h-19 bg-gray-900" />}>
             <Header />
           </Suspense>
         </HideOnAdmin>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 bg-transparent">{children}</main>
         <HideOnAdmin>
           <Footer />
         </HideOnAdmin>

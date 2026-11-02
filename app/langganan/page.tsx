@@ -50,7 +50,7 @@ export default function LanggananPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#F4F7FA] text-sm text-[#5B6879]">
+        <div className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
           Memuat data langganan...
         </div>
       }
@@ -92,7 +92,7 @@ async function LanggananContent() {
   const totalPengambilan = DUMMY_RIWAYAT.length;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F4F7FA] font-(family-name:--font-plus-jakarta-sans)">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans)">
       {/* ── Ambient Background (konsisten dengan halaman Profil & Beranda) ── */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
@@ -153,7 +153,7 @@ async function LanggananContent() {
 
             {/* Detail Grid: Data Pelanggan (DB) + Info Periode */}
             <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-sm border border-[rgba(150,177,208,0.35)] bg-[rgba(150,177,208,0.35)] sm:grid-cols-2 md:grid-cols-3">
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Nama Pelanggan
                 </dt>
@@ -162,7 +162,7 @@ async function LanggananContent() {
                 </dd>
               </div>
 
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Nomor Telepon
                 </dt>
@@ -171,7 +171,7 @@ async function LanggananContent() {
                 </dd>
               </div>
 
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Status Paket
                 </dt>
@@ -180,7 +180,7 @@ async function LanggananContent() {
                 </dd>
               </div>
 
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Periode Mulai
                 </dt>
@@ -189,7 +189,7 @@ async function LanggananContent() {
                 </dd>
               </div>
 
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Periode Berakhir
                 </dt>
@@ -198,7 +198,7 @@ async function LanggananContent() {
                 </dd>
               </div>
 
-              <div className="bg-[#F4F7FA] p-4">
+              <div className="bg-(--hx-canvas) p-4">
                 <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
                   Alamat Penjemputan
                 </dt>
