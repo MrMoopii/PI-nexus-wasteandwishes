@@ -113,7 +113,7 @@ export default function TokoPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Background ambient (sama seperti Beranda) */}
       <div
         aria-hidden="true"
