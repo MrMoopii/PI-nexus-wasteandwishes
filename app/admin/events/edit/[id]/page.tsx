@@ -75,7 +75,6 @@ export default async function EditEventPage({
     const waktuSelesai = formData.get("waktuSelesai") as string;
     const lokasi = formData.get("lokasi") as string;
     const statusInput = formData.get("statusEvent") as string; 
-    console.log("Status yang dikirim dari form:", statusInput);
     const gambarUrl = formData.get("gambarUrl") as string;
 
     const now = new Date();
