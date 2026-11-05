@@ -95,15 +95,17 @@ async function LanggananContent() {
     <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans)">
       {/* ── Ambient Background (konsisten dengan halaman Profil & Beranda) ── */}
       <div
-        className="pointer-events-none fixed inset-0 z-0"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0"
         style={{
+          height: "100vh",
           background:
             "radial-gradient(120vw 90vh at 8% -10%, rgba(185, 205, 229, 0.55), transparent 62%), radial-gradient(110vw 80vh at 98% 108%, rgba(221, 231, 242, 0.85), transparent 60%)",
         }}
       />
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-50 mix-blend-overlay"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 opacity-50 mix-blend-overlay"
         style={{
+          height: "100vh",
           backgroundImage:
             "linear-gradient(to right, rgba(150, 177, 208, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(150, 177, 208, 0.3) 1px, transparent 1px)",
           backgroundSize: "72px 72px, 72px 72px",

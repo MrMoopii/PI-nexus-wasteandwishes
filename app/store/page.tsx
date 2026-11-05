@@ -113,7 +113,7 @@ export default function TokoPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Background ambient (sama seperti Beranda) */}
       <div
         aria-hidden="true"
@@ -258,7 +258,7 @@ export default function TokoPage() {
                 </button>
               </div>
 
-              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-white/90 p-1.5 backdrop-blur-md">
+              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-(--hx-canvas) p-1.5 backdrop-blur-md">
                 {TABS.map((t) => (
                   <button
                     key={t}
