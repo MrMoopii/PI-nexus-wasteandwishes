@@ -258,7 +258,7 @@ export default function TokoPage() {
                 </button>
               </div>
 
-              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-white/90 p-1.5 backdrop-blur-md">
+              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-(--hx-canvas) p-1.5 backdrop-blur-md">
                 {TABS.map((t) => (
                   <button
                     key={t}
