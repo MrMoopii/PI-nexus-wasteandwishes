@@ -101,7 +101,7 @@ export default function AdminLayoutClient({
 
   return (
     <div
-      className={`admin-shell flex h-screen overflow-hidden ${darkMode ? "admin-theme-dark" : "bg-[#f4f5f7]"}`}
+      className={`admin-shell flex h-screen overflow-hidden font-(family-name:--font-plus-jakarta-sans) ${darkMode ? "admin-theme-dark" : "bg-[#f4f5f7]"}`}
       data-theme={darkMode ? "dark" : "light"}
     >
       <aside className="admin-sidebar flex w-64 shrink-0 flex-col bg-[#273142] text-slate-300 transition-all">

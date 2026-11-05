@@ -115,7 +115,7 @@ export default function AdminDashboardContent() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 font-(family-name:--font-plus-jakarta-sans)">
       {/* Header & Breadcrumbs */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
