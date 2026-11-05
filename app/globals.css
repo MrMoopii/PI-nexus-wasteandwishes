@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f4f7fa;
   --foreground: #171717;
   --color-waste: #17afb0;
   --color-waste-dark: #118586;
@@ -31,11 +31,31 @@
   --font-display: var(--font-plus-jakarta-sans);
 }
 
+html,
+body {
+  background-color: var(--hx-canvas);
+}
+
 /* ── Base Typography ── */
 body {
-  background: var(--background);
+  background-image:
+    radial-gradient(
+      120vw 90vh at 8% -10%,
+      rgba(185, 205, 229, 0.55),
+      transparent 62%
+    ),
+    radial-gradient(
+      110vw 80vh at 98% 108%,
+      rgba(221, 231, 242, 0.85),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #f4f7fa 0%, #edf3f9 100%);
   color: var(--foreground);
   font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+}
+
+main {
+  background: transparent;
 }
 
 @media print {
@@ -979,6 +999,27 @@ body.away .hx-panel {
 }
 
 /* ── Event Readonly Form Input ── */
+.hx-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(185, 205, 229, 0.6);
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--hx-ink);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hx-input:focus {
+  border-color: var(--hx-accent);
+  box-shadow: 0 0 0 3px rgba(23, 175, 176, 0.15);
+}
+
+.hx-input::placeholder {
+  color: var(--hx-ink-3);
+}
+
 .hx-input-readonly {
   width: 100%;
   border-radius: 0.75rem;
