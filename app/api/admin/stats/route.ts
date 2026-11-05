@@ -9,6 +9,8 @@ import {
 import { count, eq, gte, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { readdirSync } from "fs";
+import { join } from "path";
 
 export async function GET() {
   // Check apakah user adalah admin
@@ -39,11 +41,26 @@ export async function GET() {
       .from(riwayatPengambilan)
       .where(gte(riwayatPengambilan.tanggalPengambilan, firstDayOfMonth));
 
+    // Count product images in public/img/produk
+    let totalProducts = 0;
+    try {
+      const produkPath = join(process.cwd(), "public", "img", "produk");
+      const files = readdirSync(produkPath);
+      const imageExtensions = [".png", ".jpg", ".jpeg", ".webp"];
+      totalProducts = files.filter((file) =>
+        imageExtensions.some((ext) => file.toLowerCase().endsWith(ext)),
+      ).length;
+    } catch (error) {
+      console.error("Error counting product files:", error);
+      // totalProducts tetap 0 jika folder tidak ada atau tidak bisa dibaca
+    }
+
     return NextResponse.json({
       totalUsers: Number(totalUsers.count) || 0,
       activeSubscriptions: Number(activeSubscriptions.count) || 0,
       totalEvents: Number(totalEvents.count) || 0,
       wasteThisMonth: Number(wasteThisMonth?.total || 0),
+      totalProducts,
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
