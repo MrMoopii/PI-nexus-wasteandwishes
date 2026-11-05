@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -85,7 +86,12 @@ function readNestedErrorValue(error: unknown, key: string): string {
   return walk(error);
 }
 
-export async function registerForEvent(input: { eventId: number | string }) {
+export async function registerForEvent(input: {
+  eventId: number | string;
+  namaPeserta?: string;
+  nomorTelp?: string;
+  tanggalLahir?: string;
+}) {
   const session = await auth();
 
   if (!session?.user?.idUser) {
@@ -127,6 +133,28 @@ export async function registerForEvent(input: { eventId: number | string }) {
       .limit(1);
 
     if (existingRegistration) {
+      if (input.namaPeserta || input.nomorTelp || input.tanggalLahir) {
+        await getDb()
+          .update(pendaftaranEvent)
+          .set({
+            namaPeserta: input.namaPeserta
+              ? input.namaPeserta.trim()
+              : existingRegistration.namaPeserta,
+            nomorTelp: input.nomorTelp
+              ? input.nomorTelp.trim()
+              : existingRegistration.nomorTelp,
+            tanggalLahir: input.tanggalLahir
+              ? input.tanggalLahir.trim()
+              : existingRegistration.tanggalLahir,
+          })
+          .where(
+            eq(
+              pendaftaranEvent.idPendaftaran,
+              existingRegistration.idPendaftaran,
+            ),
+          );
+      }
+
       return {
         ok: true,
         message: "Anda sudah terdaftar pada event ini.",
@@ -141,6 +169,9 @@ export async function registerForEvent(input: { eventId: number | string }) {
       .values({
         eventId,
         userId,
+        namaPeserta: input.namaPeserta ? input.namaPeserta.trim() : null,
+        nomorTelp: input.nomorTelp ? input.nomorTelp.trim() : null,
+        tanggalLahir: input.tanggalLahir ? input.tanggalLahir.trim() : null,
       })
       .returning({
         idPendaftaran: pendaftaranEvent.idPendaftaran,
@@ -213,6 +244,11 @@ export async function registerForEvent(input: { eventId: number | string }) {
 }
 
 export async function confirmEventRegistration(formData: FormData) {
+  const cek = await requireLogin();
+  if (!cek.ok) {
+    redirect("/auth/login");
+  }
+
   const rawEventId = formData.get("id_event");
   const numericEventId = parsePositiveInteger(rawEventId);
 
@@ -220,14 +256,24 @@ export async function confirmEventRegistration(formData: FormData) {
     redirect(`/event?error=${encodeURIComponent("ID event tidak valid.")}`);
   }
 
-  const session = await auth();
-  const userId = Number(session?.user?.idUser ?? 0);
+  const rawNama = formData.get("nama");
+  const rawNoHp = formData.get("no_hp");
+  const rawTglLahir = formData.get("tgl_lahir");
 
-  if (userId <= 0) {
-    redirect("/auth/login");
-  }
+  const nama = typeof rawNama === "string" ? rawNama.trim() : undefined;
+  const noHp =
+    typeof rawNoHp === "string"
+      ? rawNoHp.trim().replace(/[\s-]/g, "")
+      : undefined;
+  const tglLahir =
+    typeof rawTglLahir === "string" ? rawTglLahir.trim() : undefined;
 
-  const result = await registerForEvent({ eventId: numericEventId });
+  const result = await registerForEvent({
+    eventId: numericEventId,
+    namaPeserta: nama,
+    nomorTelp: noHp,
+    tanggalLahir: tglLahir,
+  });
 
   if (result?.ok && result.idPendaftaran) {
     redirect(`/event/bukti/${result.idPendaftaran}`);
@@ -263,9 +309,13 @@ export async function getRegistrationProof(idPendaftaran: number | string) {
       idPendaftaran: pendaftaranEvent.idPendaftaran,
       tanggalDaftar: pendaftaranEvent.tanggalDaftar,
       userId: pendaftaranEvent.userId,
+      namaPeserta: pendaftaranEvent.namaPeserta,
+      nomorTelpPeserta: pendaftaranEvent.nomorTelp,
+      tanggalLahirPeserta: pendaftaranEvent.tanggalLahir,
       namaPelanggan: users.namaPelanggan,
       email: users.email,
       nomorTelp: users.nomorTelp,
+      tanggalLahir: users.tanggalLahir,
       eventId: events.idEvent,
       namaEvent: events.namaEvent,
       jenisEvent: events.jenisEvent,
@@ -292,6 +342,11 @@ export async function getRegistrationProof(idPendaftaran: number | string) {
 
   return {
     ok: true,
-    registration: row,
+    registration: {
+      ...row,
+      namaPelanggan: row.namaPeserta || row.namaPelanggan,
+      nomorTelp: row.nomorTelpPeserta || row.nomorTelp,
+      tanggalLahir: row.tanggalLahirPeserta || row.tanggalLahir,
+    },
   };
 }
