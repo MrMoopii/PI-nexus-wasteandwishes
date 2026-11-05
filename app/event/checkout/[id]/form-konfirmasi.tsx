@@ -32,7 +32,7 @@ export default function FormKonfirmasi({
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-(--hx-ink-2) font-light">
             Data peserta di bawah diambil secara otomatis dari profil akun
-            terdaftar Anda. Anda dapat mengubahnya jika diperlukan.
+            terdaftar Anda.
           </p>
         </div>
 
@@ -84,12 +84,13 @@ export default function FormKonfirmasi({
               id="nama"
               name="nama"
               required
+              readOnly
               defaultValue={currentUser?.namaPelanggan || ""}
               placeholder="Masukkan nama lengkap"
-              className="hx-input"
+              className="hx-input-readonly"
             />
             <span className="mt-1 block text-[11px] text-(--hx-ink-3)">
-              Nama untuk keperluan sertifikat &amp; absensi acara
+              Nama sesuai profil akun pengguna
             </span>
           </div>
 
@@ -105,9 +106,10 @@ export default function FormKonfirmasi({
               id="no_hp"
               name="no_hp"
               required
+              readOnly
               defaultValue={currentUser?.nomorTelp || ""}
               placeholder="Contoh: 081234567890"
-              className="hx-input"
+              className="hx-input-readonly"
             />
             <span className="mt-1 block text-[11px] text-(--hx-ink-3)">
               Untuk pengiriman informasi lokasi &amp; pengingat acara
@@ -126,8 +128,9 @@ export default function FormKonfirmasi({
               id="tgl_lahir"
               name="tgl_lahir"
               required
+              readOnly
               defaultValue={formatTanggalLahir}
-              className="hx-input"
+              className="hx-input-readonly"
             />
           </div>
 

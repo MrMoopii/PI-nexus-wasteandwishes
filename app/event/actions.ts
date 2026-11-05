@@ -226,25 +226,12 @@ export async function confirmEventRegistration(formData: FormData) {
     redirect(`/event?error=${encodeURIComponent("ID event tidak valid.")}`);
   }
 
-  const rawNama = formData.get("nama");
-  const rawNoHp = formData.get("no_hp");
-
-  const nama = typeof rawNama === "string" ? rawNama.trim() : "";
-  const noHp =
-    typeof rawNoHp === "string" ? rawNoHp.trim().replace(/[\s-]/g, "") : "";
-
   const result = await registerForEvent({
     eventId: numericEventId,
   });
 
   if (result?.ok && result.idPendaftaran) {
-    const params = new URLSearchParams();
-    if (nama) params.set("nama", nama);
-    if (noHp) params.set("no_hp", noHp);
-    const queryString = params.toString();
-    redirect(
-      `/event/bukti/${result.idPendaftaran}${queryString ? `?${queryString}` : ""}`,
-    );
+    redirect(`/event/bukti/${result.idPendaftaran}`);
   }
 
   redirect(
