@@ -86,12 +86,7 @@ function readNestedErrorValue(error: unknown, key: string): string {
   return walk(error);
 }
 
-export async function registerForEvent(input: {
-  eventId: number | string;
-  namaPeserta?: string;
-  nomorTelp?: string;
-  tanggalLahir?: string;
-}) {
+export async function registerForEvent(input: { eventId: number | string }) {
   const session = await auth();
 
   if (!session?.user?.idUser) {
@@ -133,28 +128,6 @@ export async function registerForEvent(input: {
       .limit(1);
 
     if (existingRegistration) {
-      if (input.namaPeserta || input.nomorTelp || input.tanggalLahir) {
-        await getDb()
-          .update(pendaftaranEvent)
-          .set({
-            namaPeserta: input.namaPeserta
-              ? input.namaPeserta.trim()
-              : existingRegistration.namaPeserta,
-            nomorTelp: input.nomorTelp
-              ? input.nomorTelp.trim()
-              : existingRegistration.nomorTelp,
-            tanggalLahir: input.tanggalLahir
-              ? input.tanggalLahir.trim()
-              : existingRegistration.tanggalLahir,
-          })
-          .where(
-            eq(
-              pendaftaranEvent.idPendaftaran,
-              existingRegistration.idPendaftaran,
-            ),
-          );
-      }
-
       return {
         ok: true,
         message: "Anda sudah terdaftar pada event ini.",
@@ -169,9 +142,6 @@ export async function registerForEvent(input: {
       .values({
         eventId,
         userId,
-        namaPeserta: input.namaPeserta ? input.namaPeserta.trim() : null,
-        nomorTelp: input.nomorTelp ? input.nomorTelp.trim() : null,
-        tanggalLahir: input.tanggalLahir ? input.tanggalLahir.trim() : null,
       })
       .returning({
         idPendaftaran: pendaftaranEvent.idPendaftaran,
@@ -258,25 +228,23 @@ export async function confirmEventRegistration(formData: FormData) {
 
   const rawNama = formData.get("nama");
   const rawNoHp = formData.get("no_hp");
-  const rawTglLahir = formData.get("tgl_lahir");
 
-  const nama = typeof rawNama === "string" ? rawNama.trim() : undefined;
+  const nama = typeof rawNama === "string" ? rawNama.trim() : "";
   const noHp =
-    typeof rawNoHp === "string"
-      ? rawNoHp.trim().replace(/[\s-]/g, "")
-      : undefined;
-  const tglLahir =
-    typeof rawTglLahir === "string" ? rawTglLahir.trim() : undefined;
+    typeof rawNoHp === "string" ? rawNoHp.trim().replace(/[\s-]/g, "") : "";
 
   const result = await registerForEvent({
     eventId: numericEventId,
-    namaPeserta: nama,
-    nomorTelp: noHp,
-    tanggalLahir: tglLahir,
   });
 
   if (result?.ok && result.idPendaftaran) {
-    redirect(`/event/bukti/${result.idPendaftaran}`);
+    const params = new URLSearchParams();
+    if (nama) params.set("nama", nama);
+    if (noHp) params.set("no_hp", noHp);
+    const queryString = params.toString();
+    redirect(
+      `/event/bukti/${result.idPendaftaran}${queryString ? `?${queryString}` : ""}`,
+    );
   }
 
   redirect(
@@ -309,13 +277,9 @@ export async function getRegistrationProof(idPendaftaran: number | string) {
       idPendaftaran: pendaftaranEvent.idPendaftaran,
       tanggalDaftar: pendaftaranEvent.tanggalDaftar,
       userId: pendaftaranEvent.userId,
-      namaPeserta: pendaftaranEvent.namaPeserta,
-      nomorTelpPeserta: pendaftaranEvent.nomorTelp,
-      tanggalLahirPeserta: pendaftaranEvent.tanggalLahir,
       namaPelanggan: users.namaPelanggan,
       email: users.email,
       nomorTelp: users.nomorTelp,
-      tanggalLahir: users.tanggalLahir,
       eventId: events.idEvent,
       namaEvent: events.namaEvent,
       jenisEvent: events.jenisEvent,
@@ -342,11 +306,6 @@ export async function getRegistrationProof(idPendaftaran: number | string) {
 
   return {
     ok: true,
-    registration: {
-      ...row,
-      namaPelanggan: row.namaPeserta || row.namaPelanggan,
-      nomorTelp: row.nomorTelpPeserta || row.nomorTelp,
-      tanggalLahir: row.tanggalLahirPeserta || row.tanggalLahir,
-    },
+    registration: row,
   };
 }

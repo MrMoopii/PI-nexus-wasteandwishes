@@ -17,8 +17,13 @@ function formatDate(value: string | Date | null | undefined) {
 
 export default async function EventRegistrationProofPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    nama?: string;
+    no_hp?: string;
+  }>;
 }) {
   const session = await auth();
 
@@ -27,13 +32,27 @@ export default async function EventRegistrationProofPage({
   }
 
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const result = await getRegistrationProof(id);
 
   if (!result.ok || !result.registration) {
     notFound();
   }
 
-  const registration = result.registration;
+  const customNama =
+    typeof resolvedSearchParams.nama === "string"
+      ? decodeURIComponent(resolvedSearchParams.nama).trim()
+      : "";
+  const customNoHp =
+    typeof resolvedSearchParams.no_hp === "string"
+      ? decodeURIComponent(resolvedSearchParams.no_hp).trim()
+      : "";
+
+  const registration = {
+    ...result.registration,
+    namaPelanggan: customNama || result.registration.namaPelanggan,
+    nomorTelp: customNoHp || result.registration.nomorTelp,
+  };
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 print-proof-page">

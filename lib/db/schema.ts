@@ -68,9 +68,6 @@ export const pendaftaranEvent = pgTable(
     tanggalDaftar: timestamp("tanggal_daftar", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    namaPeserta: text("nama_peserta"),
-    nomorTelp: text("nomor_telp"),
-    tanggalLahir: date("tanggal_lahir"),
   },
   (table) => [
     uniqueIndex("pendaftaran_event_event_user_unique").on(
