@@ -91,7 +91,7 @@ export default async function EditEventPage({
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
       <div className="flex items-center gap-4 mb-8">
         <Link
           href="/admin/events"
