@@ -3,12 +3,17 @@ import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { formatWaktu } from "@/lib/format-tanggal";
+import { connection } from "next/server";
+
+export const instant = false;
 
 export default async function AdminEventPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  await connection();
+
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
 
@@ -23,7 +28,7 @@ export default async function AdminEventPage({
   const dataEvents = allEvents.filter((event) => {
     if (currentTab === "draft") {
       return event.statusEvent === "draft";
-    }
+    } 
 
     let isPast = false;
     if (event.tanggalPelaksanaan) {
@@ -193,6 +198,7 @@ export default async function AdminEventPage({
 
                 <Link
                   href={`/admin/events/edit/${event.idEvent}`}
+                  prefetch={false}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                 >
                   Edit Event ➔

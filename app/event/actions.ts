@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -213,6 +214,11 @@ export async function registerForEvent(input: { eventId: number | string }) {
 }
 
 export async function confirmEventRegistration(formData: FormData) {
+  const cek = await requireLogin();
+  if (!cek.ok) {
+    redirect("/auth/login");
+  }
+
   const rawEventId = formData.get("id_event");
   const numericEventId = parsePositiveInteger(rawEventId);
 
@@ -220,14 +226,9 @@ export async function confirmEventRegistration(formData: FormData) {
     redirect(`/event?error=${encodeURIComponent("ID event tidak valid.")}`);
   }
 
-  const session = await auth();
-  const userId = Number(session?.user?.idUser ?? 0);
-
-  if (userId <= 0) {
-    redirect("/auth/login");
-  }
-
-  const result = await registerForEvent({ eventId: numericEventId });
+  const result = await registerForEvent({
+    eventId: numericEventId,
+  });
 
   if (result?.ok && result.idPendaftaran) {
     redirect(`/event/bukti/${result.idPendaftaran}`);
