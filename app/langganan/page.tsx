@@ -1,58 +1,21 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { and, eq } from "drizzle-orm";
+import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-
-// Data dummy — untuk data jadwal dan riwayat
-const DUMMY_LANGGANAN = {
-  status: "Aktif",
-  mulai: "1 Oktober 2026",
-  selesai: "31 Desember 2026",
-};
-
-const DUMMY_JADWAL = [
-  { hari: "Senin", jam: "08:00", jenis: "Rutin" },
-  { hari: "Kamis", jam: "08:00", jenis: "Rutin" },
-];
-
-const DUMMY_RIWAYAT = [
-  {
-    tanggal: "27 Oktober 2026",
-    bobot: "3,2 kg",
-    status: "Selesai",
-  },
-  {
-    tanggal: "24 Oktober 2026",
-    bobot: "2,8 kg",
-    status: "Selesai",
-  },
-  {
-    tanggal: "20 Oktober 2026",
-    bobot: "4,1 kg",
-    status: "Selesai",
-  },
-  {
-    tanggal: "17 Oktober 2026",
-    bobot: "2,5 kg",
-    status: "Selesai",
-  },
-  {
-    tanggal: "13 Oktober 2026",
-    bobot: "3,7 kg",
-    status: "Selesai",
-  },
-];
+import { dataLangganan, users } from "@/lib/db/schema";
+import { formatTanggal } from "@/lib/format-tanggal";
+import PaymentButton from "./payment-button";
 
 export default function LanggananPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
+        <main className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
           Memuat data langganan...
-        </div>
+        </main>
       }
     >
       <LanggananContent />
@@ -61,14 +24,10 @@ export default function LanggananPage() {
 }
 
 async function LanggananContent() {
-  const session = await auth();
-  const idUser = Number(session?.user?.idUser);
+  await connection();
+  const cek = await requireLogin();
+  if (!cek.ok) redirect("/auth/login");
 
-  if (!idUser) {
-    redirect("/auth/login");
-  }
-
-  // Mengambil data nama_pelanggan, nomor_telp, dan alamat dari database
   const [user] = await getDb()
     .select({
       namaPelanggan: users.namaPelanggan,
@@ -77,23 +36,33 @@ async function LanggananContent() {
       alamat: users.alamat,
     })
     .from(users)
-    .where(eq(users.idUser, idUser))
+    .where(eq(users.idUser, cek.idUser))
     .limit(1);
 
-  if (!user) {
-    redirect("/auth/login");
-  }
+  if (!user) redirect("/auth/login");
 
-  const namaDisplay = user.namaPelanggan || user.username || "Pelanggan";
-  const nomorTelpDisplay = user.nomorTelp || "-";
-  const alamatDisplay = user.alamat || "-";
+  const [langganan] = await getDb()
+    .select({
+      status: dataLangganan.statusLangganan,
+      mulai: dataLangganan.tanggalMulaiLangganan,
+      akhir: dataLangganan.tanggalAkhirLangganan,
+    })
+    .from(dataLangganan)
+    .where(
+      and(
+        eq(dataLangganan.userId, cek.idUser),
+        eq(dataLangganan.statusLangganan, "aktif"),
+      ),
+    )
+    .limit(1);
 
-  const totalBobot = "16,3 kg";
-  const totalPengambilan = DUMMY_RIWAYAT.length;
+  const hariIni = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+  }).format(new Date());
+  const aktif = Boolean(langganan?.akhir && langganan.akhir >= hariIni);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans)">
-      {/* ── Ambient Background (konsisten dengan halaman Profil & Beranda) ── */}
+    <main className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans)">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 z-0"
         style={{
@@ -118,240 +87,108 @@ async function LanggananContent() {
 
       {/* ── Konten Utama ── */}
       <div className="relative z-10 mx-auto max-w-[820px] px-5 py-12 sm:py-20">
-        {/* Header Halaman */}
-        <div className="mb-10 text-center">
+        <header className="mb-10 text-center">
           <span className="mb-2 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
             Dashboard
           </span>
-          <h1 className="font-(family-name:--font-plus-jakarta-sans) text-3xl font-semibold tracking-tight text-[#1B2233] sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-[#1B2233] sm:text-4xl">
             Langganan Saya
           </h1>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#5B6879]">
-            Kelola jadwal penjemputan sampah organik dan pantau riwayat
-            pengambilan Anda.
+            Kelola langganan pengambilan sampah organik Anda.
           </p>
-          <div className="mx-auto mt-4 h-0.5 w-16 rounded-full bg-[#17AFB0]" />
-        </div>
+        </header>
 
-        {/* ── Kartu Status Langganan & Data Pelanggan ── */}
-        <section className="mb-8">
-          <span className="mb-4 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
-            Status Langganan &amp; Pelanggan
-          </span>
-
-          <div className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-[0_16px_40px_rgba(27,34,51,0.06)] backdrop-blur-md sm:p-8">
-            {/* Badge Status */}
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#17AFB0] shadow-[0_0_6px_rgba(23,175,176,0.5)]" />
-                <span className="font-(family-name:--font-plus-jakarta-sans) text-lg font-semibold text-[#1B2233]">
-                  {DUMMY_LANGGANAN.status}
-                </span>
-              </div>
-              <span className="rounded-full border border-[#17AFB0]/30 bg-[#17AFB0]/10 px-3 py-0.5 text-[0.66rem] font-semibold uppercase tracking-widest text-[#17AFB0]">
-                Berlangganan
-              </span>
-            </div>
-
-            {/* Detail Grid: Data Pelanggan (DB) + Info Periode */}
-            <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-sm border border-[rgba(150,177,208,0.35)] bg-[rgba(150,177,208,0.35)] sm:grid-cols-2 md:grid-cols-3">
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Nama Pelanggan
+        <section className="rounded-2xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_40px_rgba(27,34,51,0.06)] sm:p-8">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#93A0B2]">
+            Status langganan
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#1B2233]">
+            {aktif ? "Aktif" : "Belum berlangganan"}
+          </h2>
+          {aktif && langganan?.akhir ? (
+            <dl className="mt-6 grid gap-4 border-t border-[#B9CDE5]/50 pt-5 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#93A0B2]">
+                  Mulai
                 </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#1B2233]">
-                  {namaDisplay}
+                <dd className="mt-1 font-medium text-[#1B2233]">
+                  {langganan.mulai ? formatTanggal(langganan.mulai) : "—"}
                 </dd>
               </div>
-
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Nomor Telepon
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#93A0B2]">
+                  Berakhir
                 </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#1B2233]">
-                  {nomorTelpDisplay}
-                </dd>
-              </div>
-
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Status Paket
-                </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#17AFB0]">
-                  {DUMMY_LANGGANAN.status}
-                </dd>
-              </div>
-
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Periode Mulai
-                </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#1B2233]">
-                  {DUMMY_LANGGANAN.mulai}
-                </dd>
-              </div>
-
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Periode Berakhir
-                </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#1B2233]">
-                  {DUMMY_LANGGANAN.selesai}
-                </dd>
-              </div>
-
-              <div className="bg-(--hx-canvas) p-4">
-                <dt className="mb-2 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                  Alamat Penjemputan
-                </dt>
-                <dd className="font-(family-name:--font-plus-jakarta-sans) text-base font-medium text-[#1B2233]">
-                  {alamatDisplay}
+                <dd className="mt-1 font-medium text-[#1B2233]">
+                  {formatTanggal(langganan.akhir)}
                 </dd>
               </div>
             </dl>
-          </div>
+          ) : (
+            <div className="mt-5 border-t border-[#B9CDE5]/50 pt-5">
+              <p className="text-sm leading-relaxed text-[#5B6879]">
+                Aktifkan langganan untuk menggunakan layanan pengambilan sampah
+                organik. Pembayaran berlaku selama 30 hari.
+              </p>
+              <p className="my-4 text-2xl font-semibold text-[#17AFB0]">
+                Rp30.000 <span className="text-sm font-normal text-[#5B6879]">/ 30 hari</span>
+              </p>
+              <PaymentButton />
+            </div>
+          )}
+          {aktif && (
+            <div className="mt-6 border-t border-[#B9CDE5]/50 pt-5">
+              <p className="mb-4 text-sm text-[#5B6879]">
+                Perpanjangan dibayar manual. Pembayaran berhasil menambahkan 30
+                hari setelah masa aktif saat ini.
+              </p>
+              <PaymentButton />
+            </div>
+          )}
+          <dl className="mt-6 grid gap-4 border-t border-[#B9CDE5]/50 pt-5 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-[#93A0B2]">
+                Nama pelanggan
+              </dt>
+              <dd className="mt-1 font-medium text-[#1B2233]">
+                {user.namaPelanggan || user.username || "Pelanggan"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-[#93A0B2]">
+                Nomor telepon
+              </dt>
+              <dd className="mt-1 font-medium text-[#1B2233]">
+                {user.nomorTelp || "Belum diisi"}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-xs uppercase tracking-wide text-[#93A0B2]">
+                Alamat penjemputan
+              </dt>
+              <dd className="mt-1 font-medium text-[#1B2233]">
+                {user.alamat || "Belum diisi"}
+              </dd>
+            </div>
+          </dl>
         </section>
 
-        {/* ── Statistik Ringkas ── */}
-        <section className="mb-8">
-          <span className="mb-4 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
-            Ringkasan
-          </span>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/70 bg-white/80 p-5 text-center shadow-[0_8px_30px_rgba(27,34,51,0.04)] backdrop-blur-sm">
-              <p className="mb-1 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                Total Pengambilan
-              </p>
-              <p className="font-(family-name:--font-plus-jakarta-sans) text-2xl font-semibold text-[#17AFB0]">
-                {totalPengambilan}
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/70 bg-white/80 p-5 text-center shadow-[0_8px_30px_rgba(27,34,51,0.04)] backdrop-blur-sm">
-              <p className="mb-1 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                Total Sampah
-              </p>
-              <p className="font-(family-name:--font-plus-jakarta-sans) text-2xl font-semibold text-[#17AFB0]">
-                {totalBobot}
-              </p>
-            </div>
-            <div className="col-span-2 rounded-xl border border-white/70 bg-white/80 p-5 text-center shadow-[0_8px_30px_rgba(27,34,51,0.04)] backdrop-blur-sm sm:col-span-1">
-              <p className="mb-1 text-[0.66rem] uppercase tracking-[0.16em] text-[#93A0B2]">
-                Jadwal per Minggu
-              </p>
-              <p className="font-(family-name:--font-plus-jakarta-sans) text-2xl font-semibold text-[#17AFB0]">
-                {DUMMY_JADWAL.length}×
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Jadwal Penjemputan ── */}
-        <section className="mb-8">
-          <span className="mb-4 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
-            Jadwal Penjemputan
-          </span>
-
-          <div className="rounded-2xl border border-white/70 bg-white/80 shadow-[0_16px_40px_rgba(27,34,51,0.06)] backdrop-blur-md">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-[rgba(150,177,208,0.35)]">
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Hari
-                    </th>
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Jam
-                    </th>
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Jenis
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {DUMMY_JADWAL.map((j, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-[rgba(150,177,208,0.2)] last:border-b-0"
-                    >
-                      <td className="px-6 py-4 font-(family-name:--font-plus-jakarta-sans) font-medium text-[#1B2233]">
-                        {j.hari}
-                      </td>
-                      <td className="px-6 py-4 text-[#5B6879]">{j.jam}</td>
-                      <td className="px-6 py-4">
-                        <span className="rounded-full border border-[#17AFB0]/30 bg-[#17AFB0]/10 px-2.5 py-0.5 text-[0.66rem] font-semibold uppercase tracking-widest text-[#17AFB0]">
-                          {j.jenis}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Riwayat Pengambilan ── */}
-        <section className="mb-8">
-          <span className="mb-4 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
-            Riwayat Pengambilan
-          </span>
-
-          <div className="rounded-2xl border border-white/70 bg-white/80 shadow-[0_16px_40px_rgba(27,34,51,0.06)] backdrop-blur-md">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-[rgba(150,177,208,0.35)]">
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Tanggal
-                    </th>
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Bobot
-                    </th>
-                    <th className="px-6 py-4 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#93A0B2]">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {DUMMY_RIWAYAT.map((r, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-[rgba(150,177,208,0.2)] last:border-b-0"
-                    >
-                      <td className="px-6 py-4 font-(family-name:--font-plus-jakarta-sans) font-medium text-[#1B2233]">
-                        {r.tanggal}
-                      </td>
-                      <td className="px-6 py-4 text-[#5B6879]">{r.bobot}</td>
-                      <td className="px-6 py-4">
-                        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[0.66rem] font-semibold uppercase tracking-widest text-emerald-600">
-                          {r.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Tombol Navigasi ── */}
-        <div className="flex flex-wrap gap-4">
+        <div className="mt-6 flex flex-wrap gap-4">
           <Link
             href="/"
-            className="flex h-11 items-center justify-center rounded-full border border-[#B9CDE5] bg-white px-6 text-[0.78rem] font-semibold uppercase tracking-[0.15em] text-[#5B6879] shadow-[0_6px_18px_-6px_rgba(27,34,51,0.15)] backdrop-blur-[10px] transition-colors hover:border-[#17AFB0] hover:text-[#17AFB0]"
+            className="flex h-11 items-center justify-center rounded-full border border-[#B9CDE5] bg-white px-6 text-xs font-semibold uppercase tracking-[0.12em] text-[#5B6879] hover:border-[#17AFB0] hover:text-[#17AFB0]"
           >
             Kembali ke Beranda
           </Link>
           <Link
             href="/profil/edit"
-            className="flex h-11 items-center justify-center rounded-full border border-transparent bg-[#17AFB0]/10 px-6 text-[0.78rem] font-semibold uppercase tracking-[0.15em] text-[#17AFB0] transition-colors hover:bg-[#17AFB0] hover:text-white"
+            className="flex h-11 items-center justify-center rounded-full bg-[#17AFB0]/10 px-6 text-xs font-semibold uppercase tracking-[0.12em] text-[#17AFB0] hover:bg-[#17AFB0] hover:text-white"
           >
             Ubah Data Profil
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
