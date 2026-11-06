@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 type Produk = {
   id: number;
@@ -71,10 +71,42 @@ const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
 
 function DetailProdukContent() {
   const params = useParams();
+  const router = useRouter();
   const id = Number(params.id);
   const produk = PRODUK_DATA.find((p) => p.id === id);
   const [jumlah, setJumlah] = useState(1);
   const [catatan, setCatatan] = useState("");
+
+  const tambahKeKeranjang = () => {
+    if (!produk) return;
+
+    const keranjang = JSON.parse(localStorage.getItem("keranjang") || "[]");
+    const itemAda = keranjang.find((item: { id: number }) => item.id === produk.id);
+
+    if (itemAda) {
+      const keranjangBaru = keranjang.map((item: { id: number; jumlah: number }) =>
+        item.id === produk.id
+          ? { ...item, jumlah: Math.min(item.jumlah + jumlah, produk.stok) }
+          : item
+      );
+      localStorage.setItem("keranjang", JSON.stringify(keranjangBaru));
+    } else {
+      keranjang.push({
+        id: produk.id,
+        nama: produk.nama,
+        harga: produk.harga,
+        jenis: produk.jenis,
+        img: produk.img,
+        jumlah: jumlah,
+        stok: produk.stok,
+        berat: produk.berat,
+        catatan: catatan,
+      });
+      localStorage.setItem("keranjang", JSON.stringify(keranjang));
+    }
+
+    router.push("/store/keranjang");
+  };
 
   if (!produk) {
     return (
@@ -289,13 +321,7 @@ function DetailProdukContent() {
                   <button
                     type="button"
                     className="hx-btn-primary w-full"
-                    onClick={() => {
-                      const message = `Halo, saya ingin membeli:\n\nProduk: ${produk.nama}\nJumlah: ${jumlah}\nSubtotal: ${rupiah(produk.harga * jumlah)}${catatan ? `\nCatatan: ${catatan}` : ""}`;
-                      window.open(
-                        `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
-                        "_blank"
-                      );
-                    }}
+                    onClick={tambahKeKeranjang}
                   >
                     + Keranjang
                   </button>
@@ -303,13 +329,6 @@ function DetailProdukContent() {
                   <button
                     type="button"
                     className="hx-btn-outline w-full"
-                    onClick={() => {
-                      const message = `Halo, saya ingin membeli langsung:\n\nProduk: ${produk.nama}\nJumlah: ${jumlah}\nSubtotal: ${rupiah(produk.harga * jumlah)}${catatan ? `\nCatatan: ${catatan}` : ""}`;
-                      window.open(
-                        `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
-                        "_blank"
-                      );
-                    }}
                   >
                     Beli Langsung
                   </button>
