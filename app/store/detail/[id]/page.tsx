@@ -9,8 +9,7 @@ type Produk = {
   nama: string;
   harga: number;
   jenis: "Pupuk" | "Olahan Maggot" | "Pakan Ternak";
-  jumlah: "Satuan" | "Puluhan" | "Ratusan";
-  waktu: "Terbaru" | "Minggu ini" | "Bulan ini";
+  waktuDitambahkan: string;
   img?: string;
   deskripsi: string;
   stok: number;
@@ -23,8 +22,7 @@ const PRODUK_DATA: Produk[] = [
     nama: "Magot Segar",
     harga: 20000,
     jenis: "Olahan Maggot",
-    jumlah: "Satuan",
-    waktu: "Terbaru",
+    waktuDitambahkan: "2026-11-05T08:00:00.000Z",
     img: "/img/produk/1.png",
     deskripsi:
       "Maggot segar berkualitas tinggi dari Black Soldier Fly (BSF) yang dibudidayakan secara organik. Cocok untuk pakan ternak seperti ikan, burung, dan unggas. Kaya protein dan nutrisi alami untuk pertumbuhan optimal hewan ternak Anda.",
@@ -36,8 +34,7 @@ const PRODUK_DATA: Produk[] = [
     nama: "Magot Proses",
     harga: 35000,
     jenis: "Olahan Maggot",
-    jumlah: "Satuan",
-    waktu: "Terbaru",
+    waktuDitambahkan: "2026-11-04T10:30:00.000Z",
     img: "/img/produk/2.png",
     deskripsi:
       "Maggot yang telah diproses dan dikeringkan untuk kemudahan penyimpanan dan penggunaan jangka panjang. Kandungan protein tetap terjaga, praktis, dan higienis. Ideal untuk pakan burung, ikan hias, dan reptil.",
@@ -49,8 +46,7 @@ const PRODUK_DATA: Produk[] = [
     nama: "Pupuk Kasgot",
     harga: 15000,
     jenis: "Pupuk",
-    jumlah: "Satuan",
-    waktu: "Terbaru",
+    waktuDitambahkan: "2026-11-04T16:00:00.000Z",
     img: "/img/produk/3.png",
     deskripsi:
       "Pupuk organik Kasgot (Kascing Maggot) hasil olahan limbah organik melalui proses budidaya maggot BSF. Kaya akan nutrisi mikro dan makro untuk menyuburkan tanah dan tanaman. Ramah lingkungan dan meningkatkan kualitas hasil panen secara alami.",
@@ -62,8 +58,7 @@ const PRODUK_DATA: Produk[] = [
     nama: "waWas Waste Box",
     harga: 50000,
     jenis: "Pakan Ternak",
-    jumlah: "Satuan",
-    waktu: "Terbaru",
+    waktuDitambahkan: "2026-10-29T11:45:00.000Z",
     img: "/img/produk/4.png",
     deskripsi:
       "Paket starter kit lengkap untuk memulai budidaya maggot BSF di rumah. Berisi box khusus, panduan lengkap, dan akses konsultasi gratis. Solusi praktis untuk mengelola sampah organik rumah tangga sekaligus menghasilkan pupuk dan pakan ternak sendiri.",
@@ -156,7 +151,7 @@ function DetailProdukContent() {
                 {produk.jenis}
               </span>
               <span className="inline-block rounded-full border border-(--hx-pastel) bg-(--hx-canvas) px-3 py-1 text-xs font-medium text-(--hx-ink-2)">
-                {produk.jumlah}
+                {produk.berat}
               </span>
             </div>
 
