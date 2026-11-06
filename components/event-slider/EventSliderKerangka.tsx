@@ -24,7 +24,7 @@ export default function EventSliderKerangka() {
       <span className="sr-only">Memuat daftar event…</span>
 
       {/* Pengganti .hx-stage: tinggi min(62vh, 560px), minimal 340px */}
-      <div className="flex h-[min(62vh,560px)] min-h-[340px] items-center justify-center px-4">
+      <div className="flex h-[min(62vh,560px)] min-h-85 items-center justify-center px-4">
         <div className="h-[85%] w-full max-w-md rounded-2xl bg-(--hx-pastel)/40 animate-pulse" />
       </div>
 
@@ -38,7 +38,7 @@ export default function EventSliderKerangka() {
       {/* Pengganti scrub bar: hx-scrub-shell memberi lebar & margin;
           isinya meniru tinggi bar (26px) + label (margin 0.7rem, teks 1.05rem) */}
       <div className="hx-scrub-shell animate-pulse">
-        <div className="flex h-[26px] items-center">
+        <div className="flex h-6.5 items-center">
           <div className="h-1 w-full rounded-full bg-(--hx-pastel)/60" />
         </div>
         <div className="mt-[0.7rem] flex h-[1.05rem] justify-center">

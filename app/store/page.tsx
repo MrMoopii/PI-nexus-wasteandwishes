@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 /* ─── Data contoh produk (ganti dengan data dari database) ─── */
 type Produk = {
@@ -14,12 +15,10 @@ type Produk = {
 };
 
 const PRODUK: Produk[] = [
-  { id: 1, nama: "Pupuk Kasgot 1 Kg", harga: 15000, jenis: "Pupuk", jumlah: "Satuan", waktu: "Terbaru" },
-  { id: 2, nama: "Maggot Kering 500 g", harga: 35000, jenis: "Olahan Maggot", jumlah: "Satuan", waktu: "Minggu ini" },
-  { id: 3, nama: "Pakan Burung Maggot", harga: 25000, jenis: "Pakan Ternak", jumlah: "Puluhan", waktu: "Bulan ini" },
-  { id: 4, nama: "Pupuk Kasgot 5 Kg", harga: 60000, jenis: "Pupuk", jumlah: "Puluhan", waktu: "Terbaru" },
-  { id: 5, nama: "Maggot Segar 1 Kg", harga: 20000, jenis: "Olahan Maggot", jumlah: "Ratusan", waktu: "Minggu ini" },
-  { id: 6, nama: "Pakan Ayam Maggot", harga: 90000, jenis: "Pakan Ternak", jumlah: "Ratusan", waktu: "Bulan ini" },
+  { id: 1, nama: "Magot Segar", harga: 20000, jenis: "Olahan Maggot", jumlah: "Satuan", waktu: "Terbaru", img: "/img/produk/1.png" },
+  { id: 2, nama: "Magot Proses", harga: 35000, jenis: "Olahan Maggot", jumlah: "Satuan", waktu: "Terbaru", img: "/img/produk/2.png" },
+  { id: 3, nama: "Pupuk Kasgot", harga: 15000, jenis: "Pupuk", jumlah: "Satuan", waktu: "Terbaru", img: "/img/produk/3.png" },
+  { id: 4, nama: "waWas Waste Box", harga: 50000, jenis: "Pakan Ternak", jumlah: "Satuan", waktu: "Terbaru", img: "/img/produk/4.png" },
 ];
 
 const WAKTU = [
@@ -29,7 +28,7 @@ const WAKTU = [
 ] as const;
 const JENIS = ["Pupuk", "Olahan Maggot", "Pakan Ternak"] as const;
 const JUMLAH = ["Satuan", "Puluhan", "Ratusan"] as const;
-const TABS = ["Etalase Toko", "Tambah", "Edit", "Hapus"] as const;
+const TABS = ["Etalase Toko"] as const;
 
 const HARGA_MAX = 100000;
 const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
@@ -113,7 +112,7 @@ export default function TokoPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark)">
       {/* Background ambient (sama seperti Beranda) */}
       <div
         aria-hidden="true"
@@ -258,7 +257,7 @@ export default function TokoPage() {
                 </button>
               </div>
 
-              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-white/90 p-1.5 backdrop-blur-md">
+              <div className="inline-flex items-center gap-1 rounded-full border border-(--hx-pastel) bg-(--hx-canvas) p-1.5 backdrop-blur-md">
                 {TABS.map((t) => (
                   <button
                     key={t}
@@ -285,12 +284,12 @@ export default function TokoPage() {
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
                 {hasil.map((p) => (
-                  <article key={p.id} className="hx-card p-3">
+                  <Link key={p.id} href={`/store/detail/${p.id}`} className="hx-card group p-3">
                     {/* Placeholder gambar */}
                     <div className="mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-(--hx-sunk)">
                       {p.img ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.img} alt={p.nama} className="h-full w-full object-cover" />
+                        <img src={p.img} alt={p.nama} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                       ) : (
                         <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="var(--hx-pastel)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <rect x="3" y="3" width="18" height="18" rx="3" />
@@ -303,12 +302,12 @@ export default function TokoPage() {
                       <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-(--hx-accent)">
                         {p.jenis}
                       </span>
-                      <h3 className="mt-1 text-sm font-medium text-(--hx-ink)">{p.nama}</h3>
+                      <h3 className="mt-1 text-sm font-medium text-(--hx-ink) group-hover:text-(--hx-accent) transition-colors">{p.nama}</h3>
                       <p className="mt-1 font-(family-name:--font-plus-jakarta-sans) text-sm font-semibold text-(--hx-ink)">
                         {rupiah(p.harga)}
                       </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             )}

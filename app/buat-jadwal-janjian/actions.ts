@@ -1,18 +1,17 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { dataLangganan } from "@/lib/db/schema";
 import { sql, eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { requireLogin } from "@/lib/require-login";
 
 export async function ajukanJadwalJanjian(formData: FormData) {
-  const session = await auth();
-  const idUser = Number(session?.user?.idUser);
-
-  if (!(Number.isInteger(idUser) && idUser > 0)) {
+  const cek = await requireLogin();
+  if (!cek.ok) {
     redirect("/auth/login");
   }
+  const idUser = cek.idUser;
 
   const hariPengambilan = formData.get("hariPengambilan");
   const jamPengambilan = formData.get("jamPengambilan");
@@ -35,6 +34,9 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     redirect("/buat-jadwal-janjian?status=input-tidak-valid");
   }
 
+  const hariIni = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+  }).format(new Date());
   const [langgananAktif] = await getDb()
     .select({ idLangganan: dataLangganan.idLangganan })
     .from(dataLangganan)
@@ -42,6 +44,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
       and(
         eq(dataLangganan.userId, idUser),
         eq(dataLangganan.statusLangganan, "aktif"),
+        sql`${dataLangganan.tanggalAkhirLangganan} >= ${hariIni}::date`,
       ),
     )
     .limit(1);
