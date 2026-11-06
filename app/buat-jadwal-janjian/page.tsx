@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
+import { and, eq, sql } from "drizzle-orm";
+import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import {
   dataLangganan,
@@ -64,12 +64,11 @@ export default async function LanggananPage({
 
 async function JadwalJanjianContent() {
   await connection();
-  const session = await auth();
-  const idUser = Number(session?.user?.idUser);
-
-  if (!(Number.isInteger(idUser) && idUser > 0)) {
+  const cek = await requireLogin();
+  if (!cek.ok) {
     redirect("/auth/login");
   }
+  const idUser = cek.idUser;
 
   const schedules = await getDb()
     .select({
@@ -97,6 +96,7 @@ async function JadwalJanjianContent() {
       and(
         eq(dataLangganan.userId, idUser),
         eq(dataLangganan.statusLangganan, "aktif"),
+        sql`${dataLangganan.tanggalAkhirLangganan} >= ${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}::date`,
       ),
     )
     .limit(1);
