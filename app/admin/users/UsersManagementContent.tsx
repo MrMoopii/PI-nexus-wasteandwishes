@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatTanggal } from "@/lib/format-tanggal";
 
 interface User {
   id: number;
@@ -37,12 +38,15 @@ export default function UsersManagementContent() {
   const [actionError, setActionError] = useState("");
   const [saving, setSaving] = useState(false);
   const [gagalMuat, setGagalMuat] = useState(false);
+  const [memuat, setMemuat] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchData = async () => {
       try {
+        setMemuat(true);
+        setGagalMuat(false);
         const params = new URLSearchParams();
         if (search) params.set("search", search);
         if (role) params.set("role", role);
@@ -59,11 +63,15 @@ export default function UsersManagementContent() {
         setUserList(usersData.users || []);
         setStats(statsData);
       } catch (error) {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted) {
           console.error("Error fetching data:", error);
-        setGagalMuat(true);
+          setGagalMuat(true);
+        }
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+          setMemuat(false);
+        }
       }
     };
 
@@ -150,14 +158,20 @@ export default function UsersManagementContent() {
 
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="relative flex-1">
             <input
               type="text"
               placeholder="Cari berdasarkan nama atau email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors pr-24"
             />
+            <span
+              aria-live="polite"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+            >
+              Memuat...
+            </span>
           </div>
           <select
             value={role}
@@ -219,121 +233,122 @@ export default function UsersManagementContent() {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
-              {userList.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
-                    #{user.id}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {user.namaPelanggan}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      @{user.username}
-                    </p>
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.email}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.nomorTelp || "-"}
-                  </td>
-                  <td className="px-5 py-4 min-w-52 max-w-72 text-sm text-gray-600">
-                    {user.alamat || "-"}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.tanggalLahir
-                      ? new Date(
-                          `${user.tanggalLahir}T00:00:00`,
-                        ).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        user.peran === "admin"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {user.peran}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        user.statusLangganan === "aktif"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {user.statusLangganan === "aktif" ? "Aktif" : "Tidak"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.updatedAt
-                      ? new Date(user.updatedAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-right">
-                    <div className="relative inline-block text-left">
-                      <button
-                        type="button"
-                        aria-label={`Aksi untuk ${user.namaPelanggan}`}
-                        aria-expanded={menuUserId === user.id}
-                        onClick={() =>
-                          setMenuUserId(menuUserId === user.id ? null : user.id)
-                        }
-                        className="user-action-trigger rounded px-2 py-1 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-semibold tracking-widest"
+            <tbody
+              className={`bg-white divide-y divide-gray-100 ${memuat ? "opacity-50" : ""}`}
+            >
+              {!gagalMuat &&
+                userList.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                      #{user.id}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {user.namaPelanggan}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        @{user.username}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {user.email}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {user.nomorTelp || "-"}
+                    </td>
+                    <td className="px-5 py-4 min-w-52 max-w-72 text-sm text-gray-600">
+                      {user.alamat || "-"}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.tanggalLahir
+                        ? formatTanggal(user.tanggalLahir)
+                        : "-"}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          user.peran === "admin"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
-                        •••
-                      </button>
-                      {menuUserId === user.id && (
-                        <div className="user-action-menu absolute right-0 z-20 mt-2 w-32 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingUser({ ...user });
-                              setMenuUserId(null);
-                            }}
-                            className="user-action-edit block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void deleteUser(user)}
-                            className="user-action-delete block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                          >
-                            Hapus
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {user.peran}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          user.statusLangganan === "aktif"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {user.statusLangganan === "aktif" ? "Aktif" : "Tidak"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                            timeZone: "Asia/Jakarta",
+                          })
+                        : "-"}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.updatedAt
+                        ? new Date(user.updatedAt).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                            timeZone: "Asia/Jakarta",
+                          })
+                        : "-"}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-right">
+                      <div className="relative inline-block text-left">
+                        <button
+                          type="button"
+                          aria-label={`Aksi untuk ${user.namaPelanggan}`}
+                          aria-expanded={menuUserId === user.id}
+                          onClick={() =>
+                            setMenuUserId(
+                              menuUserId === user.id ? null : user.id,
+                            )
+                          }
+                          className="user-action-trigger rounded px-2 py-1 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-semibold tracking-widest"
+                        >
+                          •••
+                        </button>
+                        {menuUserId === user.id && (
+                          <div className="user-action-menu absolute right-0 z-20 mt-2 w-32 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingUser({ ...user });
+                                setMenuUserId(null);
+                              }}
+                              className="user-action-edit block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void deleteUser(user)}
+                              className="user-action-delete block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               {gagalMuat && (
                 <tr>
                   <td
@@ -344,14 +359,12 @@ export default function UsersManagementContent() {
                       <p className="font-medium text-gray-700">
                         Gagal memuat data pengguna
                       </p>
-                      <p className="mt-1 text-sm">
-                        Ubah kata kunci atau filter untuk melihat hasil lain.
-                      </p>
+                      <p className="mt-1 text-sm">Coba muat ulang halaman.</p>
                     </div>
                   </td>
                 </tr>
               )}
-              {userList.length === 0 && !gagalMuat && (
+              {userList.length === 0 && !gagalMuat && !memuat && (
                 <tr>
                   <td
                     colSpan={11}
@@ -359,7 +372,7 @@ export default function UsersManagementContent() {
                   >
                     <div className="flex flex-col items-center">
                       <p className="font-medium text-gray-700">
-                        Belum ada pengguna
+                        Pengguna tidak ditemukan.
                       </p>
                       <p className="mt-1 text-sm">
                         Ubah kata kunci atau filter untuk melihat hasil lain.

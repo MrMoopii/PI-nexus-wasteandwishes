@@ -3,7 +3,6 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import EventSliderServer from "@/components/event-slider/EventSliderServer";
 import { Suspense } from "react";
 import EventSliderKerangka from "@/components/event-slider/EventSliderKerangka";
-import EventSlider from "@/components/event-slider/EventSlider";
 
 /* ─── Hero Background Image (Bumi Hijau) ─── */
 const HERO_BG_IMAGE = "/background/background.jpg";
@@ -17,7 +16,7 @@ export default async function Home() {
       {/* ── Background Image Layer (Bumi Hijau + Blur Halus) ── */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 right-0 h-[720px] md:h-[820px] overflow-hidden select-none -z-0"
+        className="pointer-events-none absolute top-0 left-0 right-0 h-180 md:h-205 overflow-hidden select-none z-0"
       >
         {/* Gambar bumi: hue-rotate mengubah biru → hijau, blur tipis */}
         <Image
@@ -35,8 +34,8 @@ export default async function Home() {
 
         {/* Wash lembut supaya teks tetap terbaca */}
         <div className="absolute inset-0 bg-(--hx-canvas)/35" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-(--hx-canvas)/50 to-(--hx-canvas)" />
-        <div className="absolute inset-0 bg-gradient-to-r from-(--hx-canvas)/80 via-(--hx-canvas)/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-(--hx-canvas)/50 to-(--hx-canvas)" />
+        <div className="absolute inset-0 bg-linear-to-r from-(--hx-canvas)/80 via-(--hx-canvas)/30 to-transparent" />
 
         {/* Ambient Blobs & Dot Grid */}
         <div className="hx-ambient-blob-1 opacity-40" />
@@ -93,7 +92,7 @@ export default async function Home() {
               {/* Glow Aksen Tosca di Belakang Kartu */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -inset-3 sm:-inset-6 rounded-3xl bg-gradient-to-tr from-(--hx-accent)/25 via-(--hx-pastel)/30 to-transparent blur-2xl -z-10"
+                className="pointer-events-none absolute -inset-3 sm:-inset-6 rounded-3xl bg-linear-to-tr from-(--hx-accent)/25 via-(--hx-pastel)/30 to-transparent blur-2xl -z-10"
               />
 
               <div className="relative rounded-2xl border border-white/70 bg-white/80 p-8 shadow-[0_16px_40px_rgba(27,34,51,0.06)] backdrop-blur-md">

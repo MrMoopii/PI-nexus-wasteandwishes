@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { tambahProduk, updateProduk } from "@/app/admin/produk/actions";
 
 type Produk = {
   id: number;
   nama: string;
   harga: number;
-  jenis: "Pupuk" | "Olahan Maggot" | "Pakan Ternak";
+  jenis: string;
   waktuDitambahkan: string;
   img?: string;
   deskripsi: string;
@@ -16,11 +17,10 @@ type Produk = {
 
 const createInitialFormData = (
   produk: Produk | null,
-): Omit<Produk, "id"> => ({
+): Omit<Produk, "id" | "waktuDitambahkan"> => ({
   nama: produk?.nama ?? "",
   harga: produk?.harga ?? 0,
   jenis: produk?.jenis ?? "Pupuk",
-  waktuDitambahkan: produk?.waktuDitambahkan ?? new Date().toISOString(),
   img: produk?.img ?? "",
   deskripsi: produk?.deskripsi ?? "",
   stok: produk?.stok ?? 0,
@@ -30,45 +30,65 @@ const createInitialFormData = (
 type ProdukFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (produk: Produk) => void;
   produk: Produk | null;
 };
 
-export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps) {
-  const [formData, setFormData] = useState<Omit<Produk, "id">>(() =>
+export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
+  const [formData, setFormData] = useState<Omit<Produk, "id" | "waktuDitambahkan">>(() =>
     createInitialFormData(produk),
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!formData.nama.trim()) {
-      alert("Nama produk tidak boleh kosong");
+      setError("Nama produk tidak boleh kosong");
       return;
     }
 
     if (formData.harga <= 0) {
-      alert("Harga harus lebih dari 0");
+      setError("Harga harus lebih dari 0");
       return;
     }
 
     if (formData.stok < 0) {
-      alert("Stok tidak boleh negatif");
+      setError("Stok tidak boleh negatif");
       return;
     }
 
-    if (!formData.berat.trim()) {
-      alert("Berat tidak boleh kosong");
-      return;
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSend = new FormData();
+      if (produk) {
+        formDataToSend.append("idProduk", produk.id.toString());
+      }
+      formDataToSend.append("namaProduk", formData.nama);
+      formDataToSend.append("jenisProduk", formData.jenis);
+      formDataToSend.append("hargaProduk", formData.harga.toString());
+      formDataToSend.append("jumlahStok", formData.stok.toString());
+      formDataToSend.append("deskripsi", formData.deskripsi);
+      formDataToSend.append("gambarUrl", formData.img || "");
+      formDataToSend.append("berat", formData.berat);
+
+      const result = produk
+        ? await updateProduk(formDataToSend)
+        : await tambahProduk(formDataToSend);
+
+      if (result.error) {
+        setError(result.error);
+      } else {
+        onClose();
+        window.location.reload();
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newProduk: Produk = {
-      id: produk?.id || 0,
-      ...formData,
-      waktuDitambahkan: produk ? formData.waktuDitambahkan : new Date().toISOString(),
-    };
-
-    onSave(newProduk);
   };
 
   if (!isOpen) return null;
@@ -83,7 +103,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-700 text-2xl leading-none"
+            disabled={isSubmitting}
+            className="text-slate-500 hover:text-slate-700 text-2xl leading-none disabled:opacity-50"
           >
             ×
           </button>
@@ -91,6 +112,13 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
 
         {/* Form Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Nama */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -103,7 +131,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
                 setFormData({ ...formData, nama: e.target.value })
               }
               placeholder="Contoh: Magot Segar"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
           </div>
 
@@ -120,7 +149,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
               }
               placeholder="20000"
               min="0"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
           </div>
 
@@ -134,10 +164,11 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  jenis: e.target.value as "Pupuk" | "Olahan Maggot" | "Pakan Ternak",
+                  jenis: e.target.value,
                 })
               }
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             >
               <option value="Pupuk">Pupuk</option>
               <option value="Olahan Maggot">Olahan Maggot</option>
@@ -159,13 +190,14 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
                 }
                 placeholder="50"
                 min="0"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Berat *
+                Berat
               </label>
               <input
                 type="text"
@@ -174,7 +206,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
                   setFormData({ ...formData, berat: e.target.value })
                 }
                 placeholder="1 Kg"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
           </div>
@@ -191,7 +224,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
                 setFormData({ ...formData, img: e.target.value })
               }
               placeholder="/img/produk/1.png"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
             <p className="text-xs text-slate-500 mt-1">
               Gunakan URL dari direktori public atau biarkan kosong untuk tidak ada gambar
@@ -210,7 +244,8 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
               }
               placeholder="Deskripsi produk..."
               rows={4}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:opacity-50"
             />
           </div>
 
@@ -219,15 +254,17 @@ export function ProdukForm({ isOpen, onClose, onSave, produk }: ProdukFormProps)
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium disabled:opacity-50"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              {produk ? "Update Produk" : "Tambah Produk"}
+              {isSubmitting ? "Menyimpan..." : produk ? "Update Produk" : "Tambah Produk"}
             </button>
           </div>
         </form>
