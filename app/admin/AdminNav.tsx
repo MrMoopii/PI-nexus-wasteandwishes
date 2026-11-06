@@ -12,7 +12,7 @@ const adminNavigation = [
     category: "NAVIGATION",
   },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
-  { name: "Produk", href: "/admin/products", category: "APPLICATION" },
+  { name: "Produk", href: "/admin/produk", category: "APPLICATION" },
   { name: "Laporan", href: "/admin/reports", category: "APPLICATION" },
 ];
 

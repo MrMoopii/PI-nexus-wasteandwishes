@@ -999,6 +999,27 @@ body.away .hx-panel {
 }
 
 /* ── Event Readonly Form Input ── */
+.hx-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(185, 205, 229, 0.6);
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--hx-ink);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hx-input:focus {
+  border-color: var(--hx-accent);
+  box-shadow: 0 0 0 3px rgba(23, 175, 176, 0.15);
+}
+
+.hx-input::placeholder {
+  color: var(--hx-ink-3);
+}
+
 .hx-input-readonly {
   width: 100%;
   border-radius: 0.75rem;

@@ -5,12 +5,18 @@ import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { connection } from "next/server";
+
+export const instant = false;
+
 
 export default async function EditEventPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
+
   const resolvedParams = await params;
   const eventId = Number(resolvedParams.id);
 
@@ -56,42 +62,64 @@ export default async function EditEventPage({
     const cek = await requireAdmin();
     if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
 
-    const id = Number(formData.get("idEvent"));
-    if (!id || isNaN(id)) {
+    const idEvent = Number(formData.get("idEvent"));
+    if (!idEvent || isNaN(idEvent)) {
       throw new Error("ID Event tidak valid untuk proses update.");
     }
 
     const namaEvent = formData.get("namaEvent") as string;
     const jenisEvent = formData.get("jenisEvent") as string;
+    const biayaEvent = formData.get("biayaEvent") as string;
     const tanggalPelaksanaan = formData.get("tanggalPelaksanaan") as string;
     const waktuMulai = formData.get("waktuMulai") as string;
     const waktuSelesai = formData.get("waktuSelesai") as string;
     const lokasi = formData.get("lokasi") as string;
-    const biayaEvent = formData.get("biayaEvent") as string;
-    const statusEvent = formData.get("statusEvent") as string;
+    const statusInput = formData.get("statusEvent") as string; 
     const gambarUrl = formData.get("gambarUrl") as string;
+
+    const now = new Date();
+    let finalStatus = statusInput; // Ambil murni dari pilihan <select>
+
+    // HANYA lakukan pengecekan waktu otomatis jika admin memilih "aktif".
+    // Jika admin memilih "draft" atau "lalu", hargai pilihan tersebut secara mutlak.
+    if (finalStatus === "aktif" && tanggalPelaksanaan) {
+      const eventDate = new Date(tanggalPelaksanaan);
+      
+      if (waktuSelesai) {
+        const [hours, minutes] = waktuSelesai.split(":");
+        eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
+      } else {
+        eventDate.setHours(23, 59, 59, 999);
+      }
+
+      if (eventDate < now) {
+        finalStatus = "lalu";
+      }
+    }
 
     await getDb()
       .update(events)
-      .set({
+      .set({  
         namaEvent,
         jenisEvent,
+        biayaEvent,
         tanggalPelaksanaan,
         waktuMulai: waktuMulai || null,
         waktuSelesai: waktuSelesai || null,
         lokasi,
-        biayaEvent: biayaEvent || "0",
-        statusEvent,
+        statusEvent: finalStatus,
         gambarUrl: gambarUrl || null,
       })
-      .where(eq(events.idEvent, id));
+      .where(eq(events.idEvent, idEvent));
 
-    revalidatePath("/admin/events");
+    revalidatePath(`/admin/events/edit/${idEvent}`, "page");
+    revalidatePath("/admin/events", "layout");
+    revalidatePath("/event", "page");
     redirect("/admin/events");
   }
-
+  
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
       <div className="flex items-center gap-4 mb-8">
         <Link
           href="/admin/events"
@@ -217,6 +245,7 @@ export default async function EditEventPage({
             </label>
             <select
               name="statusEvent"
+              key={existingEvent.statusEvent}
               defaultValue={existingEvent.statusEvent}
               className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-sm font-medium"
             >

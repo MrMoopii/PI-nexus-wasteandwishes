@@ -150,7 +150,7 @@ export default function UsersManagementContent() {
   }
 
   return (
-    <div>
+    <div className="font-(family-name:--font-plus-jakarta-sans)">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Data Pengguna</h1>
         <p className="text-gray-600 mt-1">Kelola semua pengguna aplikasi</p>

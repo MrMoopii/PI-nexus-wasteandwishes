@@ -147,7 +147,29 @@ export const dataLangganan = pgTable("data_langganan", {
     .unique()
     .references(() => users.idUser),
   statusLangganan: text("status_langganan").notNull(),
+  tanggalMulaiLangganan: date("tanggal_mulai_langganan"),
+  tanggalAkhirLangganan: date("tanggal_akhir_langganan"),
 });
+
+export const pembayaranLangganan = pgTable(
+  "pembayaran_langganan",
+  {
+    idPembayaranLangganan: integer("id_pembayaran_langganan")
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    langgananId: integer("langganan_id")
+      .notNull()
+      .references(() => dataLangganan.idLangganan),
+    orderId: text("order_id").notNull().unique(),
+    midtransTransactionId: text("midtrans_transaction_id"),
+    jumlah: numeric("jumlah", { precision: 12, scale: 2 }).notNull(),
+    statusPembayaran: text("status_pembayaran").notNull(),
+    tanggalDibuat: timestamp("tanggal_dibuat", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    tanggalDibayar: timestamp("tanggal_dibayar", { withTimezone: true }),
+  },
+);
 
 export const jadwal = pgTable("jadwal", {
   idJadwal: integer("id_jadwal").primaryKey().generatedAlwaysAsIdentity(),
