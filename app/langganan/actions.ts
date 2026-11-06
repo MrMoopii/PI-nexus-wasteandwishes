@@ -30,6 +30,14 @@ export async function mulaiPembayaranLangganan(): Promise<
 
   if (!user) return { ok: false, pesan: "Data akun tidak ditemukan." };
 
+  const appBaseUrl = process.env.APP_BASE_URL?.trim().replace(/\/$/, "");
+  if (!appBaseUrl || !URL.canParse(appBaseUrl)) {
+    return {
+      ok: false,
+      pesan: "Alamat aplikasi belum dikonfigurasi untuk kembali dari pembayaran.",
+    };
+  }
+
   await db
     .insert(dataLangganan)
     .values({ userId: cek.idUser, statusLangganan: "tidak_aktif" })
@@ -69,6 +77,11 @@ export async function mulaiPembayaranLangganan(): Promise<
           name: "Langganan 30 hari",
         },
       ],
+      callbacks: {
+        finish: `${appBaseUrl}/langganan`,
+        unfinish: `${appBaseUrl}/langganan`,
+        error: `${appBaseUrl}/langganan`,
+      },
     });
 
     if (!transaction.redirect_url) {

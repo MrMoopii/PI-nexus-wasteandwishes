@@ -21,6 +21,11 @@ declare module "midtrans-client" {
       quantity: number;
       name: string;
     }>;
+    callbacks?: {
+      finish?: string;
+      unfinish?: string;
+      error?: string;
+    };
   }
 
   export interface SnapTransactionResponse {
