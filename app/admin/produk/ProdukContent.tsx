@@ -1,15 +1,27 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Image from "next/image";
 import { ProdukForm } from "@/components/admin/ProdukForm";
 import { DeleteProdukDialog } from "@/components/admin/DeleteProdukDialog";
+
+type ProdukFromDB = {
+  idProduk: number;
+  namaProduk: string;
+  jenisProduk: string;
+  hargaProduk: string;
+  jumlahStok: number;
+  deskripsi: string | null;
+  gambarUrl: string | null;
+  berat: string | null;
+  statusProduk: string;
+  createdAt: Date;
+};
 
 type Produk = {
   id: number;
   nama: string;
   harga: number;
-  jenis: "Pupuk" | "Olahan Maggot" | "Pakan Ternak";
+  jenis: string;
   waktuDitambahkan: string;
   img?: string;
   deskripsi: string;
@@ -17,61 +29,9 @@ type Produk = {
   berat: string;
 };
 
-const PRODUK_DATA: Produk[] = [
-  {
-    id: 1,
-    nama: "Magot Segar",
-    harga: 20000,
-    jenis: "Olahan Maggot",
-    waktuDitambahkan: "2026-11-05T08:00:00.000Z",
-    img: "/img/produk/1.png",
-    deskripsi:
-      "Maggot segar berkualitas tinggi dari Black Soldier Fly (BSF) yang dibudidayakan secara organik. Cocok untuk pakan ternak seperti ikan, burung, dan unggas. Kaya protein dan nutrisi alami untuk pertumbuhan optimal hewan ternak Anda.",
-    stok: 50,
-    berat: "1 Kg",
-  },
-  {
-    id: 2,
-    nama: "Magot Proses",
-    harga: 35000,
-    jenis: "Olahan Maggot",
-    waktuDitambahkan: "2026-11-04T10:30:00.000Z",
-    img: "/img/produk/2.png",
-    deskripsi:
-      "Maggot yang telah diproses dan dikeringkan untuk kemudahan penyimpanan dan penggunaan jangka panjang. Kandungan protein tetap terjaga, praktis, dan higienis. Ideal untuk pakan burung, ikan hias, dan reptil.",
-    stok: 30,
-    berat: "500 g",
-  },
-  {
-    id: 3,
-    nama: "Pupuk Kasgot",
-    harga: 15000,
-    jenis: "Pupuk",
-    waktuDitambahkan: "2026-11-04T16:00:00.000Z",
-    img: "/img/produk/3.png",
-    deskripsi:
-      "Pupuk organik Kasgot (Kascing Maggot) hasil olahan limbah organik melalui proses budidaya maggot BSF. Kaya akan nutrisi mikro dan makro untuk menyuburkan tanah dan tanaman. Ramah lingkungan dan meningkatkan kualitas hasil panen secara alami.",
-    stok: 100,
-    berat: "1 Kg",
-  },
-  {
-    id: 4,
-    nama: "waWas Waste Box",
-    harga: 50000,
-    jenis: "Pakan Ternak",
-    waktuDitambahkan: "2026-10-29T11:45:00.000Z",
-    img: "/img/produk/4.png",
-    deskripsi:
-      "Paket starter kit lengkap untuk memulai budidaya maggot BSF di rumah. Berisi box khusus, panduan lengkap, dan akses konsultasi gratis. Solusi praktis untuk mengelola sampah organik rumah tangga sekaligus menghasilkan pupuk dan pakan ternak sendiri.",
-    stok: 15,
-    berat: "1 Set",
-  },
-];
-
 const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
 
-export function ProdukContent() {
-  const [produkList, setProdukList] = useState<Produk[]>(PRODUK_DATA);
+export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterWaktu, setFilterWaktu] = useState<string>("Semua");
   const [filterJenis, setFilterJenis] = useState<string>("Semua");
@@ -84,9 +44,22 @@ export function ProdukContent() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingProduk, setDeletingProduk] = useState<Produk | null>(null);
 
+  // Konversi data dari database ke format yang dipakai component
+  const produkConverted: Produk[] = produkList.map((p) => ({
+    id: p.idProduk,
+    nama: p.namaProduk,
+    harga: Number(p.hargaProduk),
+    jenis: p.jenisProduk,
+    waktuDitambahkan: p.createdAt.toISOString(),
+    img: p.gambarUrl || undefined,
+    deskripsi: p.deskripsi || "",
+    stok: p.jumlahStok,
+    berat: p.berat || "",
+  }));
+
   // Filter produk berdasarkan kriteria
   const filteredProduk = useMemo(() => {
-    return produkList.filter((produk) => {
+    return produkConverted.filter((produk) => {
       // Filter keyword
       if (searchKeyword && !produk.nama.toLowerCase().includes(searchKeyword.toLowerCase())) {
         return false;
@@ -95,19 +68,16 @@ export function ProdukContent() {
       // Filter waktu berdasarkan tanggal ditambahkan
       if (filterWaktu !== "Semua") {
         const tanggalDitambahkan = new Date(produk.waktuDitambahkan);
-        const sekarang = new Date(); // Current time dari context
+        const sekarang = new Date();
 
         if (filterWaktu === "Terbaru") {
-          // Produk yang ditambahkan hari ini
           const hariIni = new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate());
           if (tanggalDitambahkan < hariIni) return false;
         } else if (filterWaktu === "Minggu ini") {
-          // Produk yang ditambahkan dalam 7 hari terakhir
           const tujuhHariLalu = new Date(sekarang);
           tujuhHariLalu.setDate(sekarang.getDate() - 7);
           if (tanggalDitambahkan < tujuhHariLalu) return false;
         } else if (filterWaktu === "Bulan ini") {
-          // Produk yang ditambahkan dalam 30 hari terakhir
           const tigapuluhHariLalu = new Date(sekarang);
           tigapuluhHariLalu.setDate(sekarang.getDate() - 30);
           if (tanggalDitambahkan < tigapuluhHariLalu) return false;
@@ -134,7 +104,7 @@ export function ProdukContent() {
 
       return true;
     });
-  }, [produkList, searchKeyword, filterWaktu, filterJenis, filterKategoriStok]);
+  }, [produkConverted, searchKeyword, filterWaktu, filterJenis, filterKategoriStok]);
 
   // Produk yang ditampilkan (dengan toggle etalase)
   const displayedProduk = showEtalase ? filteredProduk : [];
@@ -152,28 +122,6 @@ export function ProdukContent() {
   const handleDeleteClick = (produk: Produk) => {
     setDeletingProduk(produk);
     setIsDeleteDialogOpen(true);
-  };
-
-  const handleSaveProduk = (produk: Produk) => {
-    if (editingProduk) {
-      // Edit existing
-      setProdukList((prev) =>
-        prev.map((p) => (p.id === produk.id ? produk : p))
-      );
-    } else {
-      // Add new - auto-increment ID
-      const newId = Math.max(...produkList.map((p) => p.id), 0) + 1;
-      setProdukList((prev) => [...prev, { ...produk, id: newId }]);
-    }
-    setIsFormOpen(false);
-  };
-
-  const handleConfirmDelete = () => {
-    if (deletingProduk) {
-      setProdukList((prev) => prev.filter((p) => p.id !== deletingProduk.id));
-      setIsDeleteDialogOpen(false);
-      setDeletingProduk(null);
-    }
   };
 
   return (
@@ -294,11 +242,11 @@ export function ProdukContent() {
                 {/* Product Image */}
                 <div className="relative h-48 bg-slate-100">
                   {produk.img ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={produk.img}
                       alt={produk.nama}
-                      fill
-                      className="object-cover"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-slate-400">
@@ -326,7 +274,7 @@ export function ProdukContent() {
                   </div>
 
                   <div className="text-sm text-slate-600 mb-3">
-                    <p>Berat: {produk.berat}</p>
+                    <p>Berat: {produk.berat || "-"}</p>
                   </div>
 
                   {/* Actions */}
@@ -365,7 +313,6 @@ export function ProdukContent() {
           key={editingProduk ? `edit-${editingProduk.id}` : "new"}
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
-          onSave={handleSaveProduk}
           produk={editingProduk}
         />
       )}
@@ -373,7 +320,7 @@ export function ProdukContent() {
       <DeleteProdukDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleConfirmDelete}
+        produkId={deletingProduk?.id || 0}
         produkNama={deletingProduk?.nama || ""}
       />
     </div>

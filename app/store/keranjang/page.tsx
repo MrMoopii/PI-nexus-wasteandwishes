@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 type ItemKeranjang = {
@@ -18,14 +18,17 @@ type ItemKeranjang = {
 const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
 
 export default function KeranjangPage() {
-  const [items, setItems] = useState<ItemKeranjang[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const keranjang = JSON.parse(localStorage.getItem("keranjang") || "[]");
-    setItems(keranjang);
-    setIsLoaded(true);
-  }, []);
+  const [items, setItems] = useState<ItemKeranjang[]>(() => {
+    // Lazy initialization - hanya dijalankan sekali saat mount
+    if (typeof window !== "undefined") {
+      try {
+        return JSON.parse(localStorage.getItem("keranjang") || "[]");
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
 
   const updateJumlah = (id: number, jumlahBaru: number) => {
     const itemsBaru = items.map((item) =>
@@ -46,16 +49,6 @@ export default function KeranjangPage() {
   const subtotal = items.reduce((acc, item) => acc + item.harga * item.jumlah, 0);
   const ongkir = 15000;
   const total = subtotal + ongkir;
-
-  if (!isLoaded) {
-    return (
-      <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink)">
-        <div className="container mx-auto max-w-7xl px-4 py-20 text-center">
-          <p className="text-(--hx-ink-2)">Memuat keranjang...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (

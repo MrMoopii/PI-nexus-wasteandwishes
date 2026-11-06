@@ -1,8 +1,12 @@
-"use client";
-
 import { Suspense } from "react";
 import Link from "next/link";
 import { ProdukContent } from "./ProdukContent";
+import { getDb } from "@/lib/db";
+import { produk } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
+import { connection } from "next/server";
+
+export const instant = false;
 
 function LoadingSkeleton() {
   return (
@@ -12,7 +16,14 @@ function LoadingSkeleton() {
   );
 }
 
-export default function AdminProdukPage() {
+export default async function AdminProdukPage() {
+  await connection();
+
+  const allProduk = await getDb()
+    .select()
+    .from(produk)
+    .orderBy(desc(produk.createdAt));
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -25,7 +36,7 @@ export default function AdminProdukPage() {
       </nav>
 
       <Suspense fallback={<LoadingSkeleton />}>
-        <ProdukContent />
+        <ProdukContent produkList={allProduk} />
       </Suspense>
     </div>
   );

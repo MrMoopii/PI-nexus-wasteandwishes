@@ -83,6 +83,13 @@ export const produk = pgTable("produk", {
   jenisProduk: text("jenis_produk").notNull(),
   hargaProduk: numeric("harga_produk", { precision: 12, scale: 2 }).notNull(),
   jumlahStok: integer("jumlah_stok").notNull().default(0),
+  deskripsi: text("deskripsi"),
+  gambarUrl: text("gambar_url"),
+  berat: text("berat"),
+  statusProduk: text("status_produk").notNull().default("aktif"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const transaksi = pgTable("transaksi", {
