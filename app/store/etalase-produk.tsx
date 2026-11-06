@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { produk } from "@/lib/db/schema";
+import TombolKeranjang from "./tombol-keranjang";
 
 type Produk = typeof produk.$inferSelect;
 
@@ -41,10 +42,15 @@ export default function EtalaseProduk({
           <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-(--hx-ink-3)">
             Toko
           </span>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Waste & <span className="text-(--hx-accent)">Wishes</span>
-          </h1>
-          <div className="mt-4 h-0.5 w-16 rounded-full bg-(--hx-accent)" />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Waste & <span className="text-(--hx-accent)">Wishes</span>
+              </h1>
+              <div className="mt-4 h-0.5 w-16 rounded-full bg-(--hx-accent)" />
+            </div>
+            <TombolKeranjang />
+          </div>
         </div>
 
         <div className="grid grid-cols-[170px_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
