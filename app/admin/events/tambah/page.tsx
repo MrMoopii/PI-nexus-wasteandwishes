@@ -5,7 +5,13 @@ import { events } from "@/lib/db/schema";
 import TambahEventForm from "./TambahEventForm"; // Import form client component
 import { revalidatePath } from "next/cache";
 
-export default function TambahEventPage() {
+export default async function TambahEventPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const resolved = await searchParams;
+  const fromTab = resolved.from || "aktif";
   
   async function simpanEvent(formData: FormData) {
     "use server";
@@ -60,5 +66,5 @@ export default function TambahEventPage() {
     redirect("/admin/events");
   }
 
-  return <TambahEventForm simpanEventAction={simpanEvent} />;
+  return <TambahEventForm simpanEventAction={simpanEvent} fromTab={fromTab} />;
 }

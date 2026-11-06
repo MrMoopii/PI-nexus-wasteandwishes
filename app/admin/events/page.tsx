@@ -97,17 +97,19 @@ export default async function AdminEventPage({
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Tombol Buat Event Baru */}
-        <Link
-          href="/admin/events/tambah"
-          className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer group"
-        >
-          <span className="text-5xl text-orange-500 font-light mb-4 group-hover:scale-110 transition-transform">
-            +
-          </span>
-          <span className="text-orange-500 font-semibold text-sm">
-            Buat Event Baru
-          </span>
-        </Link>
+        {currentTab !== "lalu" && (
+          <Link
+            href={`/admin/events/tambah?from=${currentTab}`}
+            className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer group"
+          >
+            <span className="text-5xl text-orange-500 font-light mb-4 group-hover:scale-110 transition-transform">
+              +
+            </span>
+            <span className="text-orange-500 font-semibold text-sm">
+              Buat Event Baru
+            </span>
+          </Link>
+        )}
 
         {/* Pesan Kosong */}
         {dataEvents.length === 0 && (
@@ -197,7 +199,7 @@ export default async function AdminEventPage({
                 </span>
 
                 <Link
-                  href={`/admin/events/edit/${event.idEvent}`}
+                  href={`/admin/events/edit/${event.idEvent}?from=${currentTab}`}
                   prefetch={false}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                 >
