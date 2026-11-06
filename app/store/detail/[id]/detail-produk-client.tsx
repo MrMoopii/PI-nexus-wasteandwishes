@@ -2,57 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import type { produk } from "@/lib/db/schema";
+import { tambahKeKeranjang as tambahKeKeranjangServer } from "../../keranjang/actions";
 
 type Produk = typeof produk.$inferSelect;
 
-type ItemKeranjang = {
-  id: number;
-  nama: string;
-  harga: number;
-  jenis: string;
-  gambarUrl: string | null;
-  jumlah: number;
-  stok: number;
-  berat: string | null;
-  catatan: string;
-};
-
 function rupiah(nilai: number): string {
   return `Rp${nilai.toLocaleString("id-ID")}`;
-}
-
-function adalahRecord(nilai: unknown): nilai is Record<string, unknown> {
-  return typeof nilai === "object" && nilai !== null;
-}
-
-function adalahItemKeranjang(nilai: unknown): nilai is ItemKeranjang {
-  return (
-    adalahRecord(nilai) &&
-    typeof nilai.id === "number" &&
-    typeof nilai.nama === "string" &&
-    typeof nilai.harga === "number" &&
-    typeof nilai.jenis === "string" &&
-    (typeof nilai.gambarUrl === "string" || nilai.gambarUrl === null) &&
-    typeof nilai.jumlah === "number" &&
-    typeof nilai.stok === "number" &&
-    (typeof nilai.berat === "string" || nilai.berat === null) &&
-    typeof nilai.catatan === "string"
-  );
-}
-
-function bacaKeranjang(): ItemKeranjang[] {
-  const tersimpan = localStorage.getItem("keranjang");
-  if (!tersimpan) return [];
-
-  try {
-    const data: unknown = JSON.parse(tersimpan);
-    return Array.isArray(data) ? data.filter(adalahItemKeranjang) : [];
-  } catch (error) {
-    console.error("Keranjang di penyimpanan browser tidak dapat dibaca.", error);
-    return [];
-  }
 }
 
 export default function DetailProdukClient({
@@ -64,7 +21,8 @@ export default function DetailProdukClient({
 }) {
   const router = useRouter();
   const [jumlah, setJumlah] = useState(1);
-  const [catatan, setCatatan] = useState("");
+  const [pesanKeranjang, setPesanKeranjang] = useState<string | null>(null);
+  const [sedangMenambah, setSedangMenambah] = useState(false);
   const harga = Number(produkUtama.hargaProduk);
   const stokHabis = produkUtama.jumlahStok === 0;
 
@@ -74,33 +32,28 @@ export default function DetailProdukClient({
   }
 
   function tambahKeKeranjang(): void {
-    if (stokHabis) return;
+    if (stokHabis || sedangMenambah) return;
 
-    const keranjang = bacaKeranjang();
-    const itemLama = keranjang.find((item) => item.id === produkUtama.idProduk);
-    const keranjangBaru = itemLama
-      ? keranjang.map((item) =>
-          item.id === produkUtama.idProduk
-            ? { ...item, jumlah: Math.min(item.jumlah + jumlah, produkUtama.jumlahStok) }
-            : item,
-        )
-      : [
-          ...keranjang,
-          {
-            id: produkUtama.idProduk,
-            nama: produkUtama.namaProduk,
-            harga,
-            jenis: produkUtama.jenisProduk,
-            gambarUrl: produkUtama.gambarUrl,
-            jumlah,
-            stok: produkUtama.jumlahStok,
-            berat: produkUtama.berat,
-            catatan,
-          },
-        ];
+    setSedangMenambah(true);
+    setPesanKeranjang(null);
+    startTransition(async () => {
+      const hasil = await tambahKeKeranjangServer({
+        produkId: produkUtama.idProduk,
+        jumlah,
+      });
+      setSedangMenambah(false);
 
-    localStorage.setItem("keranjang", JSON.stringify(keranjangBaru));
-    router.push("/store/keranjang");
+      if (!hasil.ok) {
+        if (hasil.status === 401) {
+          router.push("/auth/login");
+          return;
+        }
+        setPesanKeranjang(hasil.error);
+        return;
+      }
+
+      router.push("/store/keranjang");
+    });
   }
 
   return (
@@ -140,18 +93,17 @@ export default function DetailProdukClient({
             <div className="rounded-xl border border-(--hx-pastel)/60 p-5">
               <label htmlFor="jumlah-produk" className="mb-3 block text-sm font-semibold">Jumlah</label>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => ubahJumlah(jumlah - 1)} disabled={jumlah <= 1 || stokHabis} className="h-8 w-8 rounded-lg border border-(--hx-pastel) disabled:opacity-40" aria-label="Kurangi jumlah">−</button>
-                <input id="jumlah-produk" type="number" min="1" max={produkUtama.jumlahStok} value={jumlah} disabled={stokHabis} onChange={(event) => ubahJumlah(Number(event.target.value))} className="w-16 rounded-lg border border-(--hx-pastel) py-1 text-center" />
-                <button type="button" onClick={() => ubahJumlah(jumlah + 1)} disabled={jumlah >= produkUtama.jumlahStok || stokHabis} className="h-8 w-8 rounded-lg border border-(--hx-pastel) disabled:opacity-40" aria-label="Tambah jumlah">+</button>
+                <button type="button" onClick={() => ubahJumlah(jumlah - 1)} disabled={jumlah <= 1 || stokHabis || sedangMenambah} className="h-8 w-8 rounded-lg border border-(--hx-pastel) disabled:opacity-40" aria-label="Kurangi jumlah">−</button>
+                <input id="jumlah-produk" type="number" min="1" max={produkUtama.jumlahStok} value={jumlah} disabled={stokHabis || sedangMenambah} onChange={(event) => ubahJumlah(Number(event.target.value))} className="w-16 rounded-lg border border-(--hx-pastel) py-1 text-center" />
+                <button type="button" onClick={() => ubahJumlah(jumlah + 1)} disabled={jumlah >= produkUtama.jumlahStok || stokHabis || sedangMenambah} className="h-8 w-8 rounded-lg border border-(--hx-pastel) disabled:opacity-40" aria-label="Tambah jumlah">+</button>
               </div>
-              <label htmlFor="catatan-produk" className="mb-2 mt-5 block text-sm font-semibold">Catatan</label>
-              <textarea id="catatan-produk" value={catatan} onChange={(event) => setCatatan(event.target.value)} placeholder="Tambahkan catatan untuk penjual (opsional)" rows={3} className="w-full rounded-lg border border-(--hx-pastel) px-3 py-2 text-sm" />
               <div className="my-4 flex justify-between border-t border-(--hx-pastel)/40 pt-4">
                 <span>Subtotal</span>
                 <span className="font-bold">{rupiah(harga * jumlah)}</span>
               </div>
-              <button type="button" className="hx-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50" onClick={tambahKeKeranjang} disabled={stokHabis}>
-                {stokHabis ? "Stok Habis" : "+ Keranjang"}
+              {pesanKeranjang && <p role="alert" className="mb-3 text-sm text-red-600">{pesanKeranjang}</p>}
+              <button type="button" className="hx-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50" onClick={tambahKeKeranjang} disabled={stokHabis || sedangMenambah}>
+                {stokHabis ? "Stok Habis" : sedangMenambah ? "Menambahkan..." : "+ Keranjang"}
               </button>
             </div>
           </section>
