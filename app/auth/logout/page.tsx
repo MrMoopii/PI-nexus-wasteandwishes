@@ -10,7 +10,8 @@ export default function LogoutPage() {
   async function handleLogout() {
     setLoading(true);
     try {
-      await signOut({ redirectTo: "/" });
+      await signOut({ redirect: false });
+      window.location.assign(new URL("/", window.location.origin));
     } catch {
       setLoading(false);
     }

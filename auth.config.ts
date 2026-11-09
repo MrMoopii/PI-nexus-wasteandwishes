@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import { hitungIdle } from "@/lib/session";
 
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/auth/login",
   },
