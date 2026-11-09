@@ -7,7 +7,7 @@ export default function HeaderBingkai({
   children: React.ReactNode;
 }) {
   return (
-    <header className="bg-gray-900 text-white shadow">
+    <header className="bg-gray-900 text-white shadow z-50 relative">
       <nav className="mx-auto flex w-full max-w-285 flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:px-6 lg:flex-nowrap lg:gap-6 lg:py-5">
         <Link
           href="/"

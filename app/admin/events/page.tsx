@@ -122,7 +122,7 @@ export default async function AdminEventPage({
    
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Event Saya</h1>
 
       {/* Tab Navigasi */}

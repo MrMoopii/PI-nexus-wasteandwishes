@@ -8,6 +8,7 @@ interface DashboardStats {
   activeSubscriptions: number;
   totalEvents: number;
   wasteThisMonth: number;
+  totalProducts: number;
 }
 
 interface RecentUser {
@@ -23,6 +24,7 @@ const initialStats: DashboardStats = {
   activeSubscriptions: 0,
   totalEvents: 0,
   wasteThisMonth: 0,
+  totalProducts: 0,
 };
 
 const numberFormat = new Intl.NumberFormat("id-ID");
@@ -115,7 +117,7 @@ export default function AdminDashboardContent() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 font-(family-name:--font-plus-jakarta-sans)">
       {/* Header & Breadcrumbs */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
@@ -133,7 +135,7 @@ export default function AdminDashboardContent() {
       </div>
 
       {/* Metrics Row */}
-      <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
         <SparklineCard
           label="Sampah Organik"
           value={
@@ -169,6 +171,14 @@ export default function AdminDashboardContent() {
           trendLabel="event tertunda"
           colorClass="text-orange-500"
           sparklineColor="text-orange-400"
+        />
+        <SparklineCard
+          label="Total Produk"
+          value={loading ? "..." : numberFormat.format(stats.totalProducts)}
+          trend="+0"
+          trendLabel="produk tersedia"
+          colorClass="text-purple-500"
+          sparklineColor="text-purple-400"
         />
       </section>
 
