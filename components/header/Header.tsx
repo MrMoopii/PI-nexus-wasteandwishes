@@ -3,8 +3,10 @@ import HeaderBingkai from "@/components/header/HeaderBingkai";
 import NavLink from "@/components/header/NavLink";
 import ProfileDropdown from "@/components/header/ProfileDropdown";
 import { auth } from "@/lib/auth";
+import { connection } from "next/server";
 
 export default async function Header() {
+  await connection();
   const session = await auth();
   const loggedIn = !!session?.user && !session?.user.isIdle;
   const username = session?.user?.name ?? "Pengguna";

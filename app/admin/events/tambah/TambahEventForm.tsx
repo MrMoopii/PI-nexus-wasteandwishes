@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 export default function TambahEventForm({
@@ -8,22 +8,24 @@ export default function TambahEventForm({
   fromTab,
 }: {
   simpanEventAction: (formData: FormData) => Promise<void>;
-  fromTab : string;
+  fromTab: string;
 }) {
-
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const hariIni = new Date();
-  const yyyy = hariIni.getFullYear();
-  const mm = String(hariIni.getMonth()+1).padStart(2,"0");
-  const dd = String(hariIni.getDate()).padStart(2,"0");
-  const tanggalDefault = `${yyyy}-${mm}-${dd}`;
+  const getHariIni = () => {
+    const hariIni = new Date();
+    const yyyy = hariIni.getFullYear();
+    const mm = String(hariIni.getMonth() + 1).padStart(2, "0");
+    const dd = String(hariIni.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
-  const [tanggal, setTanggal] = useState(tanggalDefault);
+  const [tanggal, setTanggal] = useState(getHariIni());
   const [waktuSelesai, setWaktuSelesai] = useState("");
   const [status, setStatus] = useState("draft");
 
-  // 1. Hitung isPastEvent secara langsung (Derived State)
+  // Hitung apakah event di masa lalu
   let isPastEvent = false;
   if (tanggal) {
     const eventDate = new Date(tanggal);
@@ -36,8 +38,22 @@ export default function TambahEventForm({
     isPastEvent = eventDate < new Date();
   }
 
-  // 2. Tentukan status final secara langsung TANPA useEffect
-  const finalStatus = isPastEvent ? "lalu" : (status === "lalu" ? "draft" : status);
+  // Tentukan status akhir yang akan dikirim
+  const finalStatus = isPastEvent ? "lalu" : status;
+
+  const handleSubmit = async (formData: FormData) => {
+    formData.set("statusEvent", finalStatus);
+
+    startTransition(async () => {
+      try {
+        await simpanEventAction(formData);
+        router.push(`/admin/events?tab=${fromTab}`);
+        router.refresh();
+      } catch (error) {
+        console.error("Gagal menyimpan event:", error);
+      }
+    });
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -53,13 +69,7 @@ export default function TambahEventForm({
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
-        <form 
-        action={(formData) => {
-          simpanEventAction(formData); 
-          router.push(`/admin/events?tab=${fromTab}`); 
-        }} 
-        className="space-y-6"
-      >
+        <form action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Nama Event *</label>
@@ -154,15 +164,16 @@ export default function TambahEventForm({
           </div>
 
           <div className="border-t border-gray-200 pt-6 mt-8 flex items-center justify-end gap-4">
-            {/* OPSI RENDER DINAMIS BERDASARKAN isPastEvent */}
+            <input type="hidden" name="statusEvent" value={finalStatus} />
+
             <select
-              name="statusEvent"
               value={finalStatus}
               onChange={(e) => setStatus(e.target.value)}
-              className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-sm font-medium text-gray-700"
+              disabled={isPastEvent}
+              className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-sm font-medium text-gray-700 disabled:opacity-60"
             >
               {isPastEvent ? (
-                <option value="lalu">Lalu / Berakhir</option>
+                <option value="lalu">Lalu / Berakhir (Otomatis)</option>
               ) : (
                 <>
                   <option value="draft">Simpan sebagai Draft</option>
@@ -173,9 +184,10 @@ export default function TambahEventForm({
 
             <button
               type="submit"
-              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
+              disabled={isPending}
+              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
             >
-              Simpan Event
+              {isPending ? "Menyimpan..." : "Simpan Event"}
             </button>
           </div>
         </form>
