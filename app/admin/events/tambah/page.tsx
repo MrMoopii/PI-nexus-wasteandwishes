@@ -2,16 +2,19 @@ import { requireAdmin } from "@/lib/require-admin";
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
-import TambahEventForm from "./TambahEventForm"; // Import form client component
+import TambahEventForm from "./TambahEventForm";
 import { revalidatePath } from "next/cache";
 
 export default async function TambahEventPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; t?: string }>;
 }) {
   const resolved = await searchParams;
   const fromTab = resolved.from || "aktif";
+  
+  // Menggunakan parameter 't' dari URL sebagai key agar form mereset saat URL memiliki timestamp baru
+  const formKey = resolved.t || "default-key";
   
   async function simpanEvent(formData: FormData) {
     "use server";
@@ -32,7 +35,6 @@ export default async function TambahEventPage({
     const now = new Date();
     let finalStatus = statusInput;
 
-    // Proteksi tambahan di backend jika admin mencoba "bypass" form
     if ((finalStatus === "aktif" || finalStatus === "draft") && tanggalPelaksanaan) {
       const eventDate = new Date(tanggalPelaksanaan);
       if (waktuSelesai) {
@@ -60,11 +62,16 @@ export default async function TambahEventPage({
         gambarUrl: gambarUrl || null,
       });
 
-
     revalidatePath("/admin/events", "layout");
     revalidatePath("/event", "page");
-    redirect("/admin/events");
+    redirect(`/admin/events?tab=${fromTab}`);
   }
 
-  return <TambahEventForm simpanEventAction={simpanEvent} fromTab={fromTab} />;
+  return (
+    <TambahEventForm 
+      key={formKey} 
+      simpanEventAction={simpanEvent} 
+      fromTab={fromTab} 
+    />
+  );
 }

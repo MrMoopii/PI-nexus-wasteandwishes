@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, inArray } from "drizzle-orm";
 import { formatWaktu } from "@/lib/format-tanggal";
 import { connection } from "next/server";
 
@@ -16,15 +16,79 @@ export default async function AdminEventPage({
 
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
+  
 
-  const allEvents = await getDb()
+  let allEvents = await getDb()
     .select()
     .from(events)
     .orderBy(desc(events.idEvent));
 
   const now = new Date();
 
-  // Logika filter event berdasarkan waktu dan status
+  // --- LOGIKA AUTO-SWEEP DATABASE OTOMATIS ---
+  const toLaluIds: number[] = [];
+  const toAktifIds: number[] = [];
+
+  allEvents.forEach((event) => {
+    const eventEnd = new Date(event.tanggalPelaksanaan);
+    if (event.waktuSelesai) {
+      const [h, m] = event.waktuSelesai.split(":");
+      eventEnd.setHours(parseInt(h, 10), parseInt(m, 10), 0);
+    } else {
+      eventEnd.setHours(23, 59, 59, 999);
+    }
+    
+    const eventStart = new Date(event.tanggalPelaksanaan);
+    if (event.waktuMulai) {
+      const [h, m] = event.waktuMulai.split(":");
+      eventStart.setHours(parseInt(h, 10), parseInt(m, 10), 0);
+    } else {
+      eventStart.setHours(0, 0, 0, 0);
+    }
+
+    // Jika aktif tapi waktu sudah lewat -> ubah ke 'lalu'
+    if (event.statusEvent === "aktif" && eventEnd < now) {
+      toLaluIds.push(event.idEvent);
+    }
+
+    // Jika draft tapi sudah waktunya tayang -> ubah ke 'aktif'
+    if (event.statusEvent === "draft" && eventStart <= now && eventEnd >= now) {
+      toAktifIds.push(event.idEvent);
+    }
+
+    // Jika draft tapi waktunya sudah lewat jauh -> ubah ke 'lalu'
+    if (event.statusEvent === "draft" && eventEnd < now) {
+      toLaluIds.push(event.idEvent);
+    }
+  });
+
+  let needsRefresh = false;
+
+  if (toLaluIds.length > 0) {
+    await getDb()
+      .update(events)
+      .set({ statusEvent: "lalu" })
+      .where(inArray(events.idEvent, toLaluIds));
+    needsRefresh = true;
+  }
+
+  if (toAktifIds.length > 0) {
+    await getDb()
+      .update(events)
+      .set({ statusEvent: "aktif" })
+      .where(inArray(events.idEvent, toAktifIds));
+    needsRefresh = true;
+  }
+
+  // Ambil ulang data terbaru dari database jika ada yang berubah otomatis
+  if (needsRefresh) {
+    allEvents = await getDb()
+      .select()
+      .from(events)
+      .orderBy(desc(events.idEvent));
+  }
+
+  // Logika filter event berdasarkan tab aktif
   const dataEvents = allEvents.filter((event) => {
     if (currentTab === "draft") {
       return event.statusEvent === "draft";
@@ -55,6 +119,7 @@ export default async function AdminEventPage({
 
     return false;
   });
+   
 
   return (
     <div className="p-6 max-w-7xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
@@ -96,10 +161,10 @@ export default async function AdminEventPage({
 
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Tombol Buat Event Baru */}
+        {/* Tombol Buat Event Baru (Disembunyikan di tab "lalu") */}
         {currentTab !== "lalu" && (
           <Link
-            href={`/admin/events/tambah?from=${currentTab}`}
+            href={`/admin/events/tambah?t=${crypto.randomUUID()}`}
             className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer group"
           >
             <span className="text-5xl text-orange-500 font-light mb-4 group-hover:scale-110 transition-transform">
@@ -126,6 +191,7 @@ export default async function AdminEventPage({
         {dataEvents.map((event) => {
           const displayStatus =
             currentTab === "lalu" ? "lalu" : event.statusEvent;
+
 
           return (
             <div
@@ -182,7 +248,7 @@ export default async function AdminEventPage({
                 </div>
               </div>
 
-              {/* Footer Kartu (Di dalam container utama) */}
+              {/* Footer Kartu */}
               <div className="bg-gray-50 border-t border-gray-100 p-4 flex items-center justify-between mt-auto">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${
@@ -199,7 +265,7 @@ export default async function AdminEventPage({
                 </span>
 
                 <Link
-                  href={`/admin/events/edit/${event.idEvent}?from=${currentTab}`}
+                  href={`/admin/events/edit/${event.idEvent}?from=${currentTab}&t=${crypto.randomUUID()}`}
                   prefetch={false}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                 >

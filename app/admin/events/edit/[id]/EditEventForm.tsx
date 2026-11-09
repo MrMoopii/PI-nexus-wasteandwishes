@@ -19,11 +19,13 @@ type EventData = {
 export default function EditEventForm({
   existingEvent,
   updateEventAction,
+  fromTab,
 }: {
   existingEvent: EventData;
   updateEventAction: (formData: FormData) => Promise<void>;
+  fromTab: string;
 }) {
-  const router = useRouter();  
+  const router = useRouter();
   const formattedDate = existingEvent.tanggalPelaksanaan
     ? new Date(existingEvent.tanggalPelaksanaan).toISOString().split("T")[0]
     : "";
@@ -51,18 +53,19 @@ export default function EditEventForm({
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
-      <form 
-        action={async (formData) => {
-          updateEventAction(formData); 
-          router.back();                     
-        }} 
-        className="space-y-6"
-      >
+    <form action={updateEventAction} className="space-y-6">
         <input type="hidden" name="idEvent" value={existingEvent.idEvent} />
+        <input type="hidden" name="statusEvent" value={finalStatus} />
+        <input type="hidden" name="fromTab" value={fromTab} />
         <div className="flex items-center gap-4 mb-8">
             <button
             type="button"
-            onClick={() => router.back()} 
+            onClick={() => {
+              setTanggal(formattedDate);
+              setWaktuSelesai(existingEvent.waktuSelesai || "");
+              setStatus(existingEvent.statusEvent);
+              router.push(`/admin/events?tab=${fromTab}`);
+            }} 
             className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
             >
             ← Batal

@@ -12,13 +12,18 @@ export const instant = false;
 
 export default async function EditEventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{t?:string; from?:string}>;
 }) {
   await connection();
 
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
   const eventId = Number(resolvedParams.id);
+  const editKey = resolvedSearch.t || "default";
+  const fromTab = resolvedSearch.from || "aktif";
 
   if (!eventId || isNaN(eventId)) {
     return (
@@ -66,7 +71,8 @@ export default async function EditEventPage({
     const lokasi = formData.get("lokasi") as string;
     const statusInput = formData.get("statusEvent") as string; 
     const gambarUrl = formData.get("gambarUrl") as string;
-
+    
+    const targetTab = fromTab;
     const now = new Date();
     let finalStatus = statusInput; 
 
@@ -102,6 +108,7 @@ export default async function EditEventPage({
     revalidatePath(`/admin/events/edit/${idEvent}`, "page");
     revalidatePath("/admin/events", "layout");
     revalidatePath("/event", "page");
+    redirect(`/admin/events?tab=${targetTab}`);
   }
   
   return (
@@ -109,9 +116,10 @@ export default async function EditEventPage({
 
       {/* Gunakan Client Component dan oper data & action-nya */}
       <EditEventForm 
-        key={`${existingEvent.idEvent}-${existingEvent.statusEvent}`} 
+        key={editKey}
         existingEvent={existingEvent} 
         updateEventAction={updateEvent} 
+        fromTab={fromTab}
       />
     </div>
   );
