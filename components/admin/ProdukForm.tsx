@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { tambahProduk, updateProduk } from "@/app/admin/produk/actions";
+import { useState, useEffect } from "react";
+import {
+  tambahProduk,
+  updateProduk,
+  getFotoProduk,
+} from "@/app/admin/produk/actions";
+import { ImageKitUpload, type FotoItem } from "./ImageKitUpload";
 
 type Produk = {
   id: number;
@@ -13,19 +18,8 @@ type Produk = {
   deskripsi: string;
   stok: number;
   berat: string;
+  fotoList?: FotoItem[];
 };
-
-const createInitialFormData = (
-  produk: Produk | null,
-): Omit<Produk, "id" | "waktuDitambahkan"> => ({
-  nama: produk?.nama ?? "",
-  harga: produk?.harga ?? 0,
-  jenis: produk?.jenis ?? "Pupuk",
-  img: produk?.img ?? "",
-  deskripsi: produk?.deskripsi ?? "",
-  stok: produk?.stok ?? 0,
-  berat: produk?.berat ?? "",
-});
 
 type ProdukFormProps = {
   isOpen: boolean;
@@ -34,11 +28,68 @@ type ProdukFormProps = {
 };
 
 export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
-  const [formData, setFormData] = useState<Omit<Produk, "id" | "waktuDitambahkan">>(() =>
-    createInitialFormData(produk),
-  );
+  const [formData, setFormData] = useState({
+    nama: produk?.nama ?? "",
+    harga: produk?.harga ?? 0,
+    jenis: produk?.jenis ?? "Pupuk",
+    deskripsi: produk?.deskripsi ?? "",
+    stok: produk?.stok ?? 0,
+    berat: produk?.berat ?? "",
+  });
+
+  const [photos, setPhotos] = useState<FotoItem[]>(() => {
+    if (produk?.fotoList && produk.fotoList.length > 0) {
+      return produk.fotoList;
+    }
+    if (produk?.img) {
+      return [
+        {
+          url: produk.img,
+          fileId: "",
+          isPrimary: true,
+          urutan: 0,
+        },
+      ];
+    }
+    return [];
+  });
+
+  const [deletedFileIds, setDeletedFileIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Jika sedang edit produk, muat foto dari tabel foto_produk jika belum disediakan
+  useEffect(() => {
+    let isMounted = true;
+    if (produk?.id && (!produk.fotoList || produk.fotoList.length === 0)) {
+      getFotoProduk(produk.id).then((items) => {
+        if (!isMounted) return;
+        if (items.length > 0) {
+          setPhotos(items);
+        } else if (produk.img) {
+          setPhotos([
+            {
+              url: produk.img,
+              fileId: "",
+              isPrimary: true,
+              urutan: 0,
+            },
+          ]);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [produk]);
+
+  const handlePhotosChange = (
+    newPhotos: FotoItem[],
+    newDeletedIds: string[],
+  ) => {
+    setPhotos(newPhotos);
+    setDeletedFileIds(newDeletedIds);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +122,11 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
       formDataToSend.append("hargaProduk", formData.harga.toString());
       formDataToSend.append("jumlahStok", formData.stok.toString());
       formDataToSend.append("deskripsi", formData.deskripsi);
-      formDataToSend.append("gambarUrl", formData.img || "");
       formDataToSend.append("berat", formData.berat);
+
+      // Lampirkan data foto dari ImageKit
+      formDataToSend.append("fotoList", JSON.stringify(photos));
+      formDataToSend.append("deletedFileIds", JSON.stringify(deletedFileIds));
 
       const result = produk
         ? await updateProduk(formDataToSend)
@@ -84,8 +138,8 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
         onClose();
         window.location.reload();
       }
-    } catch (err) {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } catch {
+      setError("Terjadi kesalahan saat menyimpan produk. Silakan coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -95,9 +149,9 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-background/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200">
+      <div className="bg-background rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-slate-200">
         {/* Header */}
-        <div className="sticky top-0 bg-background border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-background border-b border-slate-200 px-6 py-4 flex items-center justify-between z-20">
           <h2 className="text-lg font-bold text-slate-800">
             {produk ? "Edit Produk" : "Tambah Produk Baru"}
           </h2>
@@ -111,7 +165,7 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -119,7 +173,16 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
             </div>
           )}
 
-          {/* Nama */}
+          {/* Upload Foto Produk dengan Drag and Drop */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <ImageKitUpload
+              existingPhotos={photos}
+              onChange={handlePhotosChange}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Nama Produk */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Nama Produk *
@@ -130,7 +193,7 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, nama: e.target.value })
               }
-              placeholder="Contoh: Magot Segar"
+              placeholder="Contoh: Maggot Segar"
               disabled={isSubmitting}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
@@ -145,7 +208,10 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
               type="number"
               value={formData.harga}
               onChange={(e) =>
-                setFormData({ ...formData, harga: parseInt(e.target.value) || 0 })
+                setFormData({
+                  ...formData,
+                  harga: parseInt(e.target.value) || 0,
+                })
               }
               placeholder="20000"
               min="0"
@@ -186,7 +252,10 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
                 type="number"
                 value={formData.stok}
                 onChange={(e) =>
-                  setFormData({ ...formData, stok: parseInt(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    stok: parseInt(e.target.value) || 0,
+                  })
                 }
                 placeholder="50"
                 min="0"
@@ -210,26 +279,6 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
-          </div>
-
-          {/* Gambar URL */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              URL Gambar
-            </label>
-            <input
-              type="text"
-              value={formData.img}
-              onChange={(e) =>
-                setFormData({ ...formData, img: e.target.value })
-              }
-              placeholder="/img/produk/1.png"
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            />
-            <p className="text-xs text-slate-500 mt-1">
-              Gunakan URL dari direktori public atau biarkan kosong untuk tidak ada gambar
-            </p>
           </div>
 
           {/* Deskripsi */}
@@ -264,7 +313,11 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              {isSubmitting ? "Menyimpan..." : produk ? "Update Produk" : "Tambah Produk"}
+              {isSubmitting
+                ? "Menyimpan..."
+                : produk
+                  ? "Update Produk"
+                  : "Tambah Produk"}
             </button>
           </div>
         </form>
