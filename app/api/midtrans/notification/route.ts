@@ -9,16 +9,23 @@ export async function POST(request: Request) {
   try {
     const body: unknown = await request.json();
     if (!isRecord(body)) {
-      return NextResponse.json({ error: "Payload tidak valid." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Payload tidak valid." },
+        { status: 400 },
+      );
     }
     payload = body;
   } catch (error) {
     console.error("Payload notifikasi Midtrans bukan JSON valid:", error);
-    return NextResponse.json({ error: "Payload tidak valid." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Payload tidak valid." },
+      { status: 400 },
+    );
   }
 
   try {
-    const notification = await getMidtransSnap().transaction.notification(payload);
+    const notification =
+      await getMidtransSnap().transaction.notification(payload);
     const [payment] = await getDb()
       .select({
         idPembayaran: pembayaranLangganan.idPembayaranLangganan,
@@ -31,12 +38,21 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (!payment) {
-      return NextResponse.json({ error: "Transaksi tidak ditemukan." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Transaksi tidak ditemukan." },
+        { status: 404 },
+      );
     }
 
     const grossAmount = Number(notification.gross_amount);
-    if (!Number.isFinite(grossAmount) || grossAmount !== Number(payment.jumlah)) {
-      return NextResponse.json({ error: "Nominal transaksi tidak cocok." }, { status: 400 });
+    if (
+      !Number.isFinite(grossAmount) ||
+      grossAmount !== Number(payment.jumlah)
+    ) {
+      return NextResponse.json(
+        { error: "Nominal transaksi tidak cocok." },
+        { status: 400 },
+      );
     }
 
     const sukses =
@@ -67,10 +83,11 @@ export async function POST(request: Request) {
                   THEN COALESCE(langganan.tanggal_mulai_langganan, ${hariIniJakarta}::date)
                 ELSE ${hariIniJakarta}::date
               END,
-              tanggal_akhir_langganan = GREATEST(
-                COALESCE(langganan.tanggal_akhir_langganan, ${hariIniJakarta}::date),
-                ${hariIniJakarta}::date
-              ) + 30
+              tanggal_akhir_langganan = CASE
+              WHEN langganan.tanggal_akhir_langganan >= ${hariIniJakarta}::date
+                THEN langganan.tanggal_akhir_langganan + 30
+              ELSE (${hariIniJakarta}::date - 1) + 30
+              END
           FROM pembayaran_berhasil
           WHERE langganan.id_langganan = pembayaran_berhasil.langganan_id
         `);

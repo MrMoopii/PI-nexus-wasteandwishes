@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ambilKeranjang } from "./keranjang/actions";
+import { ambilKeranjang } from "@/app/store/keranjang/actions";
 
 const sumberGambarKeranjang =
   "/img/keranjang/istockphoto-1325904846-612x612-removebg-preview.png";
