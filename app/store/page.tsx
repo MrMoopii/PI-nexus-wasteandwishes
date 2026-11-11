@@ -1,13 +1,20 @@
+import EtalaseProduk from "@/app/store/etalase-produk";
 import { Suspense } from "react";
 import { desc, eq } from "drizzle-orm";
 import { connection } from "next/server";
-import EtalaseProduk from "./etalase-produk";
 import { getDb } from "@/lib/db";
 import { produk } from "@/lib/db/schema";
 
 export default function TokoPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-(--hx-canvas)" aria-label="Memuat toko" />}>
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen bg-(--hx-canvas)"
+          aria-label="Memuat toko"
+        />
+      }
+    >
       <DaftarProduk />
     </Suspense>
   );
