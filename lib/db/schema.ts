@@ -207,6 +207,7 @@ export const jadwalJanjian = pgTable("jadwal_janjian", {
   jadwalId: integer("jadwal_id")
     .primaryKey()
     .references(() => jadwal.idJadwal),
+  tanggalJanjian: date("tanggal_janjian"),
   keteranganTujuan: text("keterangan_tujuan").notNull(),
   statusKonfirmasi: text("status_konfirmasi").notNull(),
 });

@@ -75,6 +75,7 @@ async function JadwalJanjianContent() {
       idJadwal: jadwal.idJadwal,
       hariPengambilan: jadwal.hariPengambilan,
       jamPengambilan: jadwal.jamPengambilan,
+      tanggalJanjian: jadwalJanjian.tanggalJanjian,
       statusLangganan: dataLangganan.statusLangganan,
       keteranganTujuan: jadwalJanjian.keteranganTujuan,
       statusKonfirmasi: jadwalJanjian.statusKonfirmasi,
@@ -117,18 +118,14 @@ async function JadwalJanjianContent() {
           </p>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
-              Hari pengambilan
-              <select
-                name="hariPengambilan"
+              Tanggal pengambilan
+              <input
+                type="date"
+                name="tanggalJanjian"
                 required
-                defaultValue=""
-                className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900"
-              >
-                <option value="" disabled>Pilih hari</option>
-                {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"].map((hari) => (
-                  <option key={hari} value={hari}>{hari}</option>
-                ))}
-              </select>
+                min={new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}
+                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
+              />
             </label>
             <label className="block text-sm font-medium text-gray-700">
               Jam pengambilan
@@ -197,7 +194,7 @@ async function JadwalJanjianContent() {
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
             <tr>
-              <th className="px-5 py-4 font-semibold">Hari Pengambilan</th>
+              <th className="px-5 py-4 font-semibold">Tanggal</th>
               <th className="px-5 py-4 font-semibold">Jam</th>
               <th className="px-5 py-4 font-semibold">Keterangan Tujuan</th>
               <th className="px-5 py-4 font-semibold">Status Konfirmasi</th>
@@ -208,7 +205,7 @@ async function JadwalJanjianContent() {
             {schedules.map((schedule) => (
               <tr key={schedule.idJadwal}>
                 <td className="px-5 py-4 font-medium text-gray-900">
-                  {schedule.hariPengambilan}
+                  {schedule.tanggalJanjian ?? "Belum diatur"}
                 </td>
                 <td className="px-5 py-4">{formatJam(schedule.jamPengambilan)} WIB</td>
                 <td className="px-5 py-4">{schedule.keteranganTujuan}</td>

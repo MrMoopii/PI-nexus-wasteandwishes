@@ -139,6 +139,15 @@ async function LanggananContent() {
           )}
           {aktif && (
             <div className="mt-6 border-t border-[#B9CDE5]/50 pt-5">
+              <p className="mb-3 text-sm text-[#5B6879]">
+                Atur dua hari dan waktu pengambilan rutin Anda.
+              </p>
+              <Link
+                href="/langganan/jadwal"
+                className="mb-4 inline-flex rounded-full bg-[#17AFB0] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#12999A]"
+              >
+                Atur Jadwal Rutin
+              </Link>
               <p className="mb-4 text-sm text-[#5B6879]">
                 Perpanjangan dibayar manual. Pembayaran berhasil menambahkan 30
                 hari setelah masa aktif saat ini.
