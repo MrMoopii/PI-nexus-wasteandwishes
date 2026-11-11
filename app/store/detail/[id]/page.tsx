@@ -1,8 +1,8 @@
+import DetailProdukClient from "@/app/store/detail/[id]/detail-produk-client";
 import { Suspense } from "react";
 import { eq } from "drizzle-orm";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import DetailProdukClient from "./detail-produk-client";
 import { getDb } from "@/lib/db";
 import { produk } from "@/lib/db/schema";
 
@@ -12,7 +12,14 @@ export default function DetailProdukPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-(--hx-canvas)" aria-label="Memuat produk" />}>
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen bg-(--hx-canvas)"
+          aria-label="Memuat produk"
+        />
+      }
+    >
       <ProdukDetail params={params} />
     </Suspense>
   );
