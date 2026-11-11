@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
-import "@/globals.css";
+import "./globals.css";
 import HeaderKerangka from "@/components/header/HeaderKerangka";
 import Header from "@/components/header/Header";
 import Footer from "@/components/Footer";
