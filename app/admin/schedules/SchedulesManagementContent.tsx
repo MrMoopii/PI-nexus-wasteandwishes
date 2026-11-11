@@ -6,6 +6,7 @@ interface Schedule {
   id: number;
   hariPengambilan: string;
   jamPengambilan: string;
+  tanggalJanjian?: string | null;
   jenisJadwal: string;
   user?: {
     namaPelanggan: string;
@@ -14,6 +15,7 @@ interface Schedule {
   janjian?: {
     status: string;
   };
+  jumlahPengambilan?: number;
 }
 
 interface Stats {
@@ -34,6 +36,42 @@ export default function SchedulesManagementContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
+  const [editSchedule, setEditSchedule] = useState<Schedule | null>(null);
+  const [deleteSchedule, setDeleteSchedule] = useState<Schedule | null>(null);
+  const [editFields, setEditFields] = useState({ hari: "", jam: "", tanggal: "", status: "menunggu" });
+  const [actionError, setActionError] = useState("");
+
+  const simpanEdit = async () => {
+    if (!editSchedule) return;
+    setActionError("");
+    const response = await fetch(`/api/admin/schedules/${editSchedule.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editSchedule.jenisJadwal === "rutin"
+        ? { hariPengambilan: editFields.hari, jamPengambilan: editFields.jam }
+        : { tanggalJanjian: editFields.tanggal, jamPengambilan: editFields.jam, statusKonfirmasi: editFields.status }),
+    });
+    const result: unknown = await response.json();
+    if (!response.ok) {
+      setActionError(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Jadwal gagal diperbarui.");
+      return;
+    }
+    setEditSchedule(null);
+    window.location.reload();
+  };
+
+  const hapusJadwal = async () => {
+    if (!deleteSchedule) return;
+    setActionError("");
+    const response = await fetch(`/api/admin/schedules/${deleteSchedule.id}`, { method: "DELETE" });
+    const result: unknown = await response.json();
+    if (!response.ok) {
+      setActionError(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Jadwal gagal dihapus.");
+      return;
+    }
+    setDeleteSchedule(null);
+    window.location.reload();
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -231,7 +269,7 @@ export default function SchedulesManagementContent() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <div>
-                      <p className="font-medium">{schedule.hariPengambilan}</p>
+                          <p className="font-medium">{schedule.jenisJadwal === "rutin" ? schedule.hariPengambilan : schedule.tanggalJanjian ?? "Tanggal belum diatur"}</p>
                       <p className="text-gray-500">{schedule.jamPengambilan}</p>
                     </div>
                   </td>
@@ -251,12 +289,23 @@ export default function SchedulesManagementContent() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button className="text-teal-600 hover:text-teal-700 font-medium text-sm mr-3">
-                      Lihat
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-700 font-medium text-sm">
-                      Edit
-                    </button>
+                    <button
+                      className="text-teal-600 hover:text-teal-700 font-medium text-sm mr-3"
+                      onClick={() => {
+                        setEditFields({
+                          hari: schedule.hariPengambilan,
+                          jam: schedule.jamPengambilan.slice(0, 5),
+                          tanggal: schedule.tanggalJanjian ?? "",
+                          status: schedule.janjian?.status ?? "menunggu",
+                        });
+                        setActionError("");
+                        setEditSchedule(schedule);
+                      }}
+                    >Edit</button>
+                    <button
+                      className="text-red-600 hover:text-red-700 font-medium text-sm"
+                      onClick={() => { setActionError(""); setDeleteSchedule(schedule); }}
+                    >Hapus</button>
                   </td>
                 </tr>
               ))}
@@ -302,6 +351,42 @@ export default function SchedulesManagementContent() {
           </div>
         </div>
       </div>
+      {(editSchedule || deleteSchedule) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="presentation">
+          <section role="dialog" aria-modal="true" aria-labelledby="schedule-dialog-title" className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <h2 id="schedule-dialog-title" className="text-xl font-semibold text-gray-900">{editSchedule ? "Edit Jadwal" : "Hapus Jadwal"}</h2>
+            {actionError && <p role="alert" className="mt-3 rounded bg-red-50 p-3 text-sm text-red-800">{actionError}</p>}
+            {editSchedule ? (
+              <div className="mt-5 space-y-4">
+                {editSchedule.jenisJadwal === "rutin" ? (
+                  <label className="block text-sm">Hari
+                    <select value={editFields.hari} onChange={(event) => setEditFields({ ...editFields, hari: event.target.value })} className="mt-1 block w-full rounded border p-2">
+                      {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"].map((hari) => <option key={hari}>{hari}</option>)}
+                    </select>
+                  </label>
+                ) : (
+                  <label className="block text-sm">Tanggal
+                    <input type="date" required value={editFields.tanggal} onChange={(event) => setEditFields({ ...editFields, tanggal: event.target.value })} className="mt-1 block w-full rounded border p-2" />
+                  </label>
+                )}
+                <label className="block text-sm">Jam
+                  <input type="time" required value={editFields.jam} onChange={(event) => setEditFields({ ...editFields, jam: event.target.value })} className="mt-1 block w-full rounded border p-2" />
+                </label>
+                {editSchedule.jenisJadwal === "janjian" && (
+                  <label className="block text-sm">Konfirmasi janjian
+                    <select value={editFields.status} onChange={(event) => setEditFields({ ...editFields, status: event.target.value })} className="mt-1 block w-full rounded border p-2">
+                      <option value="menunggu">Menunggu</option><option value="dikonfirmasi">Dikonfirmasi</option><option value="ditolak">Ditolak</option>
+                    </select>
+                  </label>
+                )}
+                <div className="flex justify-end gap-3"><button onClick={() => setEditSchedule(null)} className="rounded border px-4 py-2">Batal</button><button onClick={() => void simpanEdit()} className="rounded bg-teal-700 px-4 py-2 font-semibold text-white">Simpan</button></div>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-4"><p className="text-sm text-gray-600">Jadwal yang sudah memiliki riwayat pengambilan tidak dapat dihapus.</p><div className="flex justify-end gap-3"><button onClick={() => setDeleteSchedule(null)} className="rounded border px-4 py-2">Batal</button><button onClick={() => void hapusJadwal()} className="rounded bg-red-600 px-4 py-2 font-semibold text-white">Hapus</button></div></div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

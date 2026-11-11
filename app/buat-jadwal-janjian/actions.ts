@@ -15,6 +15,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
 
   const hariPengambilan = formData.get("hariPengambilan");
   const jamPengambilan = formData.get("jamPengambilan");
+  const tanggalJanjian = formData.get("tanggalJanjian");
   const keteranganTujuan = formData.get("keteranganTujuan");
 
   const hariValid =
@@ -29,8 +30,12 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     typeof keteranganTujuan === "string" &&
     keteranganTujuan.trim().length >= 5 &&
     keteranganTujuan.trim().length <= 500;
+  const tanggalValid =
+    typeof tanggalJanjian === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(tanggalJanjian) &&
+    new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) === tanggalJanjian;
 
-  if (!(hariValid && jamValid && tujuanValid)) {
+  if (!(hariValid && jamValid && tujuanValid && tanggalValid)) {
     redirect("/buat-jadwal-janjian?status=input-tidak-valid");
   }
 
@@ -64,8 +69,8 @@ export async function ajukanJadwalJanjian(formData: FormData) {
       )
       RETURNING id_jadwal
     )
-    INSERT INTO jadwal_janjian (jadwal_id, keterangan_tujuan, status_konfirmasi)
-    SELECT id_jadwal, ${keteranganTujuan.trim()}, 'menunggu'
+    INSERT INTO jadwal_janjian (jadwal_id, tanggal_janjian, keterangan_tujuan, status_konfirmasi)
+    SELECT id_jadwal, ${tanggalJanjian}::date, ${keteranganTujuan.trim()}, 'menunggu'
     FROM jadwal_baru
   `);
 
