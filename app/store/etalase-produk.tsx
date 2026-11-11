@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import TombolKeranjang from "@/app/store/tombol-keranjang";
 import { useMemo, useState } from "react";
 import type { produk } from "@/lib/db/schema";
-import TombolKeranjang from "./tombol-keranjang";
 
 type Produk = typeof produk.$inferSelect;
 

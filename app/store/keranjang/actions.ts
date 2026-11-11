@@ -28,9 +28,7 @@ type HasilBerhasil = {
   item?: ItemKeranjang;
 };
 
-export type HasilKeranjang =
-  | { ok: true; items: ItemKeranjang[] }
-  | HasilGagal;
+export type HasilKeranjang = { ok: true; items: ItemKeranjang[] } | HasilGagal;
 
 export type HasilAksiKeranjang = HasilGagal | HasilBerhasil;
 
@@ -127,7 +125,11 @@ export async function tambahKeKeranjang(input: {
   }
 
   if (produkDipilih.stok < input.jumlah) {
-    return { ok: false, error: "Jumlah melebihi stok yang tersedia.", status: 409 };
+    return {
+      ok: false,
+      error: "Jumlah melebihi stok yang tersedia.",
+      status: 409,
+    };
   }
 
   const idKeranjang = await buatAtauAmbilKeranjang(cek.idUser);
@@ -144,7 +146,11 @@ export async function tambahKeKeranjang(input: {
   const jumlahBaru = (itemLama[0]?.jumlah ?? 0) + input.jumlah;
 
   if (jumlahBaru > produkDipilih.stok) {
-    return { ok: false, error: "Jumlah melebihi stok yang tersedia.", status: 409 };
+    return {
+      ok: false,
+      error: "Jumlah melebihi stok yang tersedia.",
+      status: 409,
+    };
   }
 
   if (itemLama.length > 0) {
@@ -203,7 +209,11 @@ export async function ubahJumlahKeranjang(
   }
 
   const [produkDipilih] = await getDb()
-    .select({ id: produk.idProduk, stok: produk.jumlahStok, status: produk.statusProduk })
+    .select({
+      id: produk.idProduk,
+      stok: produk.jumlahStok,
+      status: produk.statusProduk,
+    })
     .from(produk)
     .where(eq(produk.idProduk, produkId))
     .limit(1);
@@ -212,7 +222,11 @@ export async function ubahJumlahKeranjang(
     return { ok: false, error: "Produk tidak ditemukan.", status: 404 };
   }
   if (jumlah > produkDipilih.stok) {
-    return { ok: false, error: "Jumlah melebihi stok yang tersedia.", status: 409 };
+    return {
+      ok: false,
+      error: "Jumlah melebihi stok yang tersedia.",
+      status: 409,
+    };
   }
 
   const hasil = await getDb()

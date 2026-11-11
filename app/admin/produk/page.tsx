@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ProdukContent } from "./ProdukContent";
 import { getDb } from "@/lib/db";
-import { produk } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { produk, fotoProduk } from "@/lib/db/schema";
+import { desc, asc } from "drizzle-orm";
 import { connection } from "next/server";
 
 export const instant = false;
@@ -24,6 +24,46 @@ export default async function AdminProdukPage() {
     .from(produk)
     .orderBy(desc(produk.createdAt));
 
+  const allFoto = await getDb()
+    .select()
+    .from(fotoProduk)
+    .orderBy(asc(fotoProduk.urutan));
+
+  // Kelompokkan foto berdasarkan productId
+  const fotoByProduct: Record<
+    number,
+    Array<{
+      idFoto: number;
+      url: string;
+      fileId: string;
+      urutan: number;
+      isPrimary: boolean;
+    }>
+  > = {};
+
+  for (const f of allFoto) {
+    if (!fotoByProduct[f.productId]) {
+      fotoByProduct[f.productId] = [];
+    }
+    fotoByProduct[f.productId].push({
+      idFoto: f.idFoto,
+      url: f.url,
+      fileId: f.fileId,
+      urutan: f.urutan,
+      isPrimary: f.isPrimary,
+    });
+  }
+
+  const produkWithPhotos = allProduk.map((p) => {
+    const photos = fotoByProduct[p.idProduk] || [];
+    const primary = photos.find((x) => x.isPrimary) || photos[0];
+    return {
+      ...p,
+      gambarUtama: primary ? primary.url : p.gambarUrl,
+      fotoList: photos,
+    };
+  });
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -36,7 +76,7 @@ export default async function AdminProdukPage() {
       </nav>
 
       <Suspense fallback={<LoadingSkeleton />}>
-        <ProdukContent produkList={allProduk} />
+        <ProdukContent produkList={produkWithPhotos} />
       </Suspense>
     </div>
   );
