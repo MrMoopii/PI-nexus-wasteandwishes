@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { ProdukForm } from "@/components/admin/ProdukForm";
 import { DeleteProdukDialog } from "@/components/admin/DeleteProdukDialog";
+import { GambarProduk } from "@/components/GambarProduk";
+import type { FotoItem } from "@/components/admin/ImageKitUpload";
 
 type ProdukFromDB = {
   idProduk: number;
@@ -12,6 +14,8 @@ type ProdukFromDB = {
   jumlahStok: number;
   deskripsi: string | null;
   gambarUrl: string | null;
+  gambarUtama?: string | null;
+  fotoList?: FotoItem[];
   berat: string | null;
   statusProduk: string;
   createdAt: Date;
@@ -27,6 +31,7 @@ type Produk = {
   deskripsi: string;
   stok: number;
   berat: string;
+  fotoList?: FotoItem[];
 };
 
 const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
@@ -51,17 +56,21 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
     harga: Number(p.hargaProduk),
     jenis: p.jenisProduk,
     waktuDitambahkan: p.createdAt.toISOString(),
-    img: p.gambarUrl || undefined,
+    img: p.gambarUtama || p.gambarUrl || undefined,
     deskripsi: p.deskripsi || "",
     stok: p.jumlahStok,
     berat: p.berat || "",
+    fotoList: p.fotoList || [],
   }));
 
   // Filter produk berdasarkan kriteria
   const filteredProduk = useMemo(() => {
     return produkConverted.filter((produk) => {
       // Filter keyword
-      if (searchKeyword && !produk.nama.toLowerCase().includes(searchKeyword.toLowerCase())) {
+      if (
+        searchKeyword &&
+        !produk.nama.toLowerCase().includes(searchKeyword.toLowerCase())
+      ) {
         return false;
       }
 
@@ -71,7 +80,11 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
         const sekarang = new Date();
 
         if (filterWaktu === "Terbaru") {
-          const hariIni = new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate());
+          const hariIni = new Date(
+            sekarang.getFullYear(),
+            sekarang.getMonth(),
+            sekarang.getDate(),
+          );
           if (tanggalDitambahkan < hariIni) return false;
         } else if (filterWaktu === "Minggu ini") {
           const tujuhHariLalu = new Date(sekarang);
@@ -91,10 +104,16 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
 
       // Filter kategori stok berdasarkan jumlah stok
       if (filterKategoriStok !== "Semua") {
-        if (filterKategoriStok === "Satuan" && (produk.stok < 1 || produk.stok > 9)) {
+        if (
+          filterKategoriStok === "Satuan" &&
+          (produk.stok < 1 || produk.stok > 9)
+        ) {
           return false;
         }
-        if (filterKategoriStok === "Puluhan" && (produk.stok < 10 || produk.stok > 99)) {
+        if (
+          filterKategoriStok === "Puluhan" &&
+          (produk.stok < 10 || produk.stok > 99)
+        ) {
           return false;
         }
         if (filterKategoriStok === "Ratusan" && produk.stok < 100) {
@@ -104,7 +123,13 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
 
       return true;
     });
-  }, [produkConverted, searchKeyword, filterWaktu, filterJenis, filterKategoriStok]);
+  }, [
+    produkConverted,
+    searchKeyword,
+    filterWaktu,
+    filterJenis,
+    filterKategoriStok,
+  ]);
 
   // Produk yang ditampilkan (dengan toggle etalase)
   const displayedProduk = showEtalase ? filteredProduk : [];
@@ -136,7 +161,7 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
         </div>
         <button
           onClick={handleAddProduk}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
         >
           + Tambah Produk
         </button>
@@ -239,20 +264,14 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
                 key={produk.id}
                 className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* Product Image */}
-                <div className="relative h-48 bg-slate-100">
-                  {produk.img ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={produk.img}
-                      alt={produk.nama}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-slate-400">
-                      No Image
-                    </div>
-                  )}
+                {/* Product Image Thumbnail */}
+                <div className="relative h-48 bg-slate-100 overflow-hidden">
+                  <GambarProduk
+                    src={produk.img}
+                    alt={produk.nama}
+                    fill
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
                 {/* Product Info */}
@@ -281,13 +300,13 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEditProduk(produk)}
-                      className="flex-1 px-3 py-2 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors text-sm font-medium"
+                      className="flex-1 px-3 py-2 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors text-sm font-medium cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteClick(produk)}
-                      className="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium"
+                      className="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium cursor-pointer"
                     >
                       Hapus
                     </button>
@@ -298,7 +317,9 @@ export function ProdukContent({ produkList }: { produkList: ProdukFromDB[] }) {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-slate-500">Tidak ada produk yang sesuai dengan filter</p>
+            <p className="text-slate-500">
+              Tidak ada produk yang sesuai dengan filter
+            </p>
           </div>
         )
       ) : (
