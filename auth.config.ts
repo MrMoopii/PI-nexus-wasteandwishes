@@ -22,7 +22,6 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/auth/register");
       const isOnProtected =
         nextUrl.pathname.startsWith("/langganan") ||
-        nextUrl.pathname.startsWith("/buat-jadwal-janjian") ||
         nextUrl.pathname.startsWith("/event") ||
         nextUrl.pathname.startsWith("/profil");
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");

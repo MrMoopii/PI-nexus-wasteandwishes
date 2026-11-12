@@ -31,7 +31,7 @@ export default async function LanggananPage({
           className="mb-6 flex overflow-x-auto border-b border-gray-200"
         >
           <Link
-            href="/buat-jadwal-janjian"
+            href="/langganan/jadwal-janjian"
             aria-current="page"
             className="whitespace-nowrap border-b-2 border-blue-600 px-6 py-4 text-sm font-medium text-blue-600"
           >
@@ -68,6 +68,9 @@ async function JadwalJanjianContent() {
   if (!cek.ok) {
     redirect("/auth/login");
   }
+  if (cek.session.user.peran !== "user") {
+    redirect("/langganan");
+  }
   const idUser = cek.idUser;
 
   const schedules = await getDb()
@@ -86,6 +89,8 @@ async function JadwalJanjianContent() {
     .where(
       and(
         eq(dataLangganan.userId, idUser),
+        eq(dataLangganan.statusLangganan, "aktif"),
+        sql`${dataLangganan.tanggalAkhirLangganan} >= ${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}::date`,
         eq(jadwal.jenisJadwal, "janjian"),
       ),
     );
@@ -101,6 +106,10 @@ async function JadwalJanjianContent() {
       ),
     )
     .limit(1);
+
+  if (!langgananAktif) {
+    redirect("/langganan");
+  }
 
   return (
     <>

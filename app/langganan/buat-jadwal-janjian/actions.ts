@@ -11,6 +11,9 @@ export async function ajukanJadwalJanjian(formData: FormData) {
   if (!cek.ok) {
     redirect("/auth/login");
   }
+  if (cek.session.user.peran !== "user") {
+    redirect("/langganan");
+  }
   const idUser = cek.idUser;
 
   const hariPengambilan = formData.get("hariPengambilan");
@@ -36,7 +39,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) === tanggalJanjian;
 
   if (!(hariValid && jamValid && tujuanValid && tanggalValid)) {
-    redirect("/buat-jadwal-janjian?status=input-tidak-valid");
+    redirect("/langganan/jadwal-janjian?status=input-tidak-valid");
   }
 
   const hariIni = new Intl.DateTimeFormat("en-CA", {
@@ -55,7 +58,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     .limit(1);
 
   if (!langgananAktif) {
-    redirect("/buat-jadwal-janjian?status=langganan-tidak-aktif");
+    redirect("/langganan/jadwal-janjian?status=langganan-tidak-aktif");
   }
 
   await getDb().execute(sql`
@@ -74,5 +77,5 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     FROM jadwal_baru
   `);
 
-  redirect("/buat-jadwal-janjian?status=permintaan-terkirim");
+  redirect("/langganan/jadwal-janjian?status=permintaan-terkirim");
 }
