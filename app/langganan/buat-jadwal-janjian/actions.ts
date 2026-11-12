@@ -39,7 +39,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) === tanggalJanjian;
 
   if (!(hariValid && jamValid && tujuanValid && tanggalValid)) {
-    redirect("/langganan/jadwal-janjian?status=input-tidak-valid");
+    redirect("/langganan/buat-jadwal-janjian?status=input-tidak-valid");
   }
 
   const hariIni = new Intl.DateTimeFormat("en-CA", {
@@ -58,7 +58,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     .limit(1);
 
   if (!langgananAktif) {
-    redirect("/langganan/jadwal-janjian?status=langganan-tidak-aktif");
+    redirect("/langganan/buat-jadwal-janjian?status=langganan-tidak-aktif");
   }
 
   await getDb().execute(sql`
@@ -77,5 +77,5 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     FROM jadwal_baru
   `);
 
-  redirect("/langganan/jadwal-janjian?status=permintaan-terkirim");
+  redirect("/langganan/buat-jadwal-janjian?status=permintaan-terkirim");
 }
