@@ -184,7 +184,7 @@ export default function ReportsPage() {
     try {
       const url = dialog === "edit" && idEdit !== null
         ? `/api/admin/reports/${idEdit}`
-        : `/api/admin/schedules/${jadwalDipilih.idJadwal}/collection`;
+        : `/api/admin/jadwal-pengambilan/${jadwalDipilih.idJadwal}/collection`;
       const response = await fetch(url, { method: dialog === "edit" ? "PATCH" : "POST", body: formData });
       const data: unknown = await response.json();
       if (!response.ok) throw new Error(isRecord(data) && typeof data.error === "string" ? data.error : "Laporan gagal disimpan.");

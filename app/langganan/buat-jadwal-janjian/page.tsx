@@ -23,20 +23,19 @@ export default async function LanggananPage({
   return (
     <main className="min-h-screen bg-(--hx-canvas) px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-5xl">
-        <h1 className="mb-8 text-3xl font-bold text-gray-900">
-          Langganan Saya
+        <Link href="/langganan" className="mb-6 inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800">
+          ← Kembali
+        </Link>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+          Jadwal Pengambilan Janjian
         </h1>
+        <p className="mb-6 text-gray-600">   Isi waktu dan tujuan pengambilan yang Anda inginkan. Pengajuan akan
+            berstatus menunggu sampai dikonfirmasi oleh pihak pengelola.
+         </p>
         <nav
           aria-label="Tab langganan"
           className="mb-6 flex overflow-x-auto border-b border-gray-200"
         >
-          <Link
-            href="/buat-jadwal-janjian"
-            aria-current="page"
-            className="whitespace-nowrap border-b-2 border-blue-600 px-6 py-4 text-sm font-medium text-blue-600"
-          >
-            JADWAL PENGAMBILAN JANJIAN
-          </Link>
         </nav>
         {status === "permintaan-terkirim" && (
           <p className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">
@@ -68,6 +67,9 @@ async function JadwalJanjianContent() {
   if (!cek.ok) {
     redirect("/auth/login");
   }
+  if (cek.session.user.peran !== "user") {
+    redirect("/langganan");
+  }
   const idUser = cek.idUser;
 
   const schedules = await getDb()
@@ -86,6 +88,8 @@ async function JadwalJanjianContent() {
     .where(
       and(
         eq(dataLangganan.userId, idUser),
+        eq(dataLangganan.statusLangganan, "aktif"),
+        sql`${dataLangganan.tanggalAkhirLangganan} >= ${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}::date`,
         eq(jadwal.jenisJadwal, "janjian"),
       ),
     );
@@ -102,6 +106,10 @@ async function JadwalJanjianContent() {
     )
     .limit(1);
 
+  if (!langgananAktif) {
+    redirect("/langganan");
+  }
+
   return (
     <>
       {langgananAktif ? (
@@ -109,13 +117,6 @@ async function JadwalJanjianContent() {
           action={ajukanJadwalJanjian}
           className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
         >
-          <h2 className="text-xl font-semibold text-gray-900">
-            Ajukan Jadwal Pengambilan
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Isi waktu dan tujuan pengambilan yang Anda inginkan. Pengajuan akan
-            berstatus menunggu sampai dikonfirmasi oleh pihak pengelola.
-          </p>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
             <label className="block text-sm font-medium text-gray-700">
               Tanggal pengambilan
@@ -168,7 +169,7 @@ async function JadwalJanjianContent() {
           </div>
           <button
             type="submit"
-            className="mt-5 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            className="mt-5 rounded-md bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800"
           >
             Kirim Permintaan
           </button>

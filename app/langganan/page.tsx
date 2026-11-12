@@ -143,11 +143,19 @@ async function LanggananContent() {
                 Atur dua hari dan waktu pengambilan rutin Anda.
               </p>
               <Link
-                href="/langganan/jadwal"
+                href="/langganan/buat-jadwal-rutin"
                 className="mb-4 inline-flex rounded-full bg-[#17AFB0] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#12999A]"
               >
                 Atur Jadwal Rutin
               </Link>
+              {cek.session.user.peran === "user" && (
+                <Link
+                  href="/langganan/buat-jadwal-janjian"
+                  className="mb-4 ml-3 inline-flex rounded-full border border-[#17AFB0] px-5 py-2.5 text-sm font-semibold text-[#12999A] hover:bg-[#17AFB0]/10"
+                >
+                  Ajukan Jadwal Janjian
+                </Link>
+              )}
               <p className="mb-4 text-sm text-[#5B6879]">
                 Perpanjangan dibayar manual. Pembayaran berhasil menambahkan 30
                 hari setelah masa aktif saat ini.

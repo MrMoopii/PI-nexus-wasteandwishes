@@ -56,7 +56,7 @@ async function JadwalRutinContent({
     .limit(1);
 
   if (!langganan) {
-    return <main className="mx-auto max-w-3xl px-4 py-12"><p>Jadwal rutin hanya dapat diatur selama langganan aktif.</p><Link href="/langganan" className="mt-4 inline-block text-teal-700 underline">Kembali ke langganan</Link></main>;
+    return <main className="mx-auto max-w-3xl px-4 py-12"><p>Jadwal rutin hanya dapat diatur selama langganan aktif.</p><Link href="/langganan" className="mt-4 inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800">← Kembali</Link></main>;
   }
 
   const jadwalMilik = await db
@@ -85,7 +85,7 @@ async function JadwalRutinContent({
   return (
     <main className="min-h-screen bg-(--hx-canvas) px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <Link href="/langganan" className="text-sm text-teal-700 underline">Kembali ke langganan</Link>
+        <Link href="/langganan" className="inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800">← Kembali</Link>
         <h1 className="mt-5 text-3xl font-bold text-gray-900">Jadwal Pengambilan Rutin</h1>
         <p className="mt-2 text-gray-600">Pilih dua hari yang berbeda. Jadwal tersedia pukul 08.00–15.00 dengan interval 15 menit.</p>
         {status && (
