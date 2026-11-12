@@ -52,8 +52,8 @@ export async function simpanJadwalRutin(formData: FormData) {
       sql`${jadwalRutin.tanggalSelesai} >= ${hariIni}::date`,
     ));
 
-  if (mode === "baru" && milikSaya.length > 0) redirect("/langganan/jadwal?status=sudah-ada");
-  if (mode === "ubah" && milikSaya.length !== 2) redirect("/langganan/jadwal?status=jadwal-tidak-lengkap");
+  if (mode === "baru" && milikSaya.length > 0) redirect("/langganan/buat-jadwal-rutin?status=sudah-ada");
+  if (mode === "ubah" && milikSaya.length !== 2) redirect("/langganan/buat-jadwal-rutin?status=jadwal-tidak-lengkap");
 
   if (mode === "ubah") {
     if (milikSaya.some(({ mulai }) => {
