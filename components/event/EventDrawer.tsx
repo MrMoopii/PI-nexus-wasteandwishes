@@ -46,38 +46,30 @@ export default function EventDrawer({
   isPast: boolean;
   onClose: () => void;
 }) {
-  const [renderedEvent, setRenderedEvent] = useState<EventRingkas | null>(event);
   const [isOpen, setIsOpen] = useState(false);
 
   // Animasi membuka saat event terpilih
   useEffect(() => {
-    if (event) {
-      setRenderedEvent(event);
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      const previousOverflow = document.body.style.overflow;
-      const previousPaddingRight = document.body.style.paddingRight;
+    if (!event) return;
 
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-      }
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
 
-      const frame = requestAnimationFrame(() => {
-        setIsOpen(true);
-      });
-
-      return () => {
-        cancelAnimationFrame(frame);
-        document.body.style.overflow = previousOverflow;
-        document.body.style.paddingRight = previousPaddingRight;
-      };
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
-    setIsOpen(false);
-    const timer = setTimeout(() => {
-      setRenderedEvent(null);
-    }, 300);
-    return () => clearTimeout(timer);
+    const frame = requestAnimationFrame(() => {
+      setIsOpen(true);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+    };
   }, [event]);
 
 
@@ -91,7 +83,7 @@ export default function EventDrawer({
 
   // Listener tombol Escape
   useEffect(() => {
-    if (!renderedEvent) return;
+    if (!event) return;
 
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Escape") {
@@ -101,9 +93,9 @@ export default function EventDrawer({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [renderedEvent, handleClose]);
+  }, [event, handleClose]);
 
-  if (!renderedEvent) return null;
+  if (!event) return null;
 
   return (
     <div
@@ -146,8 +138,8 @@ export default function EventDrawer({
         <div className="space-y-7 p-5 sm:p-7">
           <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-(--hx-sunk)">
             <GambarEvent
-              src={renderedEvent.gambarUrl}
-              alt={renderedEvent.namaEvent}
+              src={event.gambarUrl}
+              alt={event.namaEvent}
               sizes="(max-width: 640px) 100vw, 512px"
               className="object-cover"
               preload
@@ -156,13 +148,13 @@ export default function EventDrawer({
 
           <div>
             <span className="inline-flex rounded-full bg-(--hx-accent)/10 px-3 py-1 text-xs font-semibold text-(--hx-accent-dark)">
-              {renderedEvent.jenisEvent}
+              {event.jenisEvent}
             </span>
             <h2
               id="event-drawer-title"
               className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-(--hx-ink)"
             >
-              {renderedEvent.namaEvent}
+              {event.namaEvent}
             </h2>
             <p className="mt-3 text-sm font-medium text-(--hx-ink-2)">
               Diselenggarakan oleh Waste &amp; Wishes
@@ -175,7 +167,7 @@ export default function EventDrawer({
                 Tanggal
               </span>
               <p className="mt-1 text-sm font-semibold capitalize text-(--hx-ink)">
-                {formatTanggalRingkas(renderedEvent.tanggalPelaksanaan)}
+                {formatTanggalRingkas(event.tanggalPelaksanaan)}
               </p>
             </div>
             <div>
@@ -183,7 +175,7 @@ export default function EventDrawer({
                 Waktu
               </span>
               <p className="mt-1 text-sm font-semibold text-(--hx-ink)">
-                {formatWaktuRingkas(renderedEvent.waktuMulai, renderedEvent.waktuSelesai)}
+                {formatWaktuRingkas(event.waktuMulai, event.waktuSelesai)}
               </p>
             </div>
           </div>
@@ -201,14 +193,14 @@ export default function EventDrawer({
               </p>
             ) : (
               <Link
-                href={`/event/checkout/${renderedEvent.idEvent}`}
+                href={`/event/checkout/${event.idEvent}`}
                 className="hx-btn-primary mt-4 w-full justify-center"
               >
                 Daftar Sekarang
               </Link>
             )}
             <Link
-              href={`/event/detail/${renderedEvent.idEvent}`}
+              href={`/event/detail/${event.idEvent}`}
               className="hx-btn-outline mt-3 w-full justify-center"
             >
               Lihat Halaman Event
@@ -220,7 +212,7 @@ export default function EventDrawer({
               Tentang Event
             </h3>
             <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-(--hx-ink-2)">
-              {renderedEvent.deskripsi || "Tidak ada deskripsi acara"}
+              {event.deskripsi || "Tidak ada deskripsi acara"}
             </p>
           </section>
         </div>

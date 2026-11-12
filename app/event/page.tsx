@@ -6,14 +6,11 @@ import { events as eventsTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { asc } from "drizzle-orm";
 import { connection } from "next/server";
-import EventTimelineClient, {
-  type EventTimelineItem,
-} from "@/components/event/EventTimelineClient";
-import EventCalendarWidget from "@/components/event/EventCalendarWidget";
+import EventCalendarWrapper from "@/components/event/EventCalendarWrapper";
 import EventHeroBanner, {
   type HeroBannerEvent,
 } from "@/components/event/EventHeroBanner";
-
+import type { EventTimelineItem } from "@/components/event/EventTimelineClient";
 
 export const instant = false;
 
@@ -70,19 +67,18 @@ export default async function EventPage({
     typeof resolvedSearchParams.jenis === "string"
       ? resolvedSearchParams.jenis
       : "";
-  const selectedTab = resolvedSearchParams.tab === "past" ? "past" : "upcoming";
   const today = getTanggalHariIni();
-  const totalEvents = events.length;
+  const totalEvents = events.filter(
+    (event) => event.tanggalPelaksanaan >= today,
+  ).length;
   const jenisEventOptions = Array.from(
     new Set(events.map((event) => event.jenisEvent).filter(Boolean)),
   );
   const filteredEvents = selectedJenis
     ? events.filter((event) => event.jenisEvent === selectedJenis)
     : events;
-  const tabEvents = filteredEvents.filter((event) =>
-    selectedTab === "past"
-      ? event.tanggalPelaksanaan < today
-      : event.tanggalPelaksanaan >= today,
+  const tabEvents = filteredEvents.filter(
+    (event) => event.tanggalPelaksanaan >= today,
   );
   const groupedDates = Array.from(
     new Set(tabEvents.map((event) => event.tanggalPelaksanaan)),
@@ -92,17 +88,19 @@ export default async function EventPage({
     label: formatTanggalTimeline(tanggal),
     events: tabEvents
       .filter((event) => event.tanggalPelaksanaan === tanggal)
-      .map((event): EventTimelineItem => ({
-        idEvent: event.idEvent,
-        namaEvent: event.namaEvent,
-        jenisEvent: event.jenisEvent,
-        deskripsi: event.deskripsi,
-        tanggalPelaksanaan: event.tanggalPelaksanaan,
-        waktuMulai: event.waktuMulai,
-        waktuSelesai: event.waktuSelesai,
-        gambarUrl: event.gambarUrl,
-        waktuLabel: formatWaktu(event.waktuMulai, event.waktuSelesai),
-      })),
+      .map(
+        (event): EventTimelineItem => ({
+          idEvent: event.idEvent,
+          namaEvent: event.namaEvent,
+          jenisEvent: event.jenisEvent,
+          deskripsi: event.deskripsi,
+          tanggalPelaksanaan: event.tanggalPelaksanaan,
+          waktuMulai: event.waktuMulai,
+          waktuSelesai: event.waktuSelesai,
+          gambarUrl: event.gambarUrl,
+          waktuLabel: formatWaktu(event.waktuMulai, event.waktuSelesai),
+        }),
+      ),
   }));
 
   const allEventDates = events.map((event) => event.tanggalPelaksanaan);
@@ -138,22 +136,22 @@ export default async function EventPage({
         <div className="hx-ambient-blob-3" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-10">
         {/* Hero Banner dengan rotasi otomatis */}
         <EventHeroBanner events={bannerEvents} />
 
-        <section aria-labelledby="events-heading" className="mb-16">
-          <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <section aria-labelledby="events-heading" className="mb-10">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2
                 id="events-heading"
-                className="text-3xl font-semibold tracking-tight text-(--hx-ink)"
+                className="text-2xl font-semibold tracking-tight text-(--hx-ink)"
               >
                 Events
               </h2>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Link
-                  href={selectedTab === "past" ? "/event?tab=past" : "/event"}
+                  href="/event"
                   scroll={false}
                   className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                     !selectedJenis
@@ -166,7 +164,7 @@ export default async function EventPage({
                 {jenisEventOptions.map((jenisEvent) => (
                   <Link
                     key={jenisEvent}
-                    href={`/event?jenis=${encodeURIComponent(jenisEvent)}${selectedTab === "past" ? "&tab=past" : ""}`}
+                    href={`/event?jenis=${encodeURIComponent(jenisEvent)}`}
                     scroll={false}
                     className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                       selectedJenis === jenisEvent
@@ -176,61 +174,37 @@ export default async function EventPage({
                   >
                     {jenisEvent}{" "}
                     <span className="ml-1 opacity-70">
-                      {events.filter((event) => event.jenisEvent === jenisEvent)
-                        .length}
+                      {
+                        events.filter(
+                          (event) => event.jenisEvent === jenisEvent,
+                        ).length
+                      }
                     </span>
                   </Link>
                 ))}
               </div>
             </div>
-
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Link
-                href={`/event?${selectedJenis ? `jenis=${encodeURIComponent(selectedJenis)}&` : ""}tab=upcoming`}
-                scroll={false}
-                className={`rounded-lg border px-4 py-2 transition-colors ${
-                  selectedTab === "upcoming"
-                    ? "border-(--hx-accent) bg-(--hx-accent) text-white"
-                    : "border-(--hx-pastel) bg-white text-(--hx-ink-2)"
-                }`}
-              >
-                Mendatang
-              </Link>
-              <Link
-                href={`/event?${selectedJenis ? `jenis=${encodeURIComponent(selectedJenis)}&` : ""}tab=past`}
-                scroll={false}
-                className={`rounded-lg border px-4 py-2 transition-colors ${
-                  selectedTab === "past"
-                    ? "border-(--hx-accent) bg-(--hx-accent) text-white"
-                    : "border-(--hx-pastel) bg-white text-(--hx-ink-2)"
-                }`}
-              >
-                Selesai
-              </Link>
-            </div>
           </div>
 
           {gagalMuat ? (
-            <p className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+            <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               Gagal memuat event, coba lagi nanti.
             </p>
           ) : tabEvents.length === 0 ? (
-            <p className="rounded-2xl border border-(--hx-pastel) bg-white p-6 text-sm text-(--hx-ink-2)">
-              {selectedTab === "past"
-                ? "Belum ada event yang sudah selesai."
-                : "Belum ada event mendatang."}
+            <p className="rounded-2xl border border-(--hx-pastel) bg-white p-4 text-sm text-(--hx-ink-2)">
+              Belum ada event mendatang.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <EventTimelineClient groups={timelineGroups} today={today} />
-
-              <EventCalendarWidget eventDates={allEventDates} today={today} />
-            </div>
+            <EventCalendarWrapper
+              eventDates={allEventDates}
+              today={today}
+              timelineGroups={timelineGroups}
+            />
           )}
         </section>
 
         {/* Information & Contact Lines (Helix Drift Style) */}
-        <section className="mt-16 pt-10 border-t border-(--hx-pastel)/40 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-(--hx-ink-2)">
+        <section className="mt-12 pt-8 border-t border-(--hx-pastel)/40 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-(--hx-ink-2)">
           <div>
             <span className="block text-[11px] font-semibold tracking-wider text-(--hx-ink-3) uppercase mb-2">
               Pusat Edukasi &amp; Penjemputan

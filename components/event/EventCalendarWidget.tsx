@@ -1,40 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { type EventRingkas } from "./EventDrawer";
 
 export default function EventCalendarWidget({
   eventDates,
   today,
+  viewYear,
+  viewMonth,
+  onMonthChange,
 }: {
   eventDates: string[];
   today: string;
+  viewYear: number;
+  viewMonth: number;
+  onMonthChange: (year: number, month: number) => void;
 }) {
   const initialDate = new Date(`${today}T00:00:00Z`);
-  const [viewYear, setViewYear] = useState(initialDate.getUTCFullYear());
-  const [viewMonth, setViewMonth] = useState(initialDate.getUTCMonth());
-
+  const todayYear = initialDate.getUTCFullYear();
+  const todayMonth = initialDate.getUTCMonth();
   const eventDateSet = new Set(eventDates);
+
+  const canGoBack = viewYear > todayYear || (viewYear === todayYear && viewMonth > todayMonth);
 
   const prevMonth = () => {
     if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear((prev) => prev - 1);
+      onMonthChange(viewYear - 1, 11);
     } else {
-      setViewMonth((prev) => prev - 1);
+      onMonthChange(viewYear, viewMonth - 1);
     }
   };
 
   const nextMonth = () => {
     if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear((prev) => prev + 1);
+      onMonthChange(viewYear + 1, 0);
     } else {
-      setViewMonth((prev) => prev + 1);
+      onMonthChange(viewYear, viewMonth + 1);
     }
   };
 
   const currentDate = new Date(Date.UTC(viewYear, viewMonth, 1));
-  const firstWeekday = currentDate.getUTCDay();
   const daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
 
   const monthLabel = new Intl.DateTimeFormat("id-ID", {
@@ -44,8 +48,8 @@ export default function EventCalendarWidget({
   }).format(currentDate);
 
   return (
-    <aside className="h-fit rounded-2xl border border-(--hx-pastel) bg-white p-5 shadow-[0_8px_25px_rgb(27,34,51,0.05)]">
-      <div className="mb-5 flex items-center justify-between">
+    <aside className="h-fit rounded-2xl border border-(--hx-pastel) bg-white p-3 shadow-[0_8px_25px_rgb(27,34,51,0.05)]">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="text-xl font-semibold capitalize text-(--hx-ink)">
           {monthLabel}
         </h3>
@@ -57,10 +61,6 @@ export default function EventCalendarWidget({
           <span key={day} className="font-semibold text-(--hx-ink-3)">
             {day}
           </span>
-        ))}
-
-        {Array.from({ length: firstWeekday }).map((_, index) => (
-          <span key={`empty-${index}`} aria-hidden="true" />
         ))}
 
         {Array.from({ length: daysInMonth }, (_, index) => {
@@ -80,7 +80,7 @@ export default function EventCalendarWidget({
               }`}
             >
               {day}
-              {hasEvent && !isToday && (
+              {hasEvent && !isPast && !isToday && (
                 <span
                   title={isPast ? "Event sudah terlewat" : "Event akan datang"}
                   className={`absolute bottom-0.5 h-1.5 w-1.5 rounded-full ${
@@ -95,12 +95,16 @@ export default function EventCalendarWidget({
         })}
       </div>
 
-      {/* Navigasi Bulan di Bawah Kalender */}
-      <div className="mt-6 flex items-center justify-between rounded-xl bg-(--hx-sunk) p-1.5">
+      <div className="flex items-center justify-between rounded-xl bg-(--hx-sunk) p-1.5">
         <button
           type="button"
           onClick={prevMonth}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--hx-ink-2) transition hover:bg-white hover:text-(--hx-accent) hover:shadow-xs"
+          disabled={!canGoBack}
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${
+            canGoBack
+              ? "text-(--hx-ink-2) hover:bg-white hover:text-(--hx-accent) hover:shadow-xs"
+              : "text-(--hx-ink-3) cursor-not-allowed opacity-50"
+          }`}
           aria-label="Bulan sebelumnya"
         >
           <svg

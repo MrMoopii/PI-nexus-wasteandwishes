@@ -185,6 +185,9 @@ importers:
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@neondatabase/serverless@1.2.0)(zod@4.6.5)
+      kiro:
+        specifier: ^1.0.0
+        version: 1.0.0
       midtrans-client:
         specifier: ^1.4.3
         version: 1.4.3(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
@@ -2199,6 +2202,9 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+
+  kiro@1.0.0:
+    resolution: {integrity: sha512-wJRlXdFuDxXXbZB2c60tb0NfrYh6ME3aMm1o/G1RYmC5AhcMRg9DGGldQMWbxqWxqWA4l42Qwr9qj0fdSuHoUA==}
 
   language-subtag-registry@0.3.23:
     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
@@ -4619,6 +4625,8 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  kiro@1.0.0: {}
 
   language-subtag-registry@0.3.23: {}
 

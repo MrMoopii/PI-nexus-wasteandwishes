@@ -22,14 +22,14 @@ export default function EventHeroBanner({
   useEffect(() => {
     if (events.length <= 1) return;
 
-    // Setiap 1 menit (60.000 ms) ganti ke event berikutnya
+    // Setiap 10 detik (10.000 ms) ganti ke event berikutnya
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % events.length);
         setIsTransitioning(false);
       }, 350); // Waktu transisi fade
-    }, 60000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [events.length]);
@@ -37,9 +37,9 @@ export default function EventHeroBanner({
   const currentEvent = events[currentIndex] ?? null;
 
   return (
-    <header className="mb-14">
-      {/* Wide Banner Image */}
-      <div className="relative aspect-21/8 sm:aspect-24/7 w-full overflow-hidden rounded-3xl border border-(--hx-pastel) bg-(--hx-sunk) shadow-[0_12px_40px_rgb(27,34,51,0.06)]">
+    <header className="mb-8">
+      {/* Compact Banner Image */}
+      <div className="relative aspect-24/9 sm:aspect-24/8 w-full overflow-hidden rounded-2xl border border-(--hx-pastel) bg-(--hx-sunk) shadow-[0_8px_25px_rgb(27,34,51,0.06)]">
         <div
           className={`h-full w-full transition-opacity duration-500 ease-in-out ${
             isTransitioning ? "opacity-30" : "opacity-100"
@@ -55,15 +55,15 @@ export default function EventHeroBanner({
         </div>
 
         {events.length > 1 && (
-          <div className="absolute bottom-3 right-4 z-10 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 backdrop-blur-md">
+          <div className="absolute bottom-2 right-3 z-10 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
             {events.map((evt, idx) => (
               <button
                 key={evt.idEvent}
                 type="button"
                 onClick={() => setCurrentIndex(idx)}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1 rounded-full transition-all ${
                   idx === currentIndex
-                    ? "w-4 bg-white"
+                    ? "w-3 bg-white"
                     : "w-1.5 bg-white/50 hover:bg-white/80"
                 }`}
                 aria-label={`Lihat banner event ${idx + 1}`}
@@ -74,19 +74,19 @@ export default function EventHeroBanner({
       </div>
 
       {/* Event Info */}
-      <div className="mt-6 px-2 sm:px-6">
+      <div className="mt-4 px-2 sm:px-4">
         <div
           className={`transition-opacity duration-300 ease-in-out ${
             isTransitioning ? "opacity-0" : "opacity-100"
           }`}
         >
-          <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-(--hx-accent) mb-1.5">
+          <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.2em] text-(--hx-accent) mb-1">
             {currentEvent?.jenisEvent || "Agenda Komunitas"}
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) leading-tight">
             {currentEvent?.namaEvent || "Daftar Kegiatan & Aksi Hijau"}
           </h1>
-          <p className="mt-3 max-w-3xl text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
+          <p className="mt-2 max-w-3xl text-sm sm:text-base text-(--hx-ink-2) font-light leading-relaxed">
             {currentEvent?.deskripsi ||
               "Inisiatif aksi hijau, edukasi keberlanjutan, dan pengelolaan sampah organik bersama Waste & Wishes."}
           </p>

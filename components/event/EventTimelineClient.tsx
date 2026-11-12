@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import GambarEvent from "@/components/GambarEvent";
 import EventDrawer, { type EventRingkas } from "./EventDrawer";
 
@@ -11,17 +11,43 @@ export type EventTimelineItem = EventRingkas & {
 export default function EventTimelineClient({
   groups,
   today,
+  scrollTargetTanggal,
 }: {
   groups: { tanggal: string; label: string; events: EventTimelineItem[] }[];
   today: string;
+  scrollTargetTanggal?: string | null;
 }) {
   const [eventTerpilih, setEventTerpilih] = useState<EventRingkas | null>(null);
+  const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!scrollTargetTanggal) return;
+    const container = containerRef.current;
+    const target = groupRefs.current[scrollTargetTanggal];
+    if (container && target) {
+      container.scrollTo({
+        top: target.offsetTop - container.offsetTop,
+        behavior: "smooth",
+      });
+    }
+  }, [scrollTargetTanggal]);
 
   return (
     <>
-      <div className="space-y-9">
+      <div
+        ref={containerRef}
+        className="space-y-9 overflow-y-scroll h-[calc(100vh-20rem)] max-h-[calc(100vh-20rem)] scroll-smooth pb-10 scrollbar-hide"
+      >
         {groups.map((group) => (
-          <div key={group.tanggal} className="relative pl-7 sm:pl-10">
+          <div
+            key={group.tanggal}
+            ref={(el) => {
+              if (el) groupRefs.current[group.tanggal] = el;
+            }}
+            className="relative pl-7 sm:pl-10"
+          >
             <span className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-(--hx-accent) ring-4 ring-(--hx-accent)/15" />
             <div className="absolute left-1.5 top-5 bottom-[-2.25rem] border-l border-dashed border-(--hx-pastel-deep)" />
             <h3 className="mb-4 text-lg font-semibold capitalize text-(--hx-ink)">
