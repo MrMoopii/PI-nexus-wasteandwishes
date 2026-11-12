@@ -256,7 +256,7 @@ export default function AdminDashboardContent() {
           </h2>
           <div className="space-y-3">
             <Link
-              href="/admin/schedules"
+              href="/admin/jadwal-pengambilan"
               className="block rounded-lg border border-slate-100 p-3 hover:border-blue-200 hover:bg-blue-50/50 transition-all"
             >
               <p className="font-medium text-slate-800 text-sm">
