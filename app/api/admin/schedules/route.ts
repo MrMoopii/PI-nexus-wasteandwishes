@@ -8,7 +8,7 @@ import {
   users,
   riwayatPengambilan,
 } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
@@ -76,6 +76,7 @@ export async function GET(request: Request) {
           .select({
             keterangan: jadwalJanjian.keteranganTujuan,
             status: jadwalJanjian.statusKonfirmasi,
+            tanggal: jadwalJanjian.tanggalJanjian,
           })
           .from(jadwalJanjian)
           .where(eq(jadwalJanjian.jadwalId, j.id))
@@ -89,6 +90,11 @@ export async function GET(request: Request) {
           .from(jadwalRutin)
           .where(eq(jadwalRutin.jadwalId, j.id))
           .limit(1);
+
+        const [jumlahPengambilan] = await getDb()
+          .select({ count: sql<number>`count(*)` })
+          .from(riwayatPengambilan)
+          .where(eq(riwayatPengambilan.jadwalId, j.id));
 
         // Filter by search if specified
         if (search && userInfo) {
@@ -105,11 +111,13 @@ export async function GET(request: Request) {
           id: j.id,
           hariPengambilan: j.hariPengambilan,
           jamPengambilan: j.jamPengambilan,
+          tanggalJanjian: janjian?.tanggal ?? null,
           jenisJadwal: j.jenisJadwal,
           user: userInfo,
           subscription,
           janjian,
           rutin,
+          jumlahPengambilan: Number(jumlahPengambilan.count),
         };
       }),
     );

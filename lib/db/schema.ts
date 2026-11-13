@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   integer,
   numeric,
@@ -87,6 +88,20 @@ export const produk = pgTable("produk", {
   gambarUrl: text("gambar_url"),
   berat: text("berat"),
   statusProduk: text("status_produk").notNull().default("aktif"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const fotoProduk = pgTable("foto_produk", {
+  idFoto: integer("id_foto").primaryKey().generatedAlwaysAsIdentity(),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => produk.idProduk, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  fileId: text("file_id").notNull(),
+  urutan: integer("urutan").notNull().default(0),
+  isPrimary: boolean("is_primary").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -192,6 +207,7 @@ export const jadwalJanjian = pgTable("jadwal_janjian", {
   jadwalId: integer("jadwal_id")
     .primaryKey()
     .references(() => jadwal.idJadwal),
+  tanggalJanjian: date("tanggal_janjian"),
   keteranganTujuan: text("keterangan_tujuan").notNull(),
   statusKonfirmasi: text("status_konfirmasi").notNull(),
 });
