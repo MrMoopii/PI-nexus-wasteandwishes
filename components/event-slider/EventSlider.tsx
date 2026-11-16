@@ -18,8 +18,6 @@ interface EventSliderProps {
   loggedIn: boolean;
 }
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
 /* ─── Komponen Event Slider (Gaya Drag Helix Drift 3D) ─── */
 export default function EventSlider({ events, loggedIn }: EventSliderProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -241,10 +239,6 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
       );
     }
 
-    function ringPos() {
-      return ((pos % N) + N) % N;
-    }
-
     let down = false;
     let startX = 0;
     let startT = 0;
@@ -404,9 +398,6 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
                       : undefined
                   }
                 />
-                <span className="hx-plate-no">
-                  {pad(i + 1)} / {pad(total)}
-                </span>
                 <div className="hx-plate-info">
                   <h2>{ev.judul}</h2>
                   <p>{ev.deskripsi}</p>
@@ -417,7 +408,7 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
 
           {/* Caption Section (Gaya Murni Helix Drift) */}
           <section className="hx-caption" ref={capElRef} aria-live="polite">
-            <h3 className="hx-cap-title text-(--hx-ink)" ref={capTitleRef}>
+            <h3 className="hx-cap-title text-(--hx-accent)" ref={capTitleRef}>
               {events[0].judul}
             </h3>
             <p className="hx-cap-desc" ref={capDescRef}>
