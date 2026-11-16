@@ -2,6 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ImageKitEventUpload } from "@/components/admin/ImageKitEventUpload";
+
+type PosterItem = {
+  url: string;
+  fileId: string;
+};
 
 export default function TambahEventForm({
   simpanEventAction,
@@ -25,6 +31,9 @@ export default function TambahEventForm({
   const [waktuSelesai, setWaktuSelesai] = useState("");
   const [status, setStatus] = useState("draft");
 
+  const [poster, setPoster] = useState<PosterItem | null>(null);
+  const [deletedFileId, setDeletedFileId] = useState<string | null>(null);
+
   // Hitung apakah event di masa lalu
   let isPastEvent = false;
   if (tanggal) {
@@ -41,8 +50,22 @@ export default function TambahEventForm({
   // Tentukan status akhir yang akan dikirim
   const finalStatus = isPastEvent ? "lalu" : status;
 
+  const handlePosterChange = (p: PosterItem | null, d: string | null) => {
+    setPoster(p);
+    setDeletedFileId(d);
+  };
+
   const handleSubmit = async (formData: FormData) => {
     formData.set("statusEvent", finalStatus);
+
+    // Poster dari ImageKit (kosongkan jika dihapus)
+    formData.set("gambarUrl", poster?.url ?? "");
+    formData.set("gambarFileId", poster?.fileId ?? "");
+
+    // Sinyal file poster lama yang perlu dibersihkan dari ImageKit
+    if (deletedFileId) {
+      formData.set("deletedPosterFileId", deletedFileId);
+    }
 
     startTransition(async () => {
       try {
@@ -61,9 +84,10 @@ export default function TambahEventForm({
         <button
           type="button"
           onClick={() => router.push(`/admin/events?tab=${fromTab}`)}
-          className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
+          className="inline-flex items-center gap-2 rounded-lg border border-(--hx-ink-6, #e5e7eb) bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
         >
-          ← Kembali
+          <span aria-hidden="true">←</span>
+          <span>Batal</span>
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Buat Event Baru</h1>
       </div>
@@ -72,7 +96,9 @@ export default function TambahEventForm({
         <form action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nama Event *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nama Event *
+              </label>
               <input
                 type="text"
                 name="namaEvent"
@@ -83,7 +109,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Jenis / Kategori Event *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jenis / Kategori Event *
+              </label>
               <input
                 type="text"
                 name="jenisEvent"
@@ -94,7 +122,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Biaya Event (Rp) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Biaya Event (Rp) *
+              </label>
               <input
                 type="number"
                 name="biayaEvent"
@@ -106,7 +136,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Pelaksanaan *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tanggal Pelaksanaan *
+              </label>
               <input
                 type="date"
                 name="tanggalPelaksanaan"
@@ -119,7 +151,9 @@ export default function TambahEventForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jam Mulai</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Jam Mulai
+                </label>
                 <input
                   type="time"
                   name="waktuMulai"
@@ -127,7 +161,9 @@ export default function TambahEventForm({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jam Selesai</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Jam Selesai
+                </label>
                 <input
                   type="time"
                   name="waktuSelesai"
@@ -139,7 +175,9 @@ export default function TambahEventForm({
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Venue & Lokasi *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Venue & Lokasi *
+              </label>
               <input
                 type="text"
                 name="lokasi"
@@ -149,17 +187,12 @@ export default function TambahEventForm({
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">URL Poster / Gambar</label>
-              <input
-                type="url"
-                name="gambarUrl"
-                placeholder="https://contoh.com/gambar-poster.jpg"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-600"
+            <div className="md:col-span-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <ImageKitEventUpload
+                existingPoster={null}
+                onChange={handlePosterChange}
+                disabled={isPending}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                *Sementara gunakan URL eksternal (misal dari Google Drive/Imgur). Fitur upload file lokal memerlukan cloud storage.
-              </p>
             </div>
           </div>
 
