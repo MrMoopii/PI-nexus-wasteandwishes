@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 /* ─── Bentuk data event untuk slider (dikirim dari app/page.tsx) ─── */
 export type SliderEvent = {
@@ -24,22 +22,11 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /* ─── Komponen Event Slider (Gaya Drag Helix Drift 3D) ─── */
 export default function EventSlider({ events, loggedIn }: EventSliderProps) {
-  const router = useRouter();
-
   const stageRef = useRef<HTMLDivElement>(null);
   const capElRef = useRef<HTMLElement>(null);
-  const capNoRef = useRef<HTMLSpanElement>(null);
   const capTitleRef = useRef<HTMLHeadingElement>(null);
   const capDescRef = useRef<HTMLParagraphElement>(null);
   const capMetaRef = useRef<HTMLDivElement>(null);
-  const scrubRef = useRef<HTMLDivElement>(null);
-  const scrubFillRef = useRef<HTMLDivElement>(null);
-  const ticksRef = useRef<HTMLDivElement>(null);
-  const thumbRef = useRef<HTMLDivElement>(null);
-  const scrubLabRef = useRef<HTMLDivElement>(null);
-
-  const stepPrevRef = useRef<() => void>(() => {});
-  const stepNextRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const N = events.length;
@@ -53,50 +40,29 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
     if (
       !stageRef.current ||
       !capElRef.current ||
-      !capNoRef.current ||
       !capTitleRef.current ||
       !capDescRef.current ||
-      !capMetaRef.current ||
-      !scrubRef.current ||
-      !scrubFillRef.current ||
-      !ticksRef.current ||
-      !thumbRef.current ||
-      !scrubLabRef.current
+      !capMetaRef.current
     ) {
       return;
     }
 
     const stage = stageRef.current;
     const capEl = capElRef.current;
-    const capNo = capNoRef.current;
     const capTitle = capTitleRef.current;
     const capDesc = capDescRef.current;
     const capMeta = capMetaRef.current;
-    const scrub = scrubRef.current;
-    const scrubFill = scrubFillRef.current;
-    const ticksBox = ticksRef.current;
-    const thumb = thumbRef.current;
-    const scrubLab = scrubLabRef.current;
 
     // Semua listener dilepas sekaligus lewat ac.abort() saat cleanup
     const ac = new AbortController();
     const opts = { signal: ac.signal };
 
-    ticksBox.innerHTML = "";
-
     const plateEls = stage.querySelectorAll<HTMLDivElement>(".hx-plate");
     const plates: { el: HTMLDivElement; media: HTMLSpanElement }[] = [];
-    const ticks: HTMLElement[] = [];
 
-    plateEls.forEach((el, i) => {
+    plateEls.forEach((el) => {
       const media = el.querySelector<HTMLSpanElement>(".hx-plate-media")!;
       plates.push({ el, media });
-
-      const tk = document.createElement("i");
-      tk.className = "hx-tick";
-      tk.style.left = N > 1 ? `${(i / (N - 1)) * 100}%` : "0%";
-      ticksBox.appendChild(tk);
-      ticks.push(tk);
     });
 
     let pos = 0;
@@ -174,7 +140,6 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
         p.el.classList.toggle("is-centre", a < 0.5);
       }
 
-      paintScrub();
       if (nearI !== settled) setCaption(nearI);
     }
 
@@ -208,7 +173,7 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
     }
 
     /* ── Autoplay: geser otomatis setiap 10 detik ── */
-    const AUTO_MS = 10000;
+    const AUTO_MS = 2000;
     let autoTimer = 0;
 
     function startAuto() {
@@ -221,27 +186,13 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
       }, AUTO_MS);
     }
 
-    stepPrevRef.current = () => {
-      target = Math.round(target) - 1;
-      kick();
-      startAuto();
-    };
-
-    stepNextRef.current = () => {
-      target = Math.round(target) + 1;
-      kick();
-      startAuto();
-    };
-
     /* ── Klik gambar utama → halaman detail event ──
        Belum login → ke halaman login dulu, lalu kembali ke detail event. */
     function goDetail(i: number) {
       const dest = `/event/detail/${events[i].id}`;
-      router.push(
-        loggedIn
-          ? dest
-          : `/auth/login?callbackUrl=${encodeURIComponent(dest)}`,
-      );
+      window.location.href = loggedIn
+        ? dest
+        : `/auth/login?callbackUrl=${encodeURIComponent(dest)}`;
     }
 
     /* Gambar di tengah → buka detail. Gambar di samping → geser ke tengah. */
@@ -270,12 +221,15 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
 
       swapTimer = window.setTimeout(
         () => {
-          capNo.textContent = pad(i + 1);
           capTitle.textContent = ev.judul;
           capDesc.textContent = ev.deskripsi;
           // textContent (bukan innerHTML) agar data dari database aman
           capMeta.replaceChildren(
-            ...[ev.lokasi, ev.tanggal, ev.jenis].map((t) => {
+            ...[
+              `Lokasi: ${ev.lokasi}`,
+              `Tanggal: ${ev.tanggal}`,
+              `Tipe: ${ev.jenis}`,
+            ].map((t) => {
               const s = document.createElement("span");
               s.textContent = t;
               return s;
@@ -285,67 +239,11 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
         },
         REDUCED ? 0 : 160,
       );
-
-      scrub.setAttribute("aria-valuenow", String(i + 1));
-      scrub.setAttribute("aria-valuetext", `${i + 1} dari ${N}, ${ev.judul}`);
-      scrubLab.textContent = `${pad(i + 1)} / ${pad(N)}`;
-      ticks.forEach((tk, k) => tk.classList.toggle("on", k === i));
     }
 
     function ringPos() {
       return ((pos % N) + N) % N;
     }
-
-    function paintScrub() {
-      let frac = 0;
-      if (N > 1) {
-        const v = ringPos();
-        frac = v <= N - 1 ? v / (N - 1) : 1 - (v - (N - 1));
-        frac = Math.max(0, Math.min(1, frac));
-      }
-      scrubFill.style.width = `${frac * 100}%`;
-      thumb.style.left = `${frac * scrub.clientWidth}px`;
-    }
-
-    function scrubTo(clientX: number) {
-      const r = scrub.getBoundingClientRect();
-      const frac = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-      const want = frac * (N - 1);
-      target = want + Math.round((pos - want) / N) * N;
-      kick();
-    }
-
-    let scrubbing = false;
-    const endScrub = (e?: PointerEvent) => {
-      if (!scrubbing) return;
-      scrubbing = false;
-      try {
-        if (e?.pointerId !== undefined)
-          scrub.releasePointerCapture(e.pointerId);
-      } catch {}
-      target = Math.round(target);
-      kick();
-    };
-
-    const onScrubDown = (e: PointerEvent) => {
-      startAuto();
-      scrubbing = true;
-      try {
-        scrub.setPointerCapture(e.pointerId);
-      } catch {}
-      scrubTo(e.clientX);
-      e.preventDefault();
-    };
-
-    const onScrubMove = (e: PointerEvent) => {
-      if (scrubbing) scrubTo(e.clientX);
-    };
-
-    scrub.addEventListener("pointerdown", onScrubDown, opts);
-    scrub.addEventListener("pointermove", onScrubMove, opts);
-    scrub.addEventListener("pointerup", endScrub as EventListener, opts);
-    scrub.addEventListener("pointercancel", endScrub as EventListener, opts);
-    window.addEventListener("pointerup", endScrub as EventListener, opts);
 
     let down = false;
     let startX = 0;
@@ -455,7 +353,7 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
       window.clearTimeout(swapTimer);
       window.clearTimeout(rt);
     };
-  }, [events, loggedIn, router]);
+  }, [events, loggedIn]);
 
   const total = events.length;
 
@@ -500,7 +398,9 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
                   className="hx-plate-media"
                   style={
                     ev.gambarUrl
-                      ? { backgroundImage: `url(${JSON.stringify(ev.gambarUrl)})` }
+                      ? {
+                          backgroundImage: `url(${JSON.stringify(ev.gambarUrl)})`,
+                        }
                       : undefined
                   }
                 />
@@ -517,86 +417,20 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
 
           {/* Caption Section (Gaya Murni Helix Drift) */}
           <section className="hx-caption" ref={capElRef} aria-live="polite">
-            <div className="hx-cap-head">
-              <span
-                className="hx-cap-no font-normal text-(--hx-accent)"
-                ref={capNoRef}
-              >
-                01
-              </span>
-              <span className="hx-cap-rule" />
-              <h3 className="hx-cap-title text-(--hx-ink)" ref={capTitleRef}>
-                {events[0].judul}
-              </h3>
-            </div>
+            <h3 className="hx-cap-title text-(--hx-ink)" ref={capTitleRef}>
+              {events[0].judul}
+            </h3>
             <p className="hx-cap-desc" ref={capDescRef}>
               {events[0].deskripsi}
             </p>
             <div className="hx-cap-meta" ref={capMetaRef}>
-              <span>{events[0].lokasi}</span>
-              <span>{events[0].tanggal}</span>
-              <span>{events[0].jenis}</span>
+              <span>Lokasi: {events[0].lokasi}</span>
+              <span>Tanggal: {events[0].tanggal}</span>
+              <span>Tipe: {events[0].jenis}</span>
             </div>
           </section>
-
-          {/* Scrub Bar */}
-          <div className="hx-scrub-shell">
-            <div
-              className="hx-scrub"
-              ref={scrubRef}
-              role="slider"
-              tabIndex={0}
-              aria-label="Posisi galeri event"
-              aria-valuemin={1}
-              aria-valuemax={total}
-              aria-valuenow={1}
-            >
-              <div className="hx-scrub-track" />
-              <div className="hx-scrub-fill" ref={scrubFillRef} />
-              <div className="hx-scrub-ticks" ref={ticksRef} />
-              <div className="hx-thumb" ref={thumbRef}>
-                <i />
-                <i />
-              </div>
-            </div>
-            <div className="hx-scrub-label" ref={scrubLabRef}>
-              01 / {pad(total)}
-            </div>
-          </div>
         </>
       )}
-
-      {/* Tombol Navigasi Khas Helix Drift (Capsule Transport Pill) */}
-      <div className="mt-10 flex items-center justify-center px-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-(--hx-pastel) bg-white/90 backdrop-blur-md p-1.5 shadow-xs">
-          {total > 1 && (
-            <button
-              type="button"
-              onClick={() => stepPrevRef.current()}
-              className="h-8 w-8 rounded-full border border-(--hx-pastel) bg-white text-xs font-semibold text-(--hx-accent) hover:border-(--hx-accent) transition-colors flex items-center justify-center cursor-pointer"
-              aria-label="Event sebelumnya"
-            >
-              ←
-            </button>
-          )}
-          <Link
-            href="/event"
-            className="px-5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-(--hx-accent) hover:text-(--hx-accent-dark) transition-colors"
-          >
-            Lihat Agenda Event
-          </Link>
-          {total > 1 && (
-            <button
-              type="button"
-              onClick={() => stepNextRef.current()}
-              className="h-8 w-8 rounded-full border border-(--hx-pastel) bg-white text-xs font-semibold text-(--hx-accent) hover:border-(--hx-accent) transition-colors flex items-center justify-center cursor-pointer"
-              aria-label="Event berikutnya"
-            >
-              →
-            </button>
-          )}
-        </div>
-      </div>
     </section>
   );
 }
