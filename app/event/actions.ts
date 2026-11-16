@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent, users } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 
 function parsePositiveInteger(value: unknown): number | null {
   if (typeof value === "number") {
@@ -151,15 +151,43 @@ export async function registerForEvent(input: { eventId: number | string }) {
       };
     }
 
-    const [result] = await getDb()
-      .insert(pendaftaranEvent)
-      .values({
-        eventId,
-        userId,
-      })
-      .returning({
-        idPendaftaran: pendaftaranEvent.idPendaftaran,
-      });
+    // Kurangi kuota hanya jika masih tersisa. Satu UPDATE bersyarat supaya dua
+    // pendaftaran bersamaan tidak bisa sama-sama lolos saat kuota tinggal 1.
+    const [kuotaTerkurangi] = await getDb()
+      .update(events)
+      .set({ kuotaPeserta: sql`${events.kuotaPeserta} - 1` })
+      .where(and(eq(events.idEvent, eventId), gt(events.kuotaPeserta, 0)))
+      .returning({ kuotaPeserta: events.kuotaPeserta });
+
+    if (!kuotaTerkurangi) {
+      return {
+        ok: false,
+        error: "Kuota peserta event ini sudah habis.",
+      };
+    }
+
+    let result: { idPendaftaran: number };
+
+    try {
+      [result] = await getDb()
+        .insert(pendaftaranEvent)
+        .values({
+          eventId,
+          userId,
+        })
+        .returning({
+          idPendaftaran: pendaftaranEvent.idPendaftaran,
+        });
+    } catch (insertError: unknown) {
+      // Insert gagal: kembalikan kuota yang sudah dikurangi supaya tidak
+      // berkurang tanpa ada peserta yang tercatat.
+      await getDb()
+        .update(events)
+        .set({ kuotaPeserta: sql`${events.kuotaPeserta} + 1` })
+        .where(eq(events.idEvent, eventId));
+
+      throw insertError;
+    }
 
     return {
       ok: true,
