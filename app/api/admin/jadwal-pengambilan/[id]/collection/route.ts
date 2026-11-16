@@ -27,7 +27,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const foto = formData.get("fotoBuktiPengambilan");
   const tanggal = formData.get("tanggalPengambilan");
   const bobot = typeof bobotTeks === "string" ? Number(bobotTeks) : NaN;
-  if (!Number.isFinite(bobot) || bobot < 0 || !(foto instanceof File) || !foto.type.startsWith("image/") || foto.size === 0 || foto.size > 5 * 1024 * 1024 || typeof tanggal !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(tanggal)) {
+  if (!Number.isFinite(bobot) || bobot < 0 || typeof foto !== "string" || !/^https:\/\/ik\.imagekit\.io\//.test(foto) || typeof tanggal !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(tanggal)) {
     return NextResponse.json({ error: "Berat atau foto bukti tidak valid." }, { status: 400 });
   }
 
@@ -47,7 +47,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Jadwal aktif tidak ditemukan." }, { status: 404 });
   }
 
-  const gambarData = `data:${foto.type};base64,${Buffer.from(await foto.arrayBuffer()).toString("base64")}`;
   const tanggalPengambilan = new Date(`${tanggal}:00+07:00`);
   if (Number.isNaN(tanggalPengambilan.getTime())) {
     return NextResponse.json({ error: "Tanggal dan jam pengambilan tidak valid." }, { status: 400 });
@@ -58,7 +57,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       jadwalId: idJadwal,
       tanggalPengambilan,
       bobotSampah: String(bobot),
-      fotoBuktiPengambilan: gambarData,
+      fotoBuktiPengambilan: foto,
     }).returning({ idRiwayat: riwayatPengambilan.idRiwayat });
     return NextResponse.json({ idRiwayat: catatan.idRiwayat }, { status: 201 });
   } catch (error) {
