@@ -67,6 +67,25 @@ export default function KeranjangClient({
             <Link href="/store" className="hx-btn-primary">
               Belanja Sekarang
             </Link>
+            <Link
+              href="/store"
+              className="mx-auto mt-4 flex w-fit items-center gap-2 text-sm font-medium text-(--hx-ink-2) transition-colors hover:text-(--hx-accent)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Kembali
+            </Link>
           </div>
         </main>
       </div>
@@ -83,6 +102,27 @@ export default function KeranjangClient({
   return (
     <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink)">
       <main className="relative z-10 container mx-auto max-w-7xl px-4 py-10 md:py-14">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="mb-6 flex items-center gap-2 text-sm font-medium text-(--hx-ink-2) transition-colors hover:text-(--hx-accent)"
+          aria-label="Kembali ke Detail Produk"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Kembali ke Detail Produk</span>
+        </button>
         <div className="mb-8">
           <nav className="mb-4 flex items-center gap-2 text-sm text-(--hx-ink-2)">
             <Link href="/store" className="hover:text-(--hx-accent)">
