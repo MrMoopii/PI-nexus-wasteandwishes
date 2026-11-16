@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageKitEventUpload } from "@/components/admin/ImageKitEventUpload";
+
+type PosterItem = {
+  url: string;
+  fileId: string;
+};
 
 type EventData = {
   idEvent: number;
@@ -14,6 +20,7 @@ type EventData = {
   lokasi: string | null;
   statusEvent: string;
   gambarUrl: string | null;
+  gambarFileId?: string | null;
 };
 
 export default function EditEventForm({
@@ -35,7 +42,24 @@ export default function EditEventForm({
   const [waktuSelesai, setWaktuSelesai] = useState(existingEvent.waktuSelesai || "");
   const [status, setStatus] = useState(existingEvent.statusEvent);
 
- // 1. Hitung isPastEvent secara langsung
+  // Poster yang tersimpan (URL + fileId). Jika tidak ada, tetap tampilkan URL lama.
+  const [poster, setPoster] = useState<PosterItem | null>(() => {
+    if (existingEvent.gambarUrl) {
+      return {
+        url: existingEvent.gambarUrl,
+        fileId: existingEvent.gambarFileId || "",
+      };
+    }
+    return null;
+  });
+  const [deletedFileId, setDeletedFileId] = useState<string | null>(null);
+
+  const handlePosterChange = (p: PosterItem | null, d: string | null) => {
+    setPoster(p);
+    setDeletedFileId(d);
+  };
+
+  // 1. Hitung isPastEvent secara langsung
   let isPastEvent = false;
   if (tanggal) {
     const eventDate = new Date(tanggal);
@@ -51,27 +75,41 @@ export default function EditEventForm({
   // 2. Tentukan status final secara langsung TANPA useEffect
   const finalStatus = isPastEvent ? "lalu" : (status === "lalu" ? "draft" : status);
 
+  const handleSubmit = async (formData: FormData) => {
+    formData.set("statusEvent", finalStatus);
+
+    // Poster dari ImageKit (kosongkan jika dihapus)
+    formData.set("gambarUrl", poster?.url ?? "");
+    formData.set("gambarFileId", poster?.fileId ?? "");
+
+    // Sinyal file poster lama yang perlu dibersihkan dari ImageKit
+    if (deletedFileId) {
+      formData.set("deletedPosterFileId", deletedFileId);
+    }
+
+    await updateEventAction(formData);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
-    <form action={updateEventAction} className="space-y-6">
+      <form action={handleSubmit} className="space-y-6">
         <input type="hidden" name="idEvent" value={existingEvent.idEvent} />
-        <input type="hidden" name="statusEvent" value={finalStatus} />
         <input type="hidden" name="fromTab" value={fromTab} />
         <div className="flex items-center gap-4 mb-8">
-            <button
+          <button
             type="button"
             onClick={() => {
               setTanggal(formattedDate);
               setWaktuSelesai(existingEvent.waktuSelesai || "");
               setStatus(existingEvent.statusEvent);
               router.push(`/admin/events?tab=${fromTab}`);
-            }} 
+            }}
             className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
-            >
+          >
             ← Batal
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
-      </div>       
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">Nama Event *</label>
@@ -152,13 +190,10 @@ export default function EditEventForm({
             />
           </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">URL Poster / Gambar</label>
-            <input
-              type="url"
-              name="gambarUrl"
-              defaultValue={existingEvent.gambarUrl || ""}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          <div className="md:col-span-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <ImageKitEventUpload
+              existingPoster={poster}
+              onChange={handlePosterChange}
             />
           </div>
         </div>

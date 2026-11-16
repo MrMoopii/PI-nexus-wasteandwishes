@@ -2,6 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ImageKitEventUpload } from "@/components/admin/ImageKitEventUpload";
+
+type PosterItem = {
+  url: string;
+  fileId: string;
+};
 
 export default function TambahEventForm({
   simpanEventAction,
@@ -25,6 +31,9 @@ export default function TambahEventForm({
   const [waktuSelesai, setWaktuSelesai] = useState("");
   const [status, setStatus] = useState("draft");
 
+  const [poster, setPoster] = useState<PosterItem | null>(null);
+  const [deletedFileId, setDeletedFileId] = useState<string | null>(null);
+
   // Hitung apakah event di masa lalu
   let isPastEvent = false;
   if (tanggal) {
@@ -41,8 +50,22 @@ export default function TambahEventForm({
   // Tentukan status akhir yang akan dikirim
   const finalStatus = isPastEvent ? "lalu" : status;
 
+  const handlePosterChange = (p: PosterItem | null, d: string | null) => {
+    setPoster(p);
+    setDeletedFileId(d);
+  };
+
   const handleSubmit = async (formData: FormData) => {
     formData.set("statusEvent", finalStatus);
+
+    // Poster dari ImageKit (kosongkan jika dihapus)
+    formData.set("gambarUrl", poster?.url ?? "");
+    formData.set("gambarFileId", poster?.fileId ?? "");
+
+    // Sinyal file poster lama yang perlu dibersihkan dari ImageKit
+    if (deletedFileId) {
+      formData.set("deletedPosterFileId", deletedFileId);
+    }
 
     startTransition(async () => {
       try {
@@ -149,17 +172,12 @@ export default function TambahEventForm({
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">URL Poster / Gambar</label>
-              <input
-                type="url"
-                name="gambarUrl"
-                placeholder="https://contoh.com/gambar-poster.jpg"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-600"
+            <div className="md:col-span-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <ImageKitEventUpload
+                existingPoster={null}
+                onChange={handlePosterChange}
+                disabled={isPending}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                *Sementara gunakan URL eksternal (misal dari Google Drive/Imgur). Fitur upload file lokal memerlukan cloud storage.
-              </p>
             </div>
           </div>
 

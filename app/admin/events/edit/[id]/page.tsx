@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { connection } from "next/server";
+import { deleteImageKitFile } from "@/lib/imagekit";
 import EditEventForm from "./EditEventForm"; // Import form client component
 
 export const instant = false;
@@ -69,8 +70,10 @@ export default async function EditEventPage({
     const waktuMulai = formData.get("waktuMulai") as string;
     const waktuSelesai = formData.get("waktuSelesai") as string;
     const lokasi = formData.get("lokasi") as string;
-    const statusInput = formData.get("statusEvent") as string; 
+    const statusInput = formData.get("statusEvent") as string;
     const gambarUrl = formData.get("gambarUrl") as string;
+    const gambarFileId = formData.get("gambarFileId") as string;
+    const deletedPosterFileId = formData.get("deletedPosterFileId") as string;
     
     const targetTab = fromTab;
     const now = new Date();
@@ -90,9 +93,14 @@ export default async function EditEventPage({
       }
     }
 
+    // Bersihkan poster lama yang diganti/dihapus sebelum menyimpan
+    if (deletedPosterFileId) {
+      await deleteImageKitFile(deletedPosterFileId);
+    }
+
     await getDb()
       .update(events)
-      .set({  
+      .set({
         namaEvent,
         jenisEvent,
         biayaEvent,
@@ -102,6 +110,7 @@ export default async function EditEventPage({
         lokasi,
         statusEvent: finalStatus,
         gambarUrl: gambarUrl || null,
+        gambarFileId: gambarFileId || null,
       })
       .where(eq(events.idEvent, idEvent));
 
