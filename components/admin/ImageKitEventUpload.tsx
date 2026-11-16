@@ -26,7 +26,7 @@ type ImageKitEventUploadProps = {
 };
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
 // Kompresi & resize di sisi browser agar upload ringan.
 async function compressImage(
@@ -223,9 +223,7 @@ export function ImageKitEventUpload({
         fileId: result.fileId,
       };
 
-      setUploadQueue((prev) =>
-        prev.filter((item) => item.tempId !== tempId),
-      );
+      setUploadQueue((prev) => prev.filter((item) => item.tempId !== tempId));
 
       // Ganti poster lama (fileId lama ikut dihapus dari ImageKit)
       const deletedFileId =
@@ -262,7 +260,7 @@ export function ImageKitEventUpload({
 
     if (file.size > MAX_FILE_SIZE) {
       setValidationError(
-        `Ukuran file "${file.name}" melebihi batas maksimal 5 MB.`,
+        `Ukuran file "${file.name}" melebihi batas maksimal 20 MB.`,
       );
       return;
     }
@@ -362,16 +360,32 @@ export function ImageKitEventUpload({
         />
 
         <div className="flex flex-col items-center justify-center space-y-2">
-          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-            📁
-          </div>
+          <svg
+            className="w-9 h-9 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 7.5 4.5 6h3.75L10.5 8h4.5A1.5 1.5 0 0 1 16.5 9.5V17a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 17V7.5Z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 13.25h4m-4 2.5h2.5"
+            />
+          </svg>
           <div>
             <p className="text-sm font-semibold text-slate-700">
               Seret dan lepaskan poster ke sini, atau{" "}
               <span className="text-blue-600 hover:underline">pilih file</span>
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Mendukung JPG, JPEG, PNG, WEBP hingga 5 MB. Otomatis dikompresi
+              Mendukung JPG, JPEG, PNG, WEBP hingga 20 MB. Otomatis dikompresi
               ke WebP sebelum diupload.
             </p>
           </div>
