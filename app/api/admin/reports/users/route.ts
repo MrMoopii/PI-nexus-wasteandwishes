@@ -1,15 +1,12 @@
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/require-admin";
 import { getDb } from "@/lib/db";
 import { dataLangganan, jadwal, jadwalJanjian, jadwalRutin, users } from "@/lib/db/schema";
 
-export async function GET(request: Request) {
+export async function GET() {
   const cek = await requireAdmin();
   if (!cek.ok) return NextResponse.json({ error: cek.pesan }, { status: cek.status });
-  const search = new URL(request.url).searchParams.get("search")?.trim() ?? "";
-  if (search.length < 2) return NextResponse.json([]);
-
   try {
     const hariIni = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
     const hasil = await getDb().select({
@@ -32,11 +29,10 @@ export async function GET(request: Request) {
       .where(and(
         eq(dataLangganan.statusLangganan, "aktif"),
         sql`${dataLangganan.tanggalAkhirLangganan} >= ${hariIni}::date`,
-        ilike(users.namaPelanggan, `%${search.replace(/[%,_]/g, "\\$&")}%`),
       ));
     return NextResponse.json(hasil);
   } catch (error) {
-    console.error("Gagal mencari jadwal pengguna aktif:", error);
-    return NextResponse.json({ error: "Pencarian pengguna belum dapat dilakukan." }, { status: 500 });
+    console.error("Gagal memuat jadwal pengguna aktif:", error);
+    return NextResponse.json({ error: "Daftar pengguna belum dapat dimuat." }, { status: 500 });
   }
 }
