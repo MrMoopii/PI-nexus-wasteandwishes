@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import { ImageKitReportUpload } from "@/components/admin/ImageKitReportUpload";
 
 interface PilihanJadwal {
   idJadwal: number;
@@ -64,7 +65,6 @@ function formatTanggalWaktu(value: string): string {
 
 export default function ReportsPage() {
   const [laporan, setLaporan] = useState<Laporan[]>([]);
-  const [cari, setCari] = useState("");
   const [hasilCari, setHasilCari] = useState<PilihanJadwal[]>([]);
   const [idUserDipilih, setIdUserDipilih] = useState<number | null>(null);
   const [jadwalDipilih, setJadwalDipilih] = useState<PilihanJadwal | null>(null);
@@ -73,7 +73,7 @@ export default function ReportsPage() {
   const [jenis, setJenis] = useState("");
   const [tanggalJam, setTanggalJam] = useState("");
   const [bobot, setBobot] = useState("");
-  const [foto, setFoto] = useState<File | null>(null);
+  const [foto, setFoto] = useState<{ url: string; fileId: string } | null>(null);
   const [fotoLama, setFotoLama] = useState<string | null>(null);
   const [fotoDilihat, setFotoDilihat] = useState<string | null>(null);
   const [pesan, setPesan] = useState("");
@@ -101,29 +101,28 @@ export default function ReportsPage() {
   }, [muatLaporan]);
 
   useEffect(() => {
-    if (dialog !== "buat" || cari.trim().length < 2) return;
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        try {
-          const response = await fetch(`/api/admin/reports/users?search=${encodeURIComponent(cari.trim())}`);
-          const data: unknown = await response.json();
-          if (!response.ok) throw new Error(isRecord(data) && typeof data.error === "string" ? data.error : "Pencarian pengguna gagal.");
-          if (!Array.isArray(data) || !data.every(isPilihan)) throw new Error("Format data pencarian tidak valid.");
-          setHasilCari(data);
-        } catch (error) {
-          console.error("Gagal mencari pengguna:", error);
-          setPesan(error instanceof Error ? error.message : "Pencarian pengguna gagal.");
-        }
-      })();
-    }, 250);
-    return () => window.clearTimeout(timer);
-  }, [cari, dialog]);
+    if (dialog !== "buat") return;
+    let aktif = true;
+    void (async () => {
+      try {
+        const response = await fetch("/api/admin/reports/users");
+        const data: unknown = await response.json();
+        if (!response.ok) throw new Error(isRecord(data) && typeof data.error === "string" ? data.error : "Daftar pengguna gagal dimuat.");
+        if (!Array.isArray(data) || !data.every(isPilihan)) throw new Error("Format data daftar pengguna tidak valid.");
+        if (aktif) setHasilCari(data);
+      } catch (error) {
+        console.error("Gagal memuat pengguna berlangganan aktif:", error);
+        if (aktif) setPesan(error instanceof Error ? error.message : "Daftar pengguna gagal dimuat.");
+      }
+    })();
+    return () => { aktif = false; };
+  }, [dialog]);
 
   const bukaBuat = () => {
     setJadwalDipilih(null);
     setIdUserDipilih(null);
     setJenis("");
-    setCari("");
+    setHasilCari([]);
     setTanggalJam("");
     setBobot("");
     setFoto(null);
@@ -156,7 +155,6 @@ export default function ReportsPage() {
     setIdEdit(item.idRiwayat);
     setJadwalDipilih(pilihan);
     setJenis(item.jenisJadwal);
-    setCari(`${item.namaPelanggan} (${item.email})`);
     setTanggalJam(formatTanggalWaktu(item.tanggalPengambilan));
     setBobot(item.bobotSampah);
     setFoto(null);
@@ -171,15 +169,11 @@ export default function ReportsPage() {
       setPesan("Pilih jadwal, isi tanggal/jam dan bobot, serta unggah foto bukti.");
       return;
     }
-    if (foto && (!foto.type.startsWith("image/") || foto.size > 5 * 1024 * 1024)) {
-      setPesan("Foto harus berupa gambar dan berukuran maksimal 5 MB.");
-      return;
-    }
     const formData = new FormData();
     formData.set("jadwalId", String(jadwalDipilih.idJadwal));
     formData.set("tanggalPengambilan", tanggalJam);
     formData.set("bobotSampah", bobot);
-    if (foto) formData.set("fotoBuktiPengambilan", foto);
+    if (foto) formData.set("fotoBuktiPengambilan", foto.url);
     setMenyimpan(true);
     try {
       const url = dialog === "edit" && idEdit !== null
@@ -260,15 +254,12 @@ export default function ReportsPage() {
           <form onSubmit={(event) => void simpan(event)} className="my-8 w-full max-w-xl space-y-4 rounded-xl bg-white p-6 shadow-xl">
             <h2 className="text-xl font-semibold">{dialog === "buat" ? "Buat Laporan Pengambilan" : "Edit Laporan Pengambilan"}</h2>
             {dialog === "buat" && <>
-              <label className="block text-sm font-medium">Cari nama pengguna berlangganan aktif
-              <input value={cari} onChange={(event) => { setCari(event.target.value); setHasilCari([]); setIdUserDipilih(null); setJenis(""); setJadwalDipilih(null); }} minLength={2} className="mt-1 w-full rounded border p-2" placeholder="Ketik minimal 2 karakter nama" />
-              </label>
-              {hasilCari.length > 0 && <label className="block text-sm font-medium">Pilih pengguna
+              <label className="block text-sm font-medium">Pilih pengguna
                 <select required value={idUserDipilih ?? ""} onChange={(event) => { setIdUserDipilih(Number(event.target.value)); setJenis(""); setJadwalDipilih(null); setTanggalJam(""); }} className="mt-1 w-full rounded border p-2">
                   <option value="" disabled>Pilih pengguna</option>
                   {Array.from(new Map(hasilCari.map((item) => [item.idUser, item])).values()).map((item) => <option key={item.idUser} value={item.idUser}>{item.namaPelanggan} ({item.email})</option>)}
                 </select>
-              </label>}
+              </label>
               {idUserDipilih !== null && <label className="block text-sm font-medium">Jenis pengambilan
                 <select required value={jenis} onChange={(event) => { setJenis(event.target.value); setJadwalDipilih(null); setTanggalJam(""); }} className="mt-1 w-full rounded border p-2">
                   <option value="" disabled>Pilih jenis pengambilan</option><option value="rutin">Rutin</option><option value="janjian">Janjian</option>
@@ -280,7 +271,7 @@ export default function ReportsPage() {
                   {hasilCari.filter((item) => item.idUser === idUserDipilih && item.jenisJadwal === jenis).map((item) => <option key={item.idJadwal} value={item.idJadwal}>{item.jenisJadwal === "rutin" ? item.hariPengambilan : item.tanggalJanjian ?? "Tanggal belum diatur"} pukul {item.jamPengambilan.slice(0, 5)}</option>)}
                 </select>
               </label>}
-              {cari.trim().length >= 2 && hasilCari.length === 0 && <p className="text-sm text-gray-500">Tidak ditemukan jadwal untuk pengguna dengan langganan aktif.</p>}
+              {hasilCari.length === 0 && <p className="text-sm text-gray-500">Tidak ditemukan pengguna dengan langganan aktif.</p>}
             </>}
             {jadwalDipilih && <>
               <p className="text-sm text-gray-600">Jadwal terpilih: {jadwalDipilih.namaPelanggan} · {jadwalDipilih.jenisJadwal === "rutin" ? jadwalDipilih.hariPengambilan : jadwalDipilih.tanggalJanjian ?? "Tanggal belum diatur"} · {jadwalDipilih.jamPengambilan.slice(0, 5)}</p>
@@ -290,9 +281,7 @@ export default function ReportsPage() {
               <label className="block text-sm font-medium">Bobot sampah (kg)
                 <input type="number" required min="0" step="0.01" value={bobot} onChange={(event) => setBobot(event.target.value)} className="mt-1 w-full rounded border p-2" />
               </label>
-              <label className="block text-sm font-medium">Foto bukti pengambilan (gambar, maks. 5 MB)
-                <input type="file" accept="image/*" required={dialog === "buat" && !fotoLama} onChange={(event) => setFoto(event.target.files?.[0] ?? null)} className="mt-1 block w-full rounded border p-2" />
-              </label>
+              <ImageKitReportUpload foto={foto} onChange={setFoto} disabled={menyimpan} />
               {fotoLama && !foto && <p className="text-xs text-gray-500">Foto lama tersimpan. Pilih file baru jika ingin menggantinya.</p>}
             </>}
             {pesan && <p role="alert" className="text-sm text-red-700">{pesan}</p>}
