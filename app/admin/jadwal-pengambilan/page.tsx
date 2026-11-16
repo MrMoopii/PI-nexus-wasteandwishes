@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import SchedulesManagementContent from "./SchedulesManagementContent";
+import JadwalManagementContent from "./JadwalManagementContent";
 
 function LoadingSkeleton() {
   return (
@@ -14,7 +14,7 @@ function LoadingSkeleton() {
 export default function SchedulesManagement() {
   return (
     <Suspense fallback={<LoadingSkeleton />}>
-      <SchedulesManagementContent />
+      <JadwalManagementContent />
     </Suspense>
   );
 }
