@@ -29,3 +29,12 @@ export function formatWaktu(
 
   return "Waktu acara menyusul";
 }
+
+/** Tanggal hari ini menurut zona waktu Asia/Jakarta, dalam format "YYYY-MM-DD"
+ *  (sama dengan nilai kolom `date` dari Drizzle).
+ * */
+export function tanggalHariIniJakarta(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(
+    new Date(),
+  );
+}

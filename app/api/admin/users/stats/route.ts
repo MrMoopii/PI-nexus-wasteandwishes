@@ -1,9 +1,10 @@
 import { requireAdmin } from "@/lib/require-admin";
 import { getDb } from "@/lib/db";
 import { users, dataLangganan } from "@/lib/db/schema";
-import { and, count, eq, gte } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { kondisiLanggananAktif } from "@/lib/langganan";
 
 export async function GET() {
   // Check apakah user adalah admin
@@ -24,17 +25,7 @@ export async function GET() {
     const [subscribedResult] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
-      .where(
-        and(
-          eq(dataLangganan.statusLangganan, "aktif"),
-          gte(
-            dataLangganan.tanggalAkhirLangganan,
-            new Intl.DateTimeFormat("en-CA", {
-              timeZone: "Asia/Jakarta",
-            }).format(new Date()),
-          ),
-        ),
-      );
+      .where(kondisiLanggananAktif());
 
     return NextResponse.json({
       total: Number(totalResult.count) || 0,

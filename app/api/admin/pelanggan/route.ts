@@ -4,6 +4,7 @@ import { users, dataLangganan } from "@/lib/db/schema";
 import { asc, count, eq, and, or, ilike, type SQL } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { keadaanLangganan } from "@/lib/langganan";
 
 export async function GET(request: Request) {
   // Check apakah user adalah admin
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
 
     const userList = await getDb()
       .select({
-        id: users.idUser,
+        idUser: users.idUser,
         namaPelanggan: users.namaPelanggan,
         email: users.email,
         nomorTelp: users.nomorTelp,
@@ -62,6 +63,8 @@ export async function GET(request: Request) {
         tanggalLahir: users.tanggalLahir,
         updatedAt: users.updatedAt,
         statusLangganan: dataLangganan.statusLangganan,
+        tanggalMulaiLangganan: dataLangganan.tanggalMulaiLangganan,
+        tanggalAkhirLangganan: dataLangganan.tanggalAkhirLangganan,
       })
       .from(users)
       .leftJoin(dataLangganan, eq(dataLangganan.userId, users.idUser))
@@ -70,8 +73,16 @@ export async function GET(request: Request) {
       .limit(limit)
       .offset(offset);
 
+    const pelanggan = userList.map(({ statusLangganan, ...sisa }) => ({
+      ...sisa,
+      keadaan: keadaanLangganan({
+        status: statusLangganan,
+        tanggalAkhir: sisa.tanggalAkhirLangganan,
+      }),
+    }));
+
     return NextResponse.json({
-      users: userList,
+      users: pelanggan,
       total: Number(totalResult.count) || 0,
       totalPages: Math.ceil((Number(totalResult.count) || 0) / limit),
     });
