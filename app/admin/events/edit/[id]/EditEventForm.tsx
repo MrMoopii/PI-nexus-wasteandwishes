@@ -39,7 +39,9 @@ export default function EditEventForm({
 
   // State untuk memantau perubahan input
   const [tanggal, setTanggal] = useState(formattedDate);
-  const [waktuSelesai, setWaktuSelesai] = useState(existingEvent.waktuSelesai || "");
+  const [waktuSelesai, setWaktuSelesai] = useState(
+    existingEvent.waktuSelesai || "",
+  );
   const [status, setStatus] = useState(existingEvent.statusEvent);
 
   // Poster yang tersimpan (URL + fileId). Jika tidak ada, tetap tampilkan URL lama.
@@ -73,7 +75,11 @@ export default function EditEventForm({
   }
 
   // 2. Tentukan status final secara langsung TANPA useEffect
-  const finalStatus = isPastEvent ? "lalu" : (status === "lalu" ? "draft" : status);
+  const finalStatus = isPastEvent
+    ? "lalu"
+    : status === "lalu"
+      ? "draft"
+      : status;
 
   const handleSubmit = async (formData: FormData) => {
     formData.set("statusEvent", finalStatus);
@@ -104,15 +110,18 @@ export default function EditEventForm({
               setStatus(existingEvent.statusEvent);
               router.push(`/admin/events?tab=${fromTab}`);
             }}
-            className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
           >
-            ← Batal
+            <span aria-hidden="true">←</span>
+            <span>Batal</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nama Event *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nama Event *
+            </label>
             <input
               type="text"
               name="namaEvent"
@@ -123,7 +132,9 @@ export default function EditEventForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Event *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Jenis Event *
+            </label>
             <input
               type="text"
               name="jenisEvent"
@@ -134,7 +145,9 @@ export default function EditEventForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Biaya Event (Rp) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Biaya Event (Rp) *
+            </label>
             <input
               type="number"
               name="biayaEvent"
@@ -146,7 +159,9 @@ export default function EditEventForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Pelaksanaan *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tanggal Pelaksanaan *
+            </label>
             <input
               type="date"
               name="tanggalPelaksanaan"
@@ -159,7 +174,9 @@ export default function EditEventForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Jam Mulai</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jam Mulai
+              </label>
               <input
                 type="time"
                 name="waktuMulai"
@@ -168,7 +185,9 @@ export default function EditEventForm({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Jam Selesai</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jam Selesai
+              </label>
               <input
                 type="time"
                 name="waktuSelesai"
@@ -180,7 +199,9 @@ export default function EditEventForm({
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Venue & Lokasi *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Venue & Lokasi *
+            </label>
             <input
               type="text"
               name="lokasi"
@@ -199,7 +220,9 @@ export default function EditEventForm({
         </div>
 
         <div className="border-t border-gray-200 pt-6 mt-8 flex items-center justify-end gap-4">
-          <label className="text-sm font-medium text-gray-700">Status Event:</label>
+          <label className="text-sm font-medium text-gray-700">
+            Status Event:
+          </label>
           <select
             name="statusEvent"
             value={finalStatus}
