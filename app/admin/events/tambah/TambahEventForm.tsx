@@ -84,9 +84,10 @@ export default function TambahEventForm({
         <button
           type="button"
           onClick={() => router.push(`/admin/events?tab=${fromTab}`)}
-          className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"
+          className="inline-flex items-center gap-2 rounded-lg border border-(--hx-ink-6, #e5e7eb) bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
         >
-          ← Kembali
+          <span aria-hidden="true">←</span>
+          <span>Batal</span>
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Buat Event Baru</h1>
       </div>
@@ -95,7 +96,9 @@ export default function TambahEventForm({
         <form action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nama Event *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nama Event *
+              </label>
               <input
                 type="text"
                 name="namaEvent"
@@ -106,7 +109,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Jenis / Kategori Event *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jenis / Kategori Event *
+              </label>
               <input
                 type="text"
                 name="jenisEvent"
@@ -117,7 +122,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Biaya Event (Rp) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Biaya Event (Rp) *
+              </label>
               <input
                 type="number"
                 name="biayaEvent"
@@ -129,7 +136,9 @@ export default function TambahEventForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Pelaksanaan *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tanggal Pelaksanaan *
+              </label>
               <input
                 type="date"
                 name="tanggalPelaksanaan"
@@ -142,7 +151,9 @@ export default function TambahEventForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jam Mulai</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Jam Mulai
+                </label>
                 <input
                   type="time"
                   name="waktuMulai"
@@ -150,7 +161,9 @@ export default function TambahEventForm({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jam Selesai</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Jam Selesai
+                </label>
                 <input
                   type="time"
                   name="waktuSelesai"
@@ -162,7 +175,9 @@ export default function TambahEventForm({
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Venue & Lokasi *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Venue & Lokasi *
+              </label>
               <input
                 type="text"
                 name="lokasi"
