@@ -48,6 +48,7 @@ export const events = pgTable("events", {
   waktuSelesai: time("waktu_selesai"),
   lokasi: text("lokasi"),
   gambarUrl: text("gambar_url"),
+  gambarFileId: text("gambar_file_id"),
   statusEvent: text("status_event").notNull().default("draft"),
   biayaEvent: numeric("biaya_event", { precision: 12, scale: 2 })
     .notNull()

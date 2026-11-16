@@ -54,6 +54,24 @@ body {
   font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
 }
 
+/* ── Scrollbar hide utility ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media print {
+  header,
+  footer,
+  .print-button,
+  .print-proof-footer .flex > p:last-child {
+    display: none !important;
+  }
+}
+
 main {
   background: transparent;
 }

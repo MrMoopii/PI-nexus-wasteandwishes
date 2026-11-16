@@ -87,17 +87,17 @@ function readNestedErrorValue(error: unknown, key: string): string {
 }
 
 export async function registerForEvent(input: { eventId: number | string }) {
-  const session = await auth();
+  const cek = await requireLogin();
 
-  if (!session?.user?.idUser) {
+  if (!cek.ok) {
     return {
       ok: false,
-      error: "Silakan login terlebih dahulu untuk mendaftar event.",
+      error: cek.pesan,
     };
   }
 
   const eventId = Number(input.eventId);
-  const userId = Number(session.user.idUser);
+  const userId = cek.idUser;
 
   if (!Number.isInteger(eventId) || eventId <= 0) {
     return {
@@ -113,6 +113,20 @@ export async function registerForEvent(input: { eventId: number | string }) {
       return {
         ok: false,
         error: "Event tidak ditemukan.",
+      };
+    }
+
+    const tanggalHariIni = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+    if (resolvedEvent.tanggalPelaksanaan < tanggalHariIni) {
+      return {
+        ok: false,
+        error: "Pendaftaran event telah ditutup.",
       };
     }
 

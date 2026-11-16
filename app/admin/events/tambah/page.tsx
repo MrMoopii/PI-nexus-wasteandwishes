@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import TambahEventForm from "./TambahEventForm";
 import { revalidatePath } from "next/cache";
+import { deleteImageKitFile } from "@/lib/imagekit";
 
 export default async function TambahEventPage({
   searchParams,
@@ -31,6 +32,8 @@ export default async function TambahEventPage({
     const biayaEvent = formData.get("biayaEvent") as string;
     const statusInput = formData.get("statusEvent") as string;
     const gambarUrl = formData.get("gambarUrl") as string;
+    const gambarFileId = formData.get("gambarFileId") as string;
+    const deletedPosterFileId = formData.get("deletedPosterFileId") as string;
 
     const now = new Date();
     let finalStatus = statusInput;
@@ -48,6 +51,11 @@ export default async function TambahEventPage({
       }
     }
 
+    // Bersihkan poster lama yang diganti/dihapus sebelum form disimpan
+    if (deletedPosterFileId) {
+      await deleteImageKitFile(deletedPosterFileId);
+    }
+
     await getDb()
       .insert(events)
       .values({
@@ -60,6 +68,7 @@ export default async function TambahEventPage({
         biayaEvent: biayaEvent || "0",
         statusEvent: finalStatus,
         gambarUrl: gambarUrl || null,
+        gambarFileId: gambarFileId || null,
       });
 
     revalidatePath("/admin/events", "layout");
