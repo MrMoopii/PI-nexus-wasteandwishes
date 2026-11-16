@@ -25,8 +25,8 @@ interface Stats {
   totalWaste: number;
 }
 
-export default function SchedulesManagementContent() {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+export default function JadwalManagementContent() {
+  const [jadwal, setJadwal] = useState<Schedule[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalJadwal: 0,
     rutinCount: 0,
@@ -56,16 +56,16 @@ export default function SchedulesManagementContent() {
       setActionError(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Jadwal gagal diperbarui.");
       return;
     }
-    setSchedules((current) => current.map((schedule) => {
-      if (schedule.id !== editSchedule.id) return schedule;
+    setJadwal((current) => current.map((jadwalItem) => {
+      if (jadwalItem.id !== editSchedule.id) return jadwalItem;
       return {
-        ...schedule,
-        hariPengambilan: editSchedule.jenisJadwal === "rutin" ? editFields.hari : schedule.hariPengambilan,
+        ...jadwalItem,
+        hariPengambilan: editSchedule.jenisJadwal === "rutin" ? editFields.hari : jadwalItem.hariPengambilan,
         jamPengambilan: `${editFields.jam}:00`,
-        tanggalJanjian: editSchedule.jenisJadwal === "janjian" ? editFields.tanggal : schedule.tanggalJanjian,
-        janjian: editSchedule.jenisJadwal === "janjian" && schedule.janjian
-          ? { ...schedule.janjian, status: editFields.status }
-          : schedule.janjian,
+        tanggalJanjian: editSchedule.jenisJadwal === "janjian" ? editFields.tanggal : jadwalItem.tanggalJanjian,
+        janjian: editSchedule.jenisJadwal === "janjian" && jadwalItem.janjian
+          ? { ...jadwalItem.janjian, status: editFields.status }
+          : jadwalItem.janjian,
       };
     }));
     setEditSchedule(null);
@@ -91,13 +91,13 @@ export default function SchedulesManagementContent() {
         if (search) params.set("search", search);
         if (type) params.set("type", type);
 
-        const [schedulesRes, statsRes] = await Promise.all([
+        const [jadwalRes, statsRes] = await Promise.all([
           fetch(`/api/admin/jadwal-pengambilan?${params}`),
           fetch("/api/admin/jadwal-pengambilan/stats"),
         ]);
-        const schedulesData = await schedulesRes.json();
+        const jadwalData = await jadwalRes.json();
         const statsData = await statsRes.json();
-        setSchedules(schedulesData);
+        setJadwal(jadwalData);
         setStats(statsData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -245,24 +245,24 @@ export default function SchedulesManagementContent() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {schedules.map((schedule) => (
-                <tr key={schedule.id} className="hover:bg-gray-50">
+              {jadwal.map((jadwalItem) => (
+                <tr key={jadwalItem.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    #{schedule.id}
+                    #{jadwalItem.id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium">
-                        {schedule.user?.namaPelanggan
+                        {jadwalItem.user?.namaPelanggan
                           ?.slice(0, 1)
                           .toUpperCase() || "?"}
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">
-                          {schedule.user?.namaPelanggan || "Unknown"}
+                          {jadwalItem.user?.namaPelanggan || "Unknown"}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {schedule.user?.email || "-"}
+                          {jadwalItem.user?.email || "-"}
                         </p>
                       </div>
                     </div>
@@ -270,34 +270,34 @@ export default function SchedulesManagementContent() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        schedule.jenisJadwal === "rutin"
+                        jadwalItem.jenisJadwal === "rutin"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {schedule.jenisJadwal === "rutin" ? "Rutin" : "Janjian"}
+                      {jadwalItem.jenisJadwal === "rutin" ? "Rutin" : "Janjian"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <div>
-                          <p className="font-medium">{schedule.jenisJadwal === "rutin" ? schedule.hariPengambilan : schedule.tanggalJanjian ?? "Tanggal belum diatur"}</p>
-                      <p className="text-gray-500">{schedule.jamPengambilan}</p>
+                          <p className="font-medium">{jadwalItem.jenisJadwal === "rutin" ? jadwalItem.hariPengambilan : jadwalItem.tanggalJanjian ?? "Tanggal belum diatur"}</p>
+                      <p className="text-gray-500">{jadwalItem.jamPengambilan}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {schedule.janjian && (
+                    {jadwalItem.janjian && (
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          schedule.janjian.status === "dikonfirmasi"
+                          jadwalItem.janjian.status === "dikonfirmasi"
                             ? "bg-green-100 text-green-700"
-                            : schedule.janjian.status === "ditolak"
+                            : jadwalItem.janjian.status === "ditolak"
                               ? "bg-red-100 text-red-700"
                               : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {schedule.janjian.status === "dikonfirmasi"
+                        {jadwalItem.janjian.status === "dikonfirmasi"
                           ? "Dikonfirmasi"
-                          : schedule.janjian.status === "ditolak"
+                          : jadwalItem.janjian.status === "ditolak"
                             ? "Ditolak"
                             : "Menunggu"}
                       </span>
@@ -308,23 +308,23 @@ export default function SchedulesManagementContent() {
                       className="text-teal-600 hover:text-teal-700 font-medium text-sm mr-3"
                       onClick={() => {
                         setEditFields({
-                          hari: schedule.hariPengambilan,
-                          jam: schedule.jamPengambilan.slice(0, 5),
-                          tanggal: schedule.tanggalJanjian ?? "",
-                          status: schedule.janjian?.status ?? "menunggu",
+                          hari: jadwalItem.hariPengambilan,
+                          jam: jadwalItem.jamPengambilan.slice(0, 5),
+                          tanggal: jadwalItem.tanggalJanjian ?? "",
+                          status: jadwalItem.janjian?.status ?? "menunggu",
                         });
                         setActionError("");
-                        setEditSchedule(schedule);
+                        setEditSchedule(jadwalItem);
                       }}
                     >Edit</button>
                     <button
                       className="text-red-600 hover:text-red-700 font-medium text-sm"
-                      onClick={() => { setActionError(""); setDeleteSchedule(schedule); }}
+                      onClick={() => { setActionError(""); setDeleteSchedule(jadwalItem); }}
                     >Hapus</button>
                   </td>
                 </tr>
               ))}
-              {schedules.length === 0 && (
+              {jadwal.length === 0 && (
                 <tr>
                   <td
                     colSpan={6}
