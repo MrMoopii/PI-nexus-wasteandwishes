@@ -12,9 +12,11 @@ type PosterItem = {
 export default function TambahEventForm({
   simpanEventAction,
   fromTab,
+  pesanError,
 }: {
   simpanEventAction: (formData: FormData) => Promise<void>;
   fromTab: string;
+  pesanError?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -93,6 +95,11 @@ export default function TambahEventForm({
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+        {pesanError ? (
+          <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {pesanError}
+          </p>
+        ) : null}
         <form action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
@@ -137,6 +144,20 @@ export default function TambahEventForm({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kuota Peserta *
+              </label>
+              <input
+                type="number"
+                name="kuotaPeserta"
+                min="0"
+                required
+                placeholder="Contoh: 50"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tanggal Pelaksanaan *
               </label>
               <input
@@ -149,7 +170,7 @@ export default function TambahEventForm({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:col-span-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Jam Mulai
