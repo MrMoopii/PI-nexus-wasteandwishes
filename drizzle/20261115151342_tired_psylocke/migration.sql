@@ -1,0 +1,1 @@
+ALTER TABLE "events" ADD COLUMN "gambar_file_id" text;
