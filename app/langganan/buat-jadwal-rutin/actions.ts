@@ -31,7 +31,7 @@ export async function simpanJadwalRutin(formData: FormData) {
     typeof hari2 !== "string" || !HARI.includes(hari2) || hari1 === hari2 ||
     !jamValid(jam1) || !jamValid(jam2) ||
     (mode !== "baru" && mode !== "ubah")
-  ) redirect("/langganan/jadwal?status=input-tidak-valid");
+  ) redirect("/langganan/buat-jadwal-rutin?status=input-tidak-valid");
 
   const db = getDb();
   const hariIni = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
@@ -52,15 +52,15 @@ export async function simpanJadwalRutin(formData: FormData) {
       sql`${jadwalRutin.tanggalSelesai} >= ${hariIni}::date`,
     ));
 
-  if (mode === "baru" && milikSaya.length > 0) redirect("/langganan/jadwal?status=sudah-ada");
-  if (mode === "ubah" && milikSaya.length !== 2) redirect("/langganan/jadwal?status=jadwal-tidak-lengkap");
+  if (mode === "baru" && milikSaya.length > 0) redirect("/langganan/buat-jadwal-rutin?status=sudah-ada");
+  if (mode === "ubah" && milikSaya.length !== 2) redirect("/langganan/buat-jadwal-rutin?status=jadwal-tidak-lengkap");
 
   if (mode === "ubah") {
     if (milikSaya.some(({ mulai }) => {
       const mulaiMinggu = tambahHari(mulai, -((new Date(`${mulai}T00:00:00Z`).getUTCDay() + 6) % 7));
       return hariIni < tambahHari(mulaiMinggu, 7);
     })) {
-      redirect("/langganan/jadwal?status=belum-boleh-ubah");
+      redirect("/langganan/buat-jadwal-rutin?status=belum-boleh-ubah");
     }
   }
 
@@ -82,7 +82,7 @@ export async function simpanJadwalRutin(formData: FormData) {
         sql`${dataLangganan.tanggalAkhirLangganan} >= ${hariIni}::date`,
         sql`${jadwalRutin.tanggalSelesai} >= ${hariIni}::date`,
       )).limit(1);
-    if (bentrok) redirect("/langganan/jadwal?status=slot-terisi");
+    if (bentrok) redirect("/langganan/buat-jadwal-rutin?status=slot-terisi");
   }
 
   const tanggalHariIni = new Date(`${hariIni}T00:00:00Z`);
@@ -107,5 +107,5 @@ export async function simpanJadwalRutin(formData: FormData) {
     await db.insert(jadwalRutin).values({ jadwalId: baru.id, tanggalMulai, tanggalSelesai: selesai });
   }
 
-  redirect("/langganan/jadwal?status=tersimpan");
+  redirect("/langganan/buat-jadwal-rutin?status=tersimpan");
 }

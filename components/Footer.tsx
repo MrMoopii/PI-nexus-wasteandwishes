@@ -44,11 +44,11 @@ export default function Footer() {
             Hubungi Kami
           </h2>
           <p className="mb-3 text-base leading-6 text-white/60">
-            <strong className="text-white">📍 Alamat:</strong> Nglarang no 37,
+            <strong className="text-white">Alamat:</strong> Nglarang no 37,
             Malangrejo, RT 5/RW 35, Wedomartani, Ngemplak, Sleman
           </p>
           <p className="mb-3 text-base text-white/60">
-            <strong className="text-white">💬 WhatsApp:</strong>
+            <strong className="text-white">WhatsApp:</strong>
             <br />
             <a
               className="transition-colors hover:text-waste hover:[text-shadow:0_0_5px_rgb(23_175_176/30%)]"
@@ -60,7 +60,7 @@ export default function Footer() {
             </a>
           </p>
           <p className="text-base text-white/60">
-            <strong className="text-white">📸 Instagram:</strong>
+            <strong className="text-white">Instagram:</strong>
             <br />
             <a
               className="transition-colors hover:text-waste hover:[text-shadow:0_0_5px_rgb(23_175_176/30%)]"

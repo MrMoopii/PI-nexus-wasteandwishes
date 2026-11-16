@@ -44,7 +44,7 @@ export default function SchedulesManagementContent() {
   const simpanEdit = async () => {
     if (!editSchedule) return;
     setActionError("");
-    const response = await fetch(`/api/admin/schedules/${editSchedule.id}`, {
+    const response = await fetch(`/api/admin/jadwal-pengambilan/${editSchedule.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editSchedule.jenisJadwal === "rutin"
@@ -56,14 +56,25 @@ export default function SchedulesManagementContent() {
       setActionError(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Jadwal gagal diperbarui.");
       return;
     }
+    setSchedules((current) => current.map((schedule) => {
+      if (schedule.id !== editSchedule.id) return schedule;
+      return {
+        ...schedule,
+        hariPengambilan: editSchedule.jenisJadwal === "rutin" ? editFields.hari : schedule.hariPengambilan,
+        jamPengambilan: `${editFields.jam}:00`,
+        tanggalJanjian: editSchedule.jenisJadwal === "janjian" ? editFields.tanggal : schedule.tanggalJanjian,
+        janjian: editSchedule.jenisJadwal === "janjian" && schedule.janjian
+          ? { ...schedule.janjian, status: editFields.status }
+          : schedule.janjian,
+      };
+    }));
     setEditSchedule(null);
-    window.location.reload();
   };
 
   const hapusJadwal = async () => {
     if (!deleteSchedule) return;
     setActionError("");
-    const response = await fetch(`/api/admin/schedules/${deleteSchedule.id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/jadwal-pengambilan/${deleteSchedule.id}`, { method: "DELETE" });
     const result: unknown = await response.json();
     if (!response.ok) {
       setActionError(typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Jadwal gagal dihapus.");
@@ -81,8 +92,8 @@ export default function SchedulesManagementContent() {
         if (type) params.set("type", type);
 
         const [schedulesRes, statsRes] = await Promise.all([
-          fetch(`/api/admin/schedules?${params}`),
-          fetch("/api/admin/schedules/stats"),
+          fetch(`/api/admin/jadwal-pengambilan?${params}`),
+          fetch("/api/admin/jadwal-pengambilan/stats"),
         ]);
         const schedulesData = await schedulesRes.json();
         const statsData = await statsRes.json();
@@ -279,12 +290,16 @@ export default function SchedulesManagementContent() {
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           schedule.janjian.status === "dikonfirmasi"
                             ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
+                            : schedule.janjian.status === "ditolak"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
                         {schedule.janjian.status === "dikonfirmasi"
                           ? "Dikonfirmasi"
-                          : "Menunggu"}
+                          : schedule.janjian.status === "ditolak"
+                            ? "Ditolak"
+                            : "Menunggu"}
                       </span>
                     )}
                   </td>

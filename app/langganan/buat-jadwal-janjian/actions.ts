@@ -3,6 +3,7 @@
 import { getDb } from "@/lib/db";
 import { dataLangganan } from "@/lib/db/schema";
 import { sql, eq, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireLogin } from "@/lib/require-login";
 
@@ -11,18 +12,15 @@ export async function ajukanJadwalJanjian(formData: FormData) {
   if (!cek.ok) {
     redirect("/auth/login");
   }
+  if (cek.session.user.peran !== "user") {
+    redirect("/langganan");
+  }
   const idUser = cek.idUser;
 
-  const hariPengambilan = formData.get("hariPengambilan");
   const jamPengambilan = formData.get("jamPengambilan");
   const tanggalJanjian = formData.get("tanggalJanjian");
   const keteranganTujuan = formData.get("keteranganTujuan");
 
-  const hariValid =
-    typeof hariPengambilan === "string" &&
-    ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"].includes(
-      hariPengambilan,
-    );
   const jamValid =
     typeof jamPengambilan === "string" &&
     /^(?:0[89]|1[0-4]):[0-5]\d$|^15:00$/.test(jamPengambilan);
@@ -35,9 +33,19 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     /^\d{4}-\d{2}-\d{2}$/.test(tanggalJanjian) &&
     new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) === tanggalJanjian;
 
-  if (!(hariValid && jamValid && tujuanValid && tanggalValid)) {
-    redirect("/buat-jadwal-janjian?status=input-tidak-valid");
+  if (!(jamValid && tujuanValid && tanggalValid)) {
+    redirect("/langganan/buat-jadwal-janjian?status=input-tidak-valid");
   }
+
+  const hariPengambilan = [
+    "Minggu",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+  ][new Date(`${tanggalJanjian}T00:00:00Z`).getUTCDay()];
 
   const hariIni = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
@@ -55,7 +63,7 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     .limit(1);
 
   if (!langgananAktif) {
-    redirect("/buat-jadwal-janjian?status=langganan-tidak-aktif");
+    redirect("/langganan/buat-jadwal-janjian?status=langganan-tidak-aktif");
   }
 
   await getDb().execute(sql`
@@ -74,5 +82,6 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     FROM jadwal_baru
   `);
 
-  redirect("/buat-jadwal-janjian?status=permintaan-terkirim");
+  revalidatePath("/langganan/buat-jadwal-janjian");
+  redirect("/langganan/buat-jadwal-janjian?status=permintaan-terkirim");
 }

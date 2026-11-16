@@ -8,7 +8,7 @@ const adminNavigation = [
   { name: "Data Pengguna", href: "/admin/users", category: "NAVIGATION" },
   {
     name: "Jadwal Pengambilan",
-    href: "/admin/schedules",
+    href: "/admin/jadwal-pengambilan",
     category: "NAVIGATION",
   },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
