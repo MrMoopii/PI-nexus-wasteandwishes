@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { events, pendaftaranEvent } from "@/lib/db/schema";
@@ -47,6 +47,12 @@ export async function hapusPesertaEvent(formData: FormData) {
   if (!dihapus) {
     return { error: "Peserta tidak ditemukan." };
   }
+
+  // Kursi yang ditinggalkan peserta dikembalikan ke kuota event.
+  await getDb()
+    .update(events)
+    .set({ kuotaPeserta: sql`${events.kuotaPeserta} + 1` })
+    .where(eq(events.idEvent, eventId));
 
   revalidatePath(`/admin/peserta-event/${eventId}`);
   return { ok: true };

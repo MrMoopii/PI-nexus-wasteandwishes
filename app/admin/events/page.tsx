@@ -16,7 +16,6 @@ export default async function AdminEventPage({
 
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
-  
 
   let allEvents = await getDb()
     .select()
@@ -37,7 +36,7 @@ export default async function AdminEventPage({
     } else {
       eventEnd.setHours(23, 59, 59, 999);
     }
-    
+
     const eventStart = new Date(event.tanggalPelaksanaan);
     if (event.waktuMulai) {
       const [h, m] = event.waktuMulai.split(":");
@@ -92,7 +91,7 @@ export default async function AdminEventPage({
   const dataEvents = allEvents.filter((event) => {
     if (currentTab === "draft") {
       return event.statusEvent === "draft";
-    } 
+    }
 
     let isPast = false;
     if (event.tanggalPelaksanaan) {
@@ -119,7 +118,6 @@ export default async function AdminEventPage({
 
     return false;
   });
-   
 
   return (
     <div className="p-6 max-w-7xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
@@ -131,7 +129,7 @@ export default async function AdminEventPage({
           href="?tab=aktif"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "aktif"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -141,7 +139,7 @@ export default async function AdminEventPage({
           href="?tab=draft"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "draft"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -151,7 +149,7 @@ export default async function AdminEventPage({
           href="?tab=lalu"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "lalu"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -165,12 +163,12 @@ export default async function AdminEventPage({
         {currentTab !== "lalu" && (
           <Link
             href={`/admin/events/tambah?t=${crypto.randomUUID()}`}
-            className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer group"
+            className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-(--hx-accent)/50 rounded-xl hover:border-(--hx-accent) hover:bg-[var(--hx-accent)]/5 transition-colors cursor-pointer group"
           >
-            <span className="text-5xl text-orange-500 font-light mb-4 group-hover:scale-110 transition-transform">
+            <span className="text-5xl text-(--hx-accent) font-light mb-4 group-hover:scale-110 transition-transform">
               +
             </span>
-            <span className="text-orange-500 font-semibold text-sm">
+            <span className="text-(--hx-accent) font-semibold text-sm">
               Buat Event Baru
             </span>
           </Link>
@@ -191,7 +189,6 @@ export default async function AdminEventPage({
         {dataEvents.map((event) => {
           const displayStatus =
             currentTab === "lalu" ? "lalu" : event.statusEvent;
-
 
           return (
             <div
@@ -219,7 +216,7 @@ export default async function AdminEventPage({
                   <h3 className="font-bold text-gray-900 text-lg mb-1 leading-tight line-clamp-2">
                     {event.namaEvent}
                   </h3>
-                  <p className="text-orange-500 text-xs font-medium mb-4">
+                  <p className="text-(--hx-accent) text-xs font-medium mb-4">
                     {event.jenisEvent}
                   </p>
 
@@ -267,9 +264,10 @@ export default async function AdminEventPage({
                 <Link
                   href={`/admin/events/edit/${event.idEvent}?from=${currentTab}&t=${crypto.randomUUID()}`}
                   prefetch={false}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-(--hx-ink-6, #e5e7eb) bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent) cursor-pointer"
                 >
-                  Edit Event ➔
+                  <span>Edit Event</span>
+                  <span aria-hidden="true">➔</span>
                 </Link>
               </div>
             </div>
