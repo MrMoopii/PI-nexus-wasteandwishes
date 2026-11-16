@@ -1,12 +1,13 @@
 import { requireAdmin } from "@/lib/require-admin";
 import { getDb } from "@/lib/db";
+import { kondisiLanggananAktif } from "@/lib/langganan";
 import {
   users,
   dataLangganan,
   events,
   riwayatPengambilan,
 } from "@/lib/db/schema";
-import { and, count, eq, gte, sql } from "drizzle-orm";
+import { count, gte, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { readdirSync } from "fs";
@@ -24,18 +25,10 @@ export async function GET() {
   h.get("x-vercel-ip-city");
   try {
     const [totalUsers] = await getDb().select({ count: count() }).from(users);
-    const hariIniJakarta = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Jakarta",
-    }).format(new Date());
     const [activeSubscriptions] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
-      .where(
-        and(
-          eq(dataLangganan.statusLangganan, "aktif"),
-          gte(dataLangganan.tanggalAkhirLangganan, hariIniJakarta),
-        ),
-      );
+      .where(kondisiLanggananAktif);
     const [totalEvents] = await getDb().select({ count: count() }).from(events);
 
     // Get waste collected this month

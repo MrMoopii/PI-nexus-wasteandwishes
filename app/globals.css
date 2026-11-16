@@ -271,24 +271,6 @@ h6 {
   border-radius: 3px;
 }
 
-.hx-plate-no {
-  position: absolute;
-  left: 0;
-  bottom: -30px;
-  font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 0.9rem;
-  color: var(--hx-ink-3);
-  letter-spacing: 0.04em;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.hx-plate.is-centre .hx-plate-no {
-  opacity: 1;
-}
-
 .hx-plate.press .hx-plate-media {
   transform: scale(0.988);
 }
@@ -318,31 +300,9 @@ h6 {
   transform: translateY(6px);
 }
 
-.hx-cap-head {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.hx-cap-no {
-  font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.15rem;
-  color: var(--hx-accent);
-}
-
-.hx-cap-rule {
-  flex: 0 0 34px;
-  height: 1px;
-  background: var(--hx-pastel);
-  transform: translateY(-4px);
-}
-
 .hx-cap-title {
   font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
-  font-weight: 400;
+  font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -359,117 +319,14 @@ h6 {
 
 .hx-cap-meta {
   margin-top: 0.7rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--hx-ink-3);
+  color: var(--hx-ink);
+  font-weight: 600;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-}
-
-/* ── Scrub Bar (Slider Bawah) ── */
-.hx-scrub-shell {
-  margin: 1.9rem auto 0;
-  width: 340px;
-  max-width: calc(100vw - 44px);
-}
-
-.hx-scrub {
-  position: relative;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  touch-action: none;
-  cursor: pointer;
-}
-
-.hx-scrub:focus-visible {
-  outline: 2px solid var(--hx-accent);
-  outline-offset: 6px;
-  border-radius: 4px;
-}
-
-.hx-scrub-track {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--hx-sunk);
-  box-shadow:
-    inset 0 1px 2px rgba(90, 110, 145, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.hx-scrub-fill {
-  position: absolute;
-  left: 0;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--hx-pastel-deep);
-  width: 0;
-}
-
-.hx-scrub-ticks {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 26px;
-  pointer-events: none;
-}
-
-.hx-tick {
-  position: absolute;
-  top: 50%;
-  width: 1px;
-  height: 9px;
-  margin-top: -4.5px;
-  background: var(--hx-pastel);
-  transition:
-    height 0.3s var(--hx-ease),
-    background 0.3s,
-    margin-top 0.3s var(--hx-ease);
-}
-
-.hx-tick.on {
-  height: 13px;
-  margin-top: -6.5px;
-  background: var(--hx-accent);
-}
-
-.hx-thumb {
-  position: absolute;
-  top: 50%;
-  width: 34px;
-  height: 14px;
-  margin-top: -7px;
-  margin-left: -17px;
-  border-radius: 7px;
-  background: #fff;
-  border: 1px solid var(--hx-pastel);
-  box-shadow: 0 3px 8px rgba(90, 110, 145, 0.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  pointer-events: none;
-}
-
-.hx-thumb i {
-  width: 1px;
-  height: 6px;
-  background: var(--hx-pastel-deep);
-  display: block;
-}
-
-.hx-scrub-label {
-  margin-top: 0.7rem;
-  text-align: center;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  color: var(--hx-ink-3);
-  font-variant-numeric: tabular-nums;
+  gap: 0.5rem 1.6rem;
 }
 
 /* ── Sheets & Facts Section ── */

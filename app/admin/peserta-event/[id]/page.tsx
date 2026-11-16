@@ -61,7 +61,6 @@ async function DetailPesertaEvent({
     .orderBy(asc(pendaftaranEvent.tanggalDaftar));
 
   const biaya = Number(eventDipilih.biayaEvent);
-  const plateNo = String(eventDipilih.idEvent).padStart(2, "0");
 
   return (
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
@@ -72,18 +71,15 @@ async function DetailPesertaEvent({
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/admin/peserta-event"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-(--hx-ink-2) hover:text-(--hx-accent)"
-          >
-            <span aria-hidden="true">←</span>
-            <span>Kembali ke Peserta Event</span>
-          </Link>
-          <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase">
-            Plate {plateNo}
-          </span>
-        </div>
+      <div className="mb-6 flex items-center justify-between">
+        <Link
+          href="/admin/peserta-event"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
+        >
+          <span aria-hidden="true">←</span>
+          <span>Kembali ke Peserta Event</span>
+        </Link>
+      </div>
 
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
           <div className="flex flex-col gap-6 lg:col-span-5">
@@ -132,7 +128,10 @@ async function DetailPesertaEvent({
                 {formatTanggal(eventDipilih.tanggalPelaksanaan)}
               </Fakta>
               <Fakta label="Waktu & Sesi">
-                {formatWaktu(eventDipilih.waktuMulai, eventDipilih.waktuSelesai)}
+                {formatWaktu(
+                  eventDipilih.waktuMulai,
+                  eventDipilih.waktuSelesai,
+                )}
               </Fakta>
               <Fakta label="Lokasi Pertemuan">
                 {eventDipilih.lokasi || "Lokasi acara menyusul"}
