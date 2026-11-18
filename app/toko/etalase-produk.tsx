@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import TombolKeranjang from "@/app/store/tombol-keranjang";
+import TombolKeranjang from "@/app/toko/tombol-keranjang";
 import { useMemo, useState } from "react";
 import type { produk } from "@/lib/db/schema";
 
@@ -124,7 +124,7 @@ export default function EtalaseProduk({
                 {hasil.map((item) => (
                   <Link
                     key={item.idProduk}
-                    href={`/store/detail/${item.idProduk}`}
+                    href={`/toko/detail/${item.idProduk}`}
                     className="hx-card group p-3"
                   >
                     <div className="mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-(--hx-sunk)">

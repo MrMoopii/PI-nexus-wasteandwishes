@@ -1,4 +1,4 @@
-import DetailProdukClient from "@/app/store/detail/[id]/detail-produk-client";
+import DetailProdukClient from "@/app/toko/detail/[id]/detail-produk-client";
 import { Suspense } from "react";
 import { eq } from "drizzle-orm";
 import { connection } from "next/server";

@@ -40,10 +40,10 @@ type FieldErrors = {
 export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
   const [formData, setFormData] = useState({
     nama: produk?.nama ?? "",
-    harga: produk?.harga ?? 0,
+    harga: produk ? String(produk.harga) : "",
     jenis: produk?.jenis ?? "Pupuk",
     deskripsi: produk?.deskripsi ?? "",
-    stok: produk?.stok ?? 0,
+    stok: produk ? String(produk.stok) : "",
     berat: produk?.berat ?? "",
   });
 
@@ -109,12 +109,14 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
       errors.nama = "Nama produk tidak boleh kosong";
     }
 
-    if (formData.harga <= 0) {
-      errors.harga = "Harga harus lebih dari 0";
+    const hargaNum = parseInt(formData.harga, 10);
+    if (!Number.isInteger(hargaNum) || hargaNum <= 0) {
+      errors.harga = "Harga harus berupa angka lebih dari 0";
     }
 
-    if (formData.stok < 0) {
-      errors.stok = "Stok tidak boleh negatif";
+    const stokNum = formData.stok === "" ? 0 : parseInt(formData.stok, 10);
+    if (!Number.isInteger(stokNum) || stokNum < 0) {
+      errors.stok = "Stok harus berupa angka tidak negatif";
     }
 
     setFieldErrors(errors);
@@ -167,8 +169,8 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
       }
       formDataToSend.append("namaProduk", formData.nama);
       formDataToSend.append("jenisProduk", formData.jenis);
-      formDataToSend.append("hargaProduk", formData.harga.toString());
-      formDataToSend.append("jumlahStok", formData.stok.toString());
+      formDataToSend.append("hargaProduk", formData.harga);
+      formDataToSend.append("jumlahStok", formData.stok || "0");
       formDataToSend.append("deskripsi", formData.deskripsi);
       formDataToSend.append("berat", formData.berat);
 
@@ -278,12 +280,13 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
               onChange={(e) => {
                 setFormData({
                   ...formData,
-                  harga: parseInt(e.target.value) || 0,
+                  harga: e.target.value,
                 });
                 clearFieldError("harga");
               }}
               placeholder="20000"
               min="0"
+              step="1"
               disabled={isSubmitting}
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
                 fieldErrors.harga
@@ -332,12 +335,13 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
                 onChange={(e) => {
                   setFormData({
                     ...formData,
-                    stok: parseInt(e.target.value) || 0,
+                    stok: e.target.value,
                   });
                   clearFieldError("stok");
                 }}
                 placeholder="50"
                 min="0"
+                step="1"
                 disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
                   fieldErrors.stok

@@ -1,4 +1,4 @@
-import EtalaseProduk from "@/app/store/etalase-produk";
+import EtalaseProduk from "@/app/toko/etalase-produk";
 import { Suspense } from "react";
 import { desc, eq } from "drizzle-orm";
 import { connection } from "next/server";

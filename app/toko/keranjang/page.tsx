@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { ambilKeranjang } from "@/app/store/keranjang/actions";
-import KeranjangClient from "@/app/store/keranjang/keranjang-client";
+import { ambilKeranjang } from "@/app/toko/keranjang/actions";
+import KeranjangClient from "@/app/toko/keranjang/keranjang-client";
 
 export default function KeranjangPage() {
   return (
