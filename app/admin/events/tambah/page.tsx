@@ -9,10 +9,11 @@ import { deleteImageKitFile } from "@/lib/imagekit";
 export default async function TambahEventPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; t?: string }>;
+  searchParams: Promise<{ from?: string; t?: string; error?: string }>;
 }) {
   const resolved = await searchParams;
   const fromTab = resolved.from || "aktif";
+  const pesanError = resolved.error;
   
   // Menggunakan parameter 't' dari URL sebagai key agar form mereset saat URL memiliki timestamp baru
   const formKey = resolved.t || "default-key";
@@ -25,6 +26,7 @@ export default async function TambahEventPage({
 
     const namaEvent = formData.get("namaEvent") as string;
     const jenisEvent = formData.get("jenisEvent") as string;
+    const kuotaPeserta = Number(formData.get("kuotaPeserta"));
     const tanggalPelaksanaan = formData.get("tanggalPelaksanaan") as string;
     const waktuMulai = formData.get("waktuMulai") as string;
     const waktuSelesai = formData.get("waktuSelesai") as string;
@@ -34,6 +36,10 @@ export default async function TambahEventPage({
     const gambarUrl = formData.get("gambarUrl") as string;
     const gambarFileId = formData.get("gambarFileId") as string;
     const deletedPosterFileId = formData.get("deletedPosterFileId") as string;
+
+    if (!(Number.isInteger(kuotaPeserta) && kuotaPeserta >= 0)) {
+      redirect(`/admin/events/tambah?from=${fromTab}&error=${encodeURIComponent("Kuota peserta harus berupa bilangan bulat 0 atau lebih.")}`);
+    }
 
     const now = new Date();
     let finalStatus = statusInput;
@@ -61,6 +67,7 @@ export default async function TambahEventPage({
       .values({
         namaEvent,
         jenisEvent,
+        kuotaPeserta,
         tanggalPelaksanaan,
         waktuMulai: waktuMulai || null,
         waktuSelesai: waktuSelesai || null,
@@ -77,10 +84,11 @@ export default async function TambahEventPage({
   }
 
   return (
-    <TambahEventForm 
-      key={formKey} 
-      simpanEventAction={simpanEvent} 
-      fromTab={fromTab} 
+    <TambahEventForm
+      key={formKey}
+      simpanEventAction={simpanEvent}
+      fromTab={fromTab}
+      pesanError={pesanError}
     />
   );
 }

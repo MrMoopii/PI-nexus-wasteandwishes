@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
+import { toast } from "sonner";
 import type { produk } from "@/lib/db/schema";
 import { tambahKeKeranjang as tambahKeKeranjangServer } from "@/app/store/keranjang/actions";
 
@@ -52,13 +53,22 @@ export default function DetailProdukClient({
         return;
       }
 
-      router.push("/store/keranjang");
+      toast.success(`${produkUtama.namaProduk} berhasil ditambahkan ke keranjang!`);
     });
   }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans) text-(--hx-ink)">
       <main className="relative z-10 container mx-auto max-w-7xl px-4 py-10 md:py-14">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-(--hx-pastel) bg-white/80 px-5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--hx-ink-2) transition-colors hover:border-(--hx-accent) hover:text-(--hx-accent)"
+        >
+          <span aria-hidden="true">←</span>
+          Kembali
+        </button>
+
         <nav className="mb-8 flex items-center gap-2 text-sm text-(--hx-ink-2)">
           <Link href="/store" className="hover:text-(--hx-accent)">
             Toko

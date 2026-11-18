@@ -79,6 +79,8 @@ export default function ReportsPage() {
   const [pesan, setPesan] = useState("");
   const [loading, setLoading] = useState(true);
   const [menyimpan, setMenyimpan] = useState(false);
+  const [hapusId, setHapusId] = useState<number | null>(null);
+  const [menghapus, setMenghapus] = useState(false);
 
   const muatLaporan = useCallback(async () => {
     try {
@@ -193,17 +195,30 @@ export default function ReportsPage() {
     }
   };
 
-  const hapus = async (id: number) => {
-    if (!window.confirm("Hapus laporan ini?")) return;
+  const bukaHapus = (id: number) => {
+    setHapusId(id);
+  };
+
+  const tutupDeleteModal = () => {
+    setHapusId(null);
+  };
+
+  const konfirmasiHapus = async () => {
+    if (hapusId === null) return;
+    setMenghapus(true);
     try {
-      const response = await fetch(`/api/admin/reports/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/admin/reports/${hapusId}`, { method: "DELETE" });
       const data: unknown = await response.json();
       if (!response.ok) throw new Error(isRecord(data) && typeof data.error === "string" ? data.error : "Laporan gagal dihapus.");
       setPesan("Laporan berhasil dihapus.");
       await muatLaporan();
+      tutupDeleteModal();
     } catch (error) {
       console.error("Gagal menghapus laporan:", error);
       setPesan(error instanceof Error ? error.message : "Laporan gagal dihapus.");
+      tutupDeleteModal();
+    } finally {
+      setMenghapus(false);
     }
   };
 
@@ -211,9 +226,9 @@ export default function ReportsPage() {
     <main className="p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div><h1 className="text-3xl font-bold text-gray-900">Laporan Pengambilan</h1><p className="mt-1 text-gray-600">Buat dan kelola laporan pengambilan sampah.</p></div>
-        <button type="button" onClick={bukaBuat} className="rounded-lg bg-teal-700 px-5 py-2.5 font-semibold text-white hover:bg-teal-800">Buat</button>
+        <button type="button" onClick={bukaBuat} className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">Buat</button>
       </div>
-      {pesan && <p role="status" className="mt-4 rounded-lg bg-teal-50 p-3 text-sm text-teal-900">{pesan}</p>}
+      {pesan && <p role="status" className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">{pesan}</p>}
       {loading ? <p className="mt-6">Memuat laporan...</p> : laporan.length === 0 ? (
         <p className="mt-6 rounded-lg border border-dashed p-8 text-center text-gray-600">Belum ada laporan yang dibuat.</p>
       ) : (
@@ -242,7 +257,7 @@ export default function ReportsPage() {
                       </button>
                     ) : "Belum ada foto"}
                   </td>
-                  <td className="p-4 whitespace-nowrap"><button type="button" onClick={() => bukaEdit(item)} className="mr-3 font-medium text-teal-700">Edit</button><button type="button" onClick={() => void hapus(item.idRiwayat)} className="font-medium text-red-700">Hapus</button></td>
+                  <td className="p-4 whitespace-nowrap"><button type="button" onClick={() => bukaEdit(item)} className="mr-3 px-2 py-1 rounded font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-700 active:text-white transition-colors duration-200">Edit</button><button type="button" onClick={() => bukaHapus(item.idRiwayat)} className="px-2 py-1 rounded font-medium text-red-700 hover:bg-red-50 hover:text-red-800 active:bg-red-700 active:text-white transition-colors duration-200">Hapus</button></td>
                 </tr>
               ))}
             </tbody>
@@ -285,13 +300,48 @@ export default function ReportsPage() {
               {fotoLama && !foto && <p className="text-xs text-gray-500">Foto lama tersimpan. Pilih file baru jika ingin menggantinya.</p>}
             </>}
             {pesan && <p role="alert" className="text-sm text-red-700">{pesan}</p>}
-            <div className="flex justify-end gap-3"><button type="button" onClick={() => setDialog(null)} className="rounded border px-4 py-2">Batal</button><button type="submit" disabled={!jadwalDipilih || menyimpan} className="rounded bg-teal-700 px-4 py-2 font-semibold text-white disabled:opacity-50">{menyimpan ? "Menyimpan..." : "Simpan"}</button></div>
+            <div className="flex justify-end gap-3"><button type="button" onClick={() => setDialog(null)} className="rounded border px-4 py-2">Batal</button><button type="submit" disabled={!jadwalDipilih || menyimpan} className="rounded bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50">{menyimpan ? "Menyimpan..." : "Simpan"}</button></div>
           </form>
+        </div>
+      )}
+      {hapusId !== null && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+          role="presentation"
+          onClick={tutupDeleteModal}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-gray-900">Hapus Laporan</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={tutupDeleteModal}
+                disabled={menghapus}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => void konfirmasiHapus()}
+                disabled={menghapus}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {menghapus ? "Menghapus..." : "Hapus"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
       {fotoDilihat && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4"
           role="presentation"
           onClick={() => setFotoDilihat(null)}
         >

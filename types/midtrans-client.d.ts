@@ -26,6 +26,11 @@ declare module "midtrans-client" {
       unfinish?: string;
       error?: string;
     };
+    expiry?: {
+      start_time?: string;
+      unit: "minute";
+      duration: number;
+    };
   }
 
   export interface SnapTransactionResponse {
@@ -51,6 +56,7 @@ declare module "midtrans-client" {
       notification(
         payload: Record<string, unknown>,
       ): Promise<TransactionNotification>;
+      status(transactionId: string): Promise<TransactionNotification>;
     };
   }
 

@@ -7,6 +7,7 @@ import Header from "@/components/header/Header";
 import Footer from "@/components/Footer";
 import HideOnAdmin from "@/components/HideOnAdmin";
 import SessionIdleTimeout from "@/components/SessionIdleTimeout";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-transparent">
+        <ToastProvider />
         <SessionIdleTimeout />
         <HideOnAdmin fallback={<HeaderKerangka />}>
           <Suspense fallback={<HeaderKerangka />}>
