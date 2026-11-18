@@ -53,7 +53,9 @@ export default function DetailProdukClient({
         return;
       }
 
-      router.push("/store/keranjang");
+      toast.success(
+        `${produkUtama.namaProduk} berhasil ditambahkan ke keranjang!`,
+      );
     });
   }
 

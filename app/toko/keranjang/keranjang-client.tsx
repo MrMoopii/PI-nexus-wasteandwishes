@@ -68,7 +68,7 @@ export default function KeranjangClient({
               Belanja Sekarang
             </Link>
             <Link
-              href="/store"
+              href="/toko"
               className="mx-auto mt-4 flex w-fit items-center gap-2 text-sm font-medium text-(--hx-ink-2) transition-colors hover:text-(--hx-accent)"
             >
               <svg

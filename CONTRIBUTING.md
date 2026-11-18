@@ -112,7 +112,7 @@ Sebelum menggabungkan dua branch yang berkonflik besar, buat branch cadangan dul
 
 Commit baru boleh dibuat setelah `git status` menulis _"All conflicts fixed but you are still merging"_.
 
-**Konflik "modify/delete"** terjadi jika satu branch memindahkan atau menghapus file, sementara branch lain mengubah file yang sama. GitHub menampilkan _"These conflicts are too complex to resolve in the web editor"_, jadi selesaikan di laptop. Di sini `ours` adalah branch yang sedang aktif dan `theirs` adalah branch yang digabung. Contoh yang pernah terjadi: `components/Header.tsx` dipindah ke `components/header/Header.tsx`, sementara di `development` link `/Store` diubah menjadi `/store`. Penyelesaiannya: `git rm components/Header.tsx` (file lama memang sudah pindah), lalu salin perubahan dari `development` ke file di lokasi baru secara manual. Jangan sampai perubahan teman ikut hilang bersama file lama.
+**Konflik "modify/delete"** terjadi jika satu branch memindahkan atau menghapus file, sementara branch lain mengubah file yang sama. GitHub menampilkan _"These conflicts are too complex to resolve in the web editor"_, jadi selesaikan di laptop. Di sini `ours` adalah branch yang sedang aktif dan `theirs` adalah branch yang digabung. Contoh yang pernah terjadi: `components/Header.tsx` dipindah ke `components/header/Header.tsx`, sementara di `development` link `/toko` diubah menjadi `/toko`. Penyelesaiannya: `git rm components/Header.tsx` (file lama memang sudah pindah), lalu salin perubahan dari `development` ke file di lokasi baru secara manual. Jangan sampai perubahan teman ikut hilang bersama file lama.
 
 ### 3.4 Setelah PR di-merge ke `development`
 
@@ -307,7 +307,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
     - **View Page Source** (Ctrl+U): kerangka harus sudah ada di HTML awal, sebelum `<main>`.
     - Rekam layar dengan throttling jaringan (DevTools → Network → Regular 4G, centang _Disable Cache_), lalu periksa apakah ada bagian yang bergeser.
 11. **Gambar di bagian atas halaman tidak boleh mengubah tata letak saat dimuat.** Isi `width` dan `height` dengan ukuran **asli** file (prop ini menentukan rasio, bukan ukuran tampil), lalu kunci ukuran tampilnya dengan CSS di satu sisi (`w-8 h-auto`). Jangan memakai `w-auto h-auto` bersama `width`/`height` yang rasionya salah. Gambar kecil yang selalu terlihat (logo) memakai `loading="eager"`. Gambar terbesar di layar pertama (hero, elemen LCP) memakai `preload`. Keduanya tidak dipakai bersamaan.
-12. **Error yang menyebut file di dalam `.next/`** (misalnya `.next/dev/types/validator.ts … Cannot find module '../../../app/Store/page.js'`) biasanya berasal dari cache lama setelah folder di `app/` diganti nama atau dihapus. Hentikan `pnpm dev`, hapus folder `.next` (`rm -rf .next`, folder ini dibuat ulang otomatis), lalu jalankan `pnpm build` lagi. Ingat, Linux dan Vercel membedakan huruf besar dan kecil pada nama folder (`Store` ≠ `store`).
+12. **Error yang menyebut file di dalam `.next/`** (misalnya `.next/dev/types/validator.ts … Cannot find module '../../../app/toko/page.js'`) biasanya berasal dari cache lama setelah folder di `app/` diganti nama atau dihapus. Hentikan `pnpm dev`, hapus folder `.next` (`rm -rf .next`, folder ini dibuat ulang otomatis), lalu jalankan `pnpm build` lagi. Ingat, Linux dan Vercel membedakan huruf besar dan kecil pada nama folder (`Store` ≠ `store`).
 
 ## 9. Standar kode
 
