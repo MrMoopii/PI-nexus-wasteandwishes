@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { confirmEventRegistration } from "@/app/event/actions";
+import {
+  confirmEventRegistration,
+  mulaiPembayaranEvent,
+} from "@/app/event/actions";
 import { events as eventsTable, users as usersTable } from "@/lib/db/schema";
+import StatusPembayaran from "./status-pembayaran";
 
 type Event = typeof eventsTable.$inferSelect;
 type User = typeof usersTable.$inferSelect;
@@ -12,6 +16,7 @@ export default function FormKonfirmasi({
   errorMessage,
   bannerMessage,
   proofId,
+  orderId,
 }: {
   event: Event;
   currentUser: User | null;
@@ -19,6 +24,7 @@ export default function FormKonfirmasi({
   errorMessage: string;
   bannerMessage: string;
   proofId: string;
+  orderId: string;
 }) {
   return (
     <div className="lg:col-span-7">
@@ -35,6 +41,14 @@ export default function FormKonfirmasi({
             terdaftar Anda.
           </p>
         </div>
+
+        {orderId && !errorMessage && (
+          <StatusPembayaran
+            eventId={event.idEvent}
+            orderId={orderId}
+            message={bannerMessage}
+          />
+        )}
 
         {errorMessage && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -141,18 +155,30 @@ export default function FormKonfirmasi({
                 Total Biaya Pendaftaran
               </span>
               <strong className="text-sm text-(--hx-accent) font-(family-name:--font-plus-jakarta-sans)">
-                Rp 0 (Gratis Penuh)
+                {Number(event.biayaEvent) === 0
+                  ? "Rp 0 (Gratis Penuh)"
+                  : `Rp ${Number(event.biayaEvent).toLocaleString("id-ID")}`}
               </strong>
             </div>
             <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-(--hx-accent)/15 text-(--hx-accent)">
-              Terkonfirmasi
+              {Number(event.biayaEvent) === 0 ? "Gratis" : "Pembayaran"}
             </span>
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="hx-btn-primary w-full">
-              Konfirmasi &amp; Amankan Slot (Gratis)
-            </button>
+            {Number(event.biayaEvent) === 0 ? (
+              <button type="submit" className="hx-btn-primary w-full">
+                Konfirmasi &amp; Amankan Slot (Gratis)
+              </button>
+            ) : (
+              <button
+                formAction={mulaiPembayaranEvent}
+                type="submit"
+                className="hx-btn-primary w-full"
+              >
+                Lanjutkan Pembayaran
+              </button>
+            )}
           </div>
 
           <p className="text-center text-[11px] text-(--hx-ink-3)">
