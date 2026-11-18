@@ -6,15 +6,18 @@ import { sql, eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireLogin } from "@/lib/require-login";
+import { kondisiLanggananAktif } from "@/lib/langganan";
 
 export async function ajukanJadwalJanjian(formData: FormData) {
   const cek = await requireLogin();
   if (!cek.ok) {
     redirect("/auth/login");
   }
+
   if (cek.session.user.peran !== "user") {
     redirect("/langganan");
   }
+
   const idUser = cek.idUser;
 
   const jamPengambilan = formData.get("jamPengambilan");
@@ -31,7 +34,8 @@ export async function ajukanJadwalJanjian(formData: FormData) {
   const tanggalValid =
     typeof tanggalJanjian === "string" &&
     /^\d{4}-\d{2}-\d{2}$/.test(tanggalJanjian) &&
-    new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) === tanggalJanjian;
+    new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) ===
+      tanggalJanjian;
 
   if (!(jamValid && tujuanValid && tanggalValid)) {
     redirect("/langganan/buat-jadwal-janjian?status=input-tidak-valid");
@@ -47,19 +51,10 @@ export async function ajukanJadwalJanjian(formData: FormData) {
     "Sabtu",
   ][new Date(`${tanggalJanjian}T00:00:00Z`).getUTCDay()];
 
-  const hariIni = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jakarta",
-  }).format(new Date());
   const [langgananAktif] = await getDb()
     .select({ idLangganan: dataLangganan.idLangganan })
     .from(dataLangganan)
-    .where(
-      and(
-        eq(dataLangganan.userId, idUser),
-        eq(dataLangganan.statusLangganan, "aktif"),
-        sql`${dataLangganan.tanggalAkhirLangganan} >= ${hariIni}::date`,
-      ),
-    )
+    .where(and(eq(dataLangganan.userId, idUser), kondisiLanggananAktif()))
     .limit(1);
 
   if (!langgananAktif) {

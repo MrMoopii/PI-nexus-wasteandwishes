@@ -1,20 +1,21 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
+import { dataLangganan, jadwal, jadwalJanjian } from "@/lib/db/schema";
 import {
-  dataLangganan,
-  jadwal,
-  jadwalJanjian,
-} from "@/lib/db/schema";
-import { formatJam } from "@/lib/format-tanggal";
+  formatJam,
+  formatTanggal,
+  tanggalHariIniJakarta,
+} from "@/lib/format-tanggal";
 import { ajukanJadwalJanjian } from "./actions";
+import { kondisiLanggananAktif } from "@/lib/langganan";
 
 export const instant = false;
 
-export default async function LanggananPage({
+export default async function JadwalJanjianPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string }>;
@@ -23,34 +24,46 @@ export default async function LanggananPage({
   return (
     <main className="min-h-screen bg-(--hx-canvas) px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-5xl">
-        <Link href="/langganan" className="mb-6 inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800">
+        <Link
+          href="/langganan"
+          className="mb-6 inline-flex items-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+        >
           ← Kembali
         </Link>
         <h1 className="mb-2 text-3xl font-bold text-gray-900">
           Jadwal Pengambilan Janjian
         </h1>
-        <p className="mb-6 text-gray-600">   Isi waktu dan tujuan pengambilan yang Anda inginkan. Pengajuan akan
-            berstatus menunggu sampai dikonfirmasi oleh pihak pengelola.
-         </p>
+        <p className="mb-6 text-gray-600">
+          Isi waktu dan tujuan pengambilan yang Anda inginkan. Pengajuan akan
+          berstatus menunggu sampai dikonfirmasi oleh pihak pengelola.
+        </p>
         <nav
           aria-label="Tab langganan"
           className="mb-6 flex overflow-x-auto border-b border-gray-200"
-        >
-        </nav>
+        ></nav>
         {status === "permintaan-terkirim" && (
-          <p className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">
+          <p
+            className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+            role="status"
+          >
             Permintaan jadwal berhasil dikirim. Silakan menunggu kabar dari
             pihak pengelola mengenai persetujuan jadwal janjian Anda.
           </p>
         )}
         {status === "input-tidak-valid" && (
-          <p className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+          <p
+            className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+            role="alert"
+          >
             Data permintaan belum valid. Periksa kembali hari, jam, dan
             keterangan tujuan.
           </p>
         )}
         {status === "langganan-tidak-aktif" && (
-          <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800" role="status">
+          <p
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+            role="status"
+          >
             Permintaan jadwal hanya tersedia untuk pengguna dengan langganan
             aktif.
           </p>
@@ -78,7 +91,6 @@ async function JadwalJanjianContent() {
       hariPengambilan: jadwal.hariPengambilan,
       jamPengambilan: jadwal.jamPengambilan,
       tanggalJanjian: jadwalJanjian.tanggalJanjian,
-      statusLangganan: dataLangganan.statusLangganan,
       keteranganTujuan: jadwalJanjian.keteranganTujuan,
       statusKonfirmasi: jadwalJanjian.statusKonfirmasi,
     })
@@ -88,8 +100,7 @@ async function JadwalJanjianContent() {
     .where(
       and(
         eq(dataLangganan.userId, idUser),
-        eq(dataLangganan.statusLangganan, "aktif"),
-        sql`${dataLangganan.tanggalAkhirLangganan} >= ${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}::date`,
+        kondisiLanggananAktif(),
         eq(jadwal.jenisJadwal, "janjian"),
       ),
     );
@@ -97,13 +108,7 @@ async function JadwalJanjianContent() {
   const [langgananAktif] = await getDb()
     .select({ idLangganan: dataLangganan.idLangganan })
     .from(dataLangganan)
-    .where(
-      and(
-        eq(dataLangganan.userId, idUser),
-        eq(dataLangganan.statusLangganan, "aktif"),
-        sql`${dataLangganan.tanggalAkhirLangganan} >= ${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}::date`,
-      ),
-    )
+    .where(and(eq(dataLangganan.userId, idUser), kondisiLanggananAktif()))
     .limit(1);
 
   if (!langgananAktif) {
@@ -124,7 +129,7 @@ async function JadwalJanjianContent() {
                 type="date"
                 name="tanggalJanjian"
                 required
-                min={new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())}
+                min={tanggalHariIniJakarta()}
                 className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
               />
             </label>
@@ -136,10 +141,15 @@ async function JadwalJanjianContent() {
                 defaultValue=""
                 className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
               >
-                <option value="" disabled>Pilih jam</option>
+                <option value="" disabled>
+                  Pilih jam
+                </option>
                 {Array.from({ length: 29 }, (_, index) => {
                   const totalMinutes = 8 * 60 + index * 15;
-                  const jam = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+                  const jam = String(Math.floor(totalMinutes / 60)).padStart(
+                    2,
+                    "0",
+                  );
                   const menit = String(totalMinutes % 60).padStart(2, "0");
                   const waktu = `${jam}:${menit}`;
 
@@ -181,43 +191,46 @@ async function JadwalJanjianContent() {
         </p>
       )}
       {schedules.length === 0 ? (
-    <section className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
-      <h2 className="text-lg font-semibold text-gray-900">
-        Belum ada permintaan jadwal pengambilan
-      </h2>
-      <p className="mt-2 text-sm text-gray-500">
-        Setelah mengirim permintaan, status dan detail jadwal akan ditampilkan di sini.
-      </p>
-    </section>
-  ) : (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-            <tr>
-              <th className="px-5 py-4 font-semibold">Tanggal</th>
-              <th className="px-5 py-4 font-semibold">Jam</th>
-              <th className="px-5 py-4 font-semibold">Keterangan Tujuan</th>
-              <th className="px-5 py-4 font-semibold">Status Konfirmasi</th>
-              <th className="px-5 py-4 font-semibold">Status Langganan</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-            {schedules.map((schedule) => (
-              <tr key={schedule.idJadwal}>
-                <td className="px-5 py-4 font-medium text-gray-900">
-                  {schedule.tanggalJanjian ?? "Belum diatur"}
-                </td>
-                <td className="px-5 py-4">{formatJam(schedule.jamPengambilan)} WIB</td>
-                <td className="px-5 py-4">{schedule.keteranganTujuan}</td>
-                <td className="px-5 py-4">{schedule.statusKonfirmasi}</td>
-                <td className="px-5 py-4">{schedule.statusLangganan}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <section className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Belum ada permintaan jadwal pengambilan
+          </h2>
+          <p className="mt-2 text-sm text-gray-500">
+            Setelah mengirim permintaan, status dan detail jadwal akan
+            ditampilkan di sini.
+          </p>
+        </section>
+      ) : (
+        <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-5 py-4 font-semibold">Tanggal</th>
+                  <th className="px-5 py-4 font-semibold">Jam</th>
+                  <th className="px-5 py-4 font-semibold">Keterangan Tujuan</th>
+                  <th className="px-5 py-4 font-semibold">Status Konfirmasi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
+                {schedules.map((janjian) => (
+                  <tr key={janjian.idJadwal}>
+                    <td className="px-5 py-4 font-medium text-gray-900">
+                      {janjian.tanggalJanjian
+                        ? formatTanggal(janjian.tanggalJanjian)
+                        : "Belum diatur"}
+                    </td>
+                    <td className="px-5 py-4">
+                      {formatJam(janjian.jamPengambilan)} WIB
+                    </td>
+                    <td className="px-5 py-4">{janjian.keteranganTujuan}</td>
+                    <td className="px-5 py-4">{janjian.statusKonfirmasi}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
     </>
   );
