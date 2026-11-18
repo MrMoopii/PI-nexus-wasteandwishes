@@ -1,8 +1,12 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { pembayaranLangganan } from "@/lib/db/schema";
+import {
+  pembayaranEvent,
+  pembayaranLangganan,
+} from "@/lib/db/schema";
 import { getMidtransSnap } from "@/lib/midtrans";
+import { selesaikanPembayaranEvent } from "@/lib/pembayaran-event";
 
 export async function POST(request: Request) {
   let payload: Record<string, unknown>;
@@ -26,6 +30,83 @@ export async function POST(request: Request) {
   try {
     const notification =
       await getMidtransSnap().transaction.notification(payload);
+
+    const [eventPayment] = await getDb()
+      .select({
+        id: pembayaranEvent.idPembayaranEvent,
+        eventId: pembayaranEvent.eventId,
+        userId: pembayaranEvent.userId,
+        amount: pembayaranEvent.jumlah,
+        status: pembayaranEvent.statusPembayaran,
+      })
+      .from(pembayaranEvent)
+      .where(eq(pembayaranEvent.orderId, notification.order_id))
+      .limit(1);
+
+    if (eventPayment) {
+      const grossAmount = Number(notification.gross_amount);
+      if (
+        !Number.isFinite(grossAmount) ||
+        grossAmount !== Number(eventPayment.amount)
+      ) {
+        return NextResponse.json(
+          { error: "Nominal transaksi tidak cocok." },
+          { status: 400 },
+        );
+      }
+
+      const sukses =
+        notification.transaction_status === "settlement" ||
+        (notification.transaction_status === "capture" &&
+          notification.fraud_status === "accept");
+
+      if (
+        sukses &&
+        (eventPayment.status === "pending" ||
+          eventPayment.status === "memproses")
+      ) {
+        await selesaikanPembayaranEvent(
+          eventPayment.id,
+          notification.transaction_id ?? null,
+        );
+      } else if (
+        (eventPayment.status === "pending" ||
+          eventPayment.status === "memproses") &&
+        (notification.transaction_status === "expire" ||
+          notification.transaction_status === "cancel")
+      ) {
+        await getDb()
+          .update(pembayaranEvent)
+          .set({
+            statusPembayaran:
+              notification.transaction_status === "expire"
+                ? "kedaluwarsa"
+                : "dibatalkan",
+            midtransTransactionId: notification.transaction_id ?? null,
+          })
+          .where(
+            and(
+              eq(pembayaranEvent.idPembayaranEvent, eventPayment.id),
+              inArray(pembayaranEvent.statusPembayaran, [
+                "pending",
+                "memproses",
+              ]),
+            ),
+          );
+      } else if (
+        notification.transaction_status === "pending" &&
+        (eventPayment.status === "pending" ||
+          eventPayment.status === "memproses")
+      ) {
+        await getDb()
+          .update(pembayaranEvent)
+          .set({ midtransTransactionId: notification.transaction_id ?? null })
+          .where(eq(pembayaranEvent.idPembayaranEvent, eventPayment.id));
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     const [payment] = await getDb()
       .select({
         idPembayaran: pembayaranLangganan.idPembayaranLangganan,

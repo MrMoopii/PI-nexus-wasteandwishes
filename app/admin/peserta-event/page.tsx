@@ -26,9 +26,7 @@ async function DaftarEventAktif() {
   return (
     <div className="mx-auto max-w-7xl p-6 font-(family-name:--font-plus-jakarta-sans)">
       <h1 className="mb-2 text-2xl font-bold text-gray-900">Peserta Event</h1>
-      <p className="mb-8 text-sm text-gray-500">
-        Pilih event aktif untuk melihat peserta yang sudah mendaftar.
-      </p>
+      <p className="mb-8 text-sm text-gray-500"></p>
 
       {dataEvents.length === 0 ? (
         <div className="flex min-h-64 items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
@@ -61,7 +59,7 @@ async function DaftarEventAktif() {
                   <h2 className="mb-1 line-clamp-2 text-lg font-bold leading-tight text-gray-900">
                     {event.namaEvent}
                   </h2>
-                  <p className="mb-4 text-xs font-medium text-orange-500">
+                  <p className="mb-4 text-xs font-medium text-(--hx-accent)">
                     {event.jenisEvent}
                   </p>
                   <div className="border-t border-gray-100 pt-4">
@@ -86,7 +84,7 @@ async function DaftarEventAktif() {
               <div className="mt-auto flex justify-center border-t border-gray-100 bg-gray-50 p-4">
                 <Link
                   href={`/admin/peserta-event/${event.idEvent}`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="rounded-lg bg-(--hx-accent) px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity cursor-pointer"
                 >
                   Detail
                 </Link>

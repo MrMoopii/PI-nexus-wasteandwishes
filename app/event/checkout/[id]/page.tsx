@@ -19,6 +19,7 @@ export default async function EventCheckoutPage({
     error?: string;
     message?: string;
     proofId?: string;
+    order_id?: string;
   }>;
 }) {
   const session = await auth();
@@ -62,17 +63,15 @@ export default async function EventCheckoutPage({
   }
   //
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const rawErrorMessage =
-    typeof resolvedSearchParams.error === "string"
-      ? decodeURIComponent(resolvedSearchParams.error)
-      : "";
-  const infoMessage =
-    typeof resolvedSearchParams.message === "string"
-      ? decodeURIComponent(resolvedSearchParams.message)
-      : "";
+  const rawErrorMessage = resolvedSearchParams.error ?? "";
+  const infoMessage = resolvedSearchParams.message ?? "";
   const proofId =
     typeof resolvedSearchParams.proofId === "string"
       ? resolvedSearchParams.proofId
+      : "";
+  const orderId =
+    typeof resolvedSearchParams.order_id === "string"
+      ? resolvedSearchParams.order_id
       : "";
 
   const errorMessage = rawErrorMessage.includes(
@@ -157,6 +156,7 @@ export default async function EventCheckoutPage({
             errorMessage={errorMessage}
             bannerMessage={bannerMessage}
             proofId={proofId}
+            orderId={orderId}
           />
         </div>
       </div>

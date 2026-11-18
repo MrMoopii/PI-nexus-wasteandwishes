@@ -52,7 +52,8 @@ export default function EventDrawer({
   useEffect(() => {
     if (!event) return;
 
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
 
@@ -71,7 +72,6 @@ export default function EventDrawer({
       document.body.style.paddingRight = previousPaddingRight;
     };
   }, [event]);
-
 
   // Handler menutup dengan transisi halus keluar
   const handleClose = useCallback(() => {
@@ -100,7 +100,9 @@ export default function EventDrawer({
   return (
     <div
       className={`fixed inset-0 z-50 flex justify-end bg-(--hx-ink)/35 p-0 backdrop-blur-[2px] transition-opacity duration-300 ease-out ${
-        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
       }`}
       role="dialog"
       aria-modal="true"
@@ -130,7 +132,11 @@ export default function EventDrawer({
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeWidth={2} d="m6 6 12 12M18 6 6 18" />
+              <path
+                strokeLinecap="round"
+                strokeWidth={2}
+                d="m6 6 12 12M18 6 6 18"
+              />
             </svg>
           </button>
         </div>
@@ -181,7 +187,9 @@ export default function EventDrawer({
           </div>
 
           <section className="rounded-2xl border border-(--hx-pastel) bg-(--hx-canvas) p-5">
-            <h3 className="text-base font-semibold text-(--hx-ink)">Pendaftaran</h3>
+            <h3 className="text-base font-semibold text-(--hx-ink)">
+              Pendaftaran
+            </h3>
             <p className="mt-2 text-sm leading-relaxed text-(--hx-ink-2)">
               {isPast
                 ? "Event ini telah selesai sehingga pendaftaran tidak lagi tersedia."
@@ -203,7 +211,7 @@ export default function EventDrawer({
               href={`/event/detail/${event.idEvent}`}
               className="hx-btn-outline mt-3 w-full justify-center"
             >
-              Lihat Halaman Event
+              Lihat Detail Event
             </Link>
           </section>
 
