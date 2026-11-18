@@ -28,7 +28,7 @@ export async function GET() {
     const [activeSubscriptions] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
-      .where(kondisiLanggananAktif);
+      .where(kondisiLanggananAktif());
     const [totalEvents] = await getDb().select({ count: count() }).from(events);
 
     // Get waste collected this month
