@@ -49,7 +49,9 @@ export default function RingkasanEvent({ event }: { event: Event }) {
           <div className="flex items-center justify-between">
             <span className="text-(--hx-ink-3)">Status Tiket:</span>
             <span className="font-bold text-(--hx-accent)">
-              Gratis (1 Slot)
+              {Number(event.biayaEvent) === 0
+                ? "Gratis"
+                : `Rp ${Number(event.biayaEvent).toLocaleString("id-ID")}`}
             </span>
           </div>
         </div>

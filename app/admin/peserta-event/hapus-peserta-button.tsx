@@ -45,7 +45,7 @@ export default function HapusPesertaButton({
           setPesan("");
           setTerbuka(true);
         }}
-        className="text-sm font-medium text-red-600 hover:text-red-800"
+        className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 cursor-pointer"
       >
         Hapus
       </button>
@@ -77,7 +77,7 @@ export default function HapusPesertaButton({
                 type="button"
                 onClick={() => setTerbuka(false)}
                 disabled={sedangMenghapus}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:text-gray-400"
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer"
               >
                 Batal
               </button>
@@ -85,9 +85,12 @@ export default function HapusPesertaButton({
                 type="button"
                 onClick={hapus}
                 disabled={sedangMenghapus}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-red-300"
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
               >
-                {sedangMenghapus ? "Menghapus..." : "Hapus"}
+                {sedangMenghapus && (
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+                <span>{sedangMenghapus ? "Menghapus..." : "Hapus"}</span>
               </button>
             </div>
           </div>

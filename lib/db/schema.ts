@@ -79,6 +79,29 @@ export const pendaftaranEvent = pgTable(
   ],
 );
 
+export const pembayaranEvent = pgTable("pembayaran_event", {
+  idPembayaranEvent: integer("id_pembayaran_event")
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+  eventId: integer("event_id")
+    .notNull()
+    .references(() => events.idEvent),
+  userId: integer("id_user")
+    .notNull()
+    .references(() => users.idUser),
+  orderId: text("order_id").notNull().unique(),
+  midtransTransactionId: text("midtrans_transaction_id"),
+  redirectUrl: text("redirect_url"),
+  jumlah: numeric("jumlah", { precision: 12, scale: 2 }).notNull(),
+  statusPembayaran: text("status_pembayaran").notNull(),
+  tanggalDibuat: timestamp("tanggal_dibuat", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  tanggalDibayar: timestamp("tanggal_dibayar", { withTimezone: true }),
+  tanggalKedaluwarsa: timestamp("tanggal_kedaluwarsa", { withTimezone: true })
+    .notNull(),
+});
+
 export const produk = pgTable("produk", {
   idProduk: integer("id_produk").primaryKey().generatedAlwaysAsIdentity(),
   namaProduk: text("nama_produk").notNull(),

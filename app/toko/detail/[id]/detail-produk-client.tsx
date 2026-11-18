@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
+import { toast } from "sonner";
 import type { produk } from "@/lib/db/schema";
 import { tambahKeKeranjang as tambahKeKeranjangServer } from "@/app/toko/keranjang/actions";
 
@@ -52,7 +53,7 @@ export default function DetailProdukClient({
         return;
       }
 
-      router.push("/toko/keranjang");
+      router.push("/store/keranjang");
     });
   }
 

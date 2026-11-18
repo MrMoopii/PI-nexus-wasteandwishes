@@ -71,15 +71,18 @@ async function DetailPesertaEvent({
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Link
-          href="/admin/peserta-event"
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
-        >
-          <span aria-hidden="true">←</span>
-          <span>Kembali ke Peserta Event</span>
-        </Link>
-      </div>
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/admin/peserta-event"
+            className="inline-flex items-center gap-2 rounded-lg border border-(--hx-ink-6, #e5e7eb) bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent)"
+          >
+            <span aria-hidden="true">←</span>
+            <span>Kembali</span>
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Detail Peserta Event
+          </h1>
+        </div>
 
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
           <div className="flex flex-col gap-6 lg:col-span-5">
@@ -172,7 +175,6 @@ async function DetailPesertaEvent({
                     <th className="px-4 py-3 font-semibold">ID pendaftaran</th>
                     <th className="px-4 py-3 font-semibold">Email user</th>
                     <th className="px-4 py-3 font-semibold">Nomor telepon</th>
-                    <th className="px-4 py-3 font-semibold">ID user</th>
                     <th className="px-4 py-3 font-semibold">Tanggal daftar</th>
                     <th className="px-4 py-3 font-semibold">Aksi</th>
                   </tr>
@@ -192,7 +194,6 @@ async function DetailPesertaEvent({
                       <td className="px-4 py-3">
                         {baris.nomorTelp || "Nomor belum diisi"}
                       </td>
-                      <td className="px-4 py-3">{baris.userId}</td>
                       <td className="px-4 py-3">
                         {baris.tanggalDaftar.toLocaleString("id-ID", {
                           dateStyle: "long",

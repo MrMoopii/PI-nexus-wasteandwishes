@@ -16,6 +16,7 @@ type EventData = {
   namaEvent: string;
   jenisEvent: string;
   biayaEvent: string | number;
+  kuotaPeserta: number;
   tanggalPelaksanaan: Date | string;
   waktuMulai: string | null;
   waktuSelesai: string | null;
@@ -29,10 +30,12 @@ export default function EditEventForm({
   existingEvent,
   updateEventAction,
   fromTab,
+  pesanError,
 }: {
   existingEvent: EventData;
   updateEventAction: (formData: FormData) => Promise<void>;
   fromTab: string;
+  pesanError?: string;
 }) {
   const router = useRouter();
   const formattedDate = existingEvent.tanggalPelaksanaan
@@ -113,6 +116,11 @@ export default function EditEventForm({
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+      {pesanError ? (
+        <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {pesanError}
+        </p>
+      ) : null}
       <form action={handleSubmit} className="space-y-6">
         <input type="hidden" name="idEvent" value={existingEvent.idEvent} />
         <input type="hidden" name="fromTab" value={fromTab} />
@@ -171,6 +179,24 @@ export default function EditEventForm({
               defaultValue={Number(existingEvent.biayaEvent)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Kuota Peserta *
+            </label>
+            <input
+              type="number"
+              name="kuotaPeserta"
+              min="0"
+              required
+              defaultValue={existingEvent.kuotaPeserta}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Sisa kursi saat ini. Angka yang disimpan akan menjadi sisa kuota
+              baru.
+            </p>
           </div>
 
           <div>

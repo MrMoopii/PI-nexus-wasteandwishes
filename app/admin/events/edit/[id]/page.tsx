@@ -16,7 +16,7 @@ export default async function EditEventPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{t?:string; from?:string}>;
+  searchParams: Promise<{t?:string; from?:string; error?:string}>;
 }) {
   await connection();
 
@@ -25,6 +25,7 @@ export default async function EditEventPage({
   const eventId = Number(resolvedParams.id);
   const editKey = resolvedSearch.t || "default";
   const fromTab = resolvedSearch.from || "aktif";
+  const pesanError = resolvedSearch.error;
 
   if (!eventId || isNaN(eventId)) {
     return (
@@ -66,6 +67,7 @@ export default async function EditEventPage({
     const namaEvent = formData.get("namaEvent") as string;
     const jenisEvent = formData.get("jenisEvent") as string;
     const biayaEvent = formData.get("biayaEvent") as string;
+    const kuotaPeserta = Number(formData.get("kuotaPeserta"));
     const tanggalPelaksanaan = formData.get("tanggalPelaksanaan") as string;
     const waktuMulai = formData.get("waktuMulai") as string;
     const waktuSelesai = formData.get("waktuSelesai") as string;
@@ -76,8 +78,15 @@ export default async function EditEventPage({
     const deletedPosterFileId = formData.get("deletedPosterFileId") as string;
     
     const targetTab = fromTab;
+
+    if (!(Number.isInteger(kuotaPeserta) && kuotaPeserta >= 0)) {
+      redirect(
+        `/admin/events/edit/${idEvent}?from=${targetTab}&error=${encodeURIComponent("Kuota peserta harus berupa bilangan bulat 0 atau lebih.")}`,
+      );
+    }
+
     const now = new Date();
-    let finalStatus = statusInput; 
+    let finalStatus = statusInput;
 
     // Pengecekan ulang di backend agar lebih aman
     if (finalStatus === "aktif" && tanggalPelaksanaan) {
@@ -104,6 +113,7 @@ export default async function EditEventPage({
         namaEvent,
         jenisEvent,
         biayaEvent,
+        kuotaPeserta,
         tanggalPelaksanaan,
         waktuMulai: waktuMulai || null,
         waktuSelesai: waktuSelesai || null,
@@ -124,11 +134,12 @@ export default async function EditEventPage({
     <div className="p-6 max-w-4xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
 
       {/* Gunakan Client Component dan oper data & action-nya */}
-      <EditEventForm 
+      <EditEventForm
         key={editKey}
-        existingEvent={existingEvent} 
-        updateEventAction={updateEvent} 
+        existingEvent={existingEvent}
+        updateEventAction={updateEvent}
         fromTab={fromTab}
+        pesanError={pesanError}
       />
     </div>
   );
