@@ -34,7 +34,6 @@ export default async function JadwalJanjianPage({
           Jadwal Pengambilan Janjian
         </h1>
         <p className="mb-6 text-gray-600">
-          {" "}
           Isi waktu dan tujuan pengambilan yang Anda inginkan. Pengajuan akan
           berstatus menunggu sampai dikonfirmasi oleh pihak pengelola.
         </p>
@@ -92,7 +91,6 @@ async function JadwalJanjianContent() {
       hariPengambilan: jadwal.hariPengambilan,
       jamPengambilan: jadwal.jamPengambilan,
       tanggalJanjian: jadwalJanjian.tanggalJanjian,
-      statusLangganan: dataLangganan.statusLangganan,
       keteranganTujuan: jadwalJanjian.keteranganTujuan,
       statusKonfirmasi: jadwalJanjian.statusKonfirmasi,
     })
@@ -212,21 +210,25 @@ async function JadwalJanjianContent() {
                   <th className="px-5 py-4 font-semibold">Jam</th>
                   <th className="px-5 py-4 font-semibold">Keterangan Tujuan</th>
                   <th className="px-5 py-4 font-semibold">Status Konfirmasi</th>
-                  <th className="px-5 py-4 font-semibold">Status Langganan</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-                {schedules.map((schedule) => (
-                  <tr key={schedule.idJadwal}>
+                {schedules.map((jadwalJanjian) => (
+                  <tr key={jadwalJanjian.idJadwal}>
                     <td className="px-5 py-4 font-medium text-gray-900">
-                      {formatTanggal(schedule.tanggalJanjian ?? "Belum diatur")}
+                      {formatTanggal(
+                        jadwalJanjian.tanggalJanjian ?? "Belum diatur",
+                      )}
                     </td>
                     <td className="px-5 py-4">
-                      {formatJam(schedule.jamPengambilan)} WIB
+                      {formatJam(jadwalJanjian.jamPengambilan)} WIB
                     </td>
-                    <td className="px-5 py-4">{schedule.keteranganTujuan}</td>
-                    <td className="px-5 py-4">{schedule.statusKonfirmasi}</td>
-                    <td className="px-5 py-4">{schedule.statusLangganan}</td>
+                    <td className="px-5 py-4">
+                      {jadwalJanjian.keteranganTujuan}
+                    </td>
+                    <td className="px-5 py-4">
+                      {jadwalJanjian.statusKonfirmasi}
+                    </td>
                   </tr>
                 ))}
               </tbody>
