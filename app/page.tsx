@@ -1,6 +1,7 @@
 import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import EventSliderServer from "@/components/event-slider/EventSliderServer";
+import FadeUp from "@/components/FadeUp";
 import { Suspense } from "react";
 import EventSliderKerangka from "@/components/event-slider/EventSliderKerangka";
 
@@ -51,7 +52,7 @@ export default async function Home() {
         <section className="container mx-auto px-4 py-16 md:py-20 max-w-7xl">
           <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-center">
             {/* Kolom Kiri: Copywriting & Call to Action */}
-            <div>
+            <FadeUp>
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-3">
                 Solusi Sirkular Ekonomi
               </span>
@@ -85,10 +86,10 @@ export default async function Home() {
                   Pelajari Layanan
                 </a>
               </div>
-            </div>
+            </FadeUp>
 
             {/* Kolom Kanan: Kartu Sorotan Fitur (Frosted Glass di atas Background Gambar) */}
-            <div className="relative">
+            <FadeUp className="relative" delay={150}>
               {/* Glow Aksen Tosca di Belakang Kartu */}
               <div
                 aria-hidden="true"
@@ -113,7 +114,7 @@ export default async function Home() {
                   Cakupan Wilayah: Wedomartani, Gejayan &amp; Sekitarnya
                 </div>
               </div>
-            </div>
+            </FadeUp>
           </div>
         </section>
 
@@ -132,7 +133,7 @@ export default async function Home() {
         >
           <div className="container mx-auto px-4 max-w-7xl">
             {/* Header Layanan */}
-            <div className="text-center mb-14 max-w-2xl mx-auto">
+            <FadeUp className="text-center mb-14 max-w-2xl mx-auto">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
                 Solusi Terpadu
               </span>
@@ -145,12 +146,12 @@ export default async function Home() {
                 masyarakat.
               </p>
               <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
-            </div>
+            </FadeUp>
 
             {/* Grid Kartu Layanan */}
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               {/* Card 1: Penjemputan Sampah Organik */}
-              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60 flex flex-col justify-between">
+              <FadeUp className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase">
@@ -195,10 +196,13 @@ export default async function Home() {
                     Cek Paket Langganan
                   </a>
                 </div>
-              </div>
+              </FadeUp>
 
               {/* Card 2: Edukasi & Pendampingan */}
-              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60 flex flex-col justify-between">
+              <FadeUp
+                delay={150}
+                className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm flex flex-col justify-between"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase">
@@ -243,11 +247,11 @@ export default async function Home() {
                     Lihat Jadwal Terdekat
                   </a>
                 </div>
-              </div>
+              </FadeUp>
             </div>
 
             {/* ── Komponen Statistik (Facts Grid Khas Helix Drift seperti di app/event/page) ── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-(--hx-pastel)/40 rounded-2xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
+            <FadeUp className="grid grid-cols-1 md:grid-cols-3 gap-px bg-(--hx-pastel)/40 rounded-2xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
               <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-6 sm:p-8 text-center">
                 <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
                   Limbah Organik Terolah
@@ -275,7 +279,7 @@ export default async function Home() {
                   Workshop, sosialisasi &amp; aksi bersih
                 </span>
               </div>
-            </div>
+            </FadeUp>
           </div>
         </section>
       </div>

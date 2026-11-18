@@ -717,20 +717,6 @@ body.away .hx-panel {
   line-height: 1;
 }
 
-/* ── Reveal Transition ── */
-.hx-rv {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.55s var(--hx-ease),
-    transform 0.55s var(--hx-ease);
-}
-
-.hx-rv.in {
-  opacity: 1;
-  transform: none;
-}
-
 /* ==========================================================================
    SHARED EVENT COMPONENT STYLES (event/page, detail, checkout)
    ========================================================================== */

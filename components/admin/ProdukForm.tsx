@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   tambahProduk,
   updateProduk,
   getFotoProduk,
 } from "@/app/admin/produk/actions";
-import { ImageKitUpload, type FotoItem } from "./ImageKitUpload";
+import ImageKitUpload, {
+  type FotoItem,
+  type ImageKitUploadHandle,
+} from "./ImageKitUpload";
 
 type Produk = {
   id: number;
@@ -25,6 +28,13 @@ type ProdukFormProps = {
   isOpen: boolean;
   onClose: () => void;
   produk: Produk | null;
+};
+
+type FieldErrors = {
+  nama?: string;
+  harga?: string;
+  stok?: string;
+  global?: string;
 };
 
 export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
@@ -56,7 +66,8 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
 
   const [deletedFileIds, setDeletedFileIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const uploadRef = useRef<ImageKitUploadHandle>(null);
 
   // Jika sedang edit produk, muat foto dari tabel foto_produk jika belum disediakan
   useEffect(() => {
@@ -91,28 +102,65 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
     setDeletedFileIds(newDeletedIds);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const validate = (): boolean => {
+    const errors: FieldErrors = {};
 
     if (!formData.nama.trim()) {
-      setError("Nama produk tidak boleh kosong");
-      return;
+      errors.nama = "Nama produk tidak boleh kosong";
     }
 
     if (formData.harga <= 0) {
-      setError("Harga harus lebih dari 0");
-      return;
+      errors.harga = "Harga harus lebih dari 0";
     }
 
     if (formData.stok < 0) {
-      setError("Stok tidak boleh negatif");
+      errors.stok = "Stok tidak boleh negatif";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const clearFieldError = (field: keyof FieldErrors) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFieldErrors({});
+
+    if (!validate()) {
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // 1. Upload pending files ke ImageKit (jika ada)
+      let uploadedPhotos: FotoItem[] = [];
+      const pendingFiles = uploadRef.current?.getPendingFiles() ?? [];
+      if (pendingFiles.length > 0) {
+        const { results, errors } = await uploadRef.current!.flushPending();
+        if (errors.length > 0) {
+          setFieldErrors({
+            global: `Gagal mengunggah ${errors.length} foto: ${errors.map((e) => e.pesan).join("; ")}`,
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        uploadedPhotos = results.map((r, idx) => ({
+          url: r.url,
+          fileId: r.fileId,
+          isPrimary: photos.length === 0 && idx === 0,
+          urutan: photos.length + idx,
+        }));
+      }
+
       const formDataToSend = new FormData();
       if (produk) {
         formDataToSend.append("idProduk", produk.id.toString());
@@ -124,8 +172,11 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
       formDataToSend.append("deskripsi", formData.deskripsi);
       formDataToSend.append("berat", formData.berat);
 
-      // Lampirkan data foto dari ImageKit
-      formDataToSend.append("fotoList", JSON.stringify(photos));
+      // Gabungkan foto yang sudah tersimpan + yang baru diupload
+      formDataToSend.append(
+        "fotoList",
+        JSON.stringify([...photos, ...uploadedPhotos]),
+      );
       formDataToSend.append("deletedFileIds", JSON.stringify(deletedFileIds));
 
       const result = produk
@@ -133,13 +184,16 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
         : await tambahProduk(formDataToSend);
 
       if (result.error) {
-        setError(result.error);
+        setFieldErrors({ global: result.error });
       } else {
+        uploadRef.current?.clearPending();
         onClose();
         window.location.reload();
       }
     } catch {
-      setError("Terjadi kesalahan saat menyimpan produk. Silakan coba lagi.");
+      setFieldErrors({
+        global: "Terjadi kesalahan saat menyimpan produk. Silakan coba lagi.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -166,16 +220,17 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
 
         {/* Form Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Error Message */}
-          {error && (
+          {/* Global Error (dari server / gagal upload) */}
+          {fieldErrors.global && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
+              {fieldErrors.global}
             </div>
           )}
 
           {/* Upload Foto Produk dengan Drag and Drop */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
             <ImageKitUpload
+              ref={uploadRef}
               existingPhotos={photos}
               onChange={handlePhotosChange}
               disabled={isSubmitting}
@@ -187,15 +242,23 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Nama Produk *
             </label>
+            {fieldErrors.nama && (
+              <p className="text-xs text-red-600 mb-1">{fieldErrors.nama}</p>
+            )}
             <input
               type="text"
               value={formData.nama}
-              onChange={(e) =>
-                setFormData({ ...formData, nama: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, nama: e.target.value });
+                clearFieldError("nama");
+              }}
               placeholder="Contoh: Maggot Segar"
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
+                fieldErrors.nama
+                  ? "border-red-400 ring-1 ring-red-200"
+                  : "border-slate-300"
+              }`}
             />
           </div>
 
@@ -204,19 +267,29 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Harga (Rp) *
             </label>
+            {fieldErrors.harga && (
+              <p className="text-xs text-red-600 mb-1">
+                {fieldErrors.harga}
+              </p>
+            )}
             <input
               type="number"
               value={formData.harga}
-              onChange={(e) =>
+              onChange={(e) => {
                 setFormData({
                   ...formData,
                   harga: parseInt(e.target.value) || 0,
-                })
-              }
+                });
+                clearFieldError("harga");
+              }}
               placeholder="20000"
               min="0"
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
+                fieldErrors.harga
+                  ? "border-red-400 ring-1 ring-red-200"
+                  : "border-slate-300"
+              }`}
             />
           </div>
 
@@ -248,19 +321,29 @@ export function ProdukForm({ isOpen, onClose, produk }: ProdukFormProps) {
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Stok *
               </label>
+              {fieldErrors.stok && (
+                <p className="text-xs text-red-600 mb-1">
+                  {fieldErrors.stok}
+                </p>
+              )}
               <input
                 type="number"
                 value={formData.stok}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData({
                     ...formData,
                     stok: parseInt(e.target.value) || 0,
-                  })
-                }
+                  });
+                  clearFieldError("stok");
+                }}
                 placeholder="50"
                 min="0"
                 disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
+                  fieldErrors.stok
+                    ? "border-red-400 ring-1 ring-red-200"
+                    : "border-slate-300"
+                }`}
               />
             </div>
 
