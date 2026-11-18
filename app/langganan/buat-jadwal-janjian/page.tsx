@@ -213,22 +213,18 @@ async function JadwalJanjianContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-                {schedules.map((jadwalJanjian) => (
-                  <tr key={jadwalJanjian.idJadwal}>
+                {schedules.map((janjian) => (
+                  <tr key={janjian.idJadwal}>
                     <td className="px-5 py-4 font-medium text-gray-900">
-                      {formatTanggal(
-                        jadwalJanjian.tanggalJanjian ?? "Belum diatur",
-                      )}
+                      {janjian.tanggalJanjian
+                        ? formatTanggal(janjian.tanggalJanjian)
+                        : "Belum diatur"}
                     </td>
                     <td className="px-5 py-4">
-                      {formatJam(jadwalJanjian.jamPengambilan)} WIB
+                      {formatJam(janjian.jamPengambilan)} WIB
                     </td>
-                    <td className="px-5 py-4">
-                      {jadwalJanjian.keteranganTujuan}
-                    </td>
-                    <td className="px-5 py-4">
-                      {jadwalJanjian.statusKonfirmasi}
-                    </td>
+                    <td className="px-5 py-4">{janjian.keteranganTujuan}</td>
+                    <td className="px-5 py-4">{janjian.statusKonfirmasi}</td>
                   </tr>
                 ))}
               </tbody>
