@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 interface FadeInOnMountProps {
   children: ReactNode;
@@ -9,7 +10,13 @@ interface FadeInOnMountProps {
   waitForScroll?: boolean;
 }
 
-export default function FadeInOnMount({
+/* Wrapper: remount inner setiap ganti route supaya animasi muncul lagi */
+export default function FadeInOnMount(props: FadeInOnMountProps) {
+  const pathname = usePathname();
+  return <FadeInOnMountInner key={pathname} {...props} />;
+}
+
+function FadeInOnMountInner({
   children,
   className,
   delay = 0,
