@@ -1,6 +1,5 @@
 "use client";
 
-import FadeUp from "@/components/FadeUp";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Komponen Statistik Animasi Angka ─── */
@@ -94,7 +93,7 @@ export default function Home() {
         <section className="container mx-auto px-4 py-12 md:py-16 max-w-6xl">
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Image Column */}
-            <FadeUp className="order-2 md:order-1">
+            <div className="order-2 md:order-1">
               <div className="relative rounded-2xl overflow-hidden border border-(--hx-pastel)/60 shadow-[0_8px_30px_rgb(27,34,51,0.04)]">
                 <img
                   src="/img/tentang-kami/team.jpg"
@@ -103,13 +102,10 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
               </div>
-            </FadeUp>
+            </div>
 
             {/* Content Column */}
-            <FadeUp
-              delay={150}
-              className="order-1 md:order-2 rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm"
-            >
+            <div className="order-1 md:order-2 rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Cerita Kami
               </span>
@@ -133,13 +129,13 @@ export default function Home() {
                   langkah kecil menuju bumi yang lebih lestari.
                 </p>
               </div>
-            </FadeUp>
+            </div>
           </div>
         </section>
 
         {/* Three Pillars Section */}
         <section className="container mx-auto px-4 py-12 md:py-16 max-w-6xl">
-          <FadeUp className="text-center mb-12 max-w-2xl mx-auto">
+          <div className="text-center mb-12 max-w-2xl mx-auto">
             <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
               Tiga Pilar Kami
             </span>
@@ -147,11 +143,11 @@ export default function Home() {
               Mengapa Waste &amp; Wishes?
             </h2>
             <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
-          </FadeUp>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {/* Pillar 1: Permasalahan */}
-            <FadeUp className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 01 / Permasalahan
               </span>
@@ -163,13 +159,10 @@ export default function Home() {
                 Kami hadir dengan teknologi informasi terintegrasi sebagai
                 solusi pengelolaan yang efektif dan terukur.
               </p>
-            </FadeUp>
+            </div>
 
             {/* Pillar 2: Peluang */}
-            <FadeUp
-              delay={150}
-              className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm"
-            >
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 02 / Peluang
               </span>
@@ -181,13 +174,10 @@ export default function Home() {
                 membantu masyarakat sekaligus menciptakan nilai ekonomi dari
                 limbah organik.
               </p>
-            </FadeUp>
+            </div>
 
             {/* Pillar 3: Keharusan */}
-            <FadeUp
-              delay={300}
-              className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm"
-            >
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 03 / Keharusan
               </span>
@@ -210,7 +200,7 @@ export default function Home() {
                   <i>real-time</i>.
                 </p>
               </div>
-            </FadeUp>
+            </div>
           </div>
         </section>
 
@@ -218,7 +208,7 @@ export default function Home() {
         <section className="container mx-auto px-4 py-12 md:py-16 max-w-5xl">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Visi */}
-            <FadeUp className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Visi
               </span>
@@ -230,13 +220,10 @@ export default function Home() {
                 yang mewujudkan lingkungan bersih, sehat, dan mendukung ekonomi
                 sirkular melalui maggot BSF di Indonesia.
               </p>
-            </FadeUp>
+            </div>
 
             {/* Misi */}
-            <FadeUp
-              delay={150}
-              className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm"
-            >
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-8 md:p-10 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-4">
                 Misi
               </span>
@@ -266,13 +253,13 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-            </FadeUp>
+            </div>
           </div>
         </section>
 
         {/* Facts Grid - Helix Drift Style dengan Animasi */}
         <section className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
-          <FadeUp className="grid grid-cols-2 md:grid-cols-4 gap-px bg-(--hx-pastel)/40 rounded-2xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-(--hx-pastel)/40 rounded-2xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
             <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-6 text-center">
               <div className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
                 Didirikan
@@ -297,12 +284,12 @@ export default function Home() {
               </div>
               <AnimatedCounter value={45} suffix="+" />
             </div>
-          </FadeUp>
+          </div>
         </section>
 
         {/* CTA Section */}
         <section className="container mx-auto px-4 py-16 md:py-20 max-w-4xl text-center">
-          <FadeUp className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-10 md:p-14 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
+          <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-10 md:p-14 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
             <h2 className="text-3xl md:text-4xl font-light tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans) mb-4 leading-snug">
               Mari Bergabung Bersama Kami
             </h2>
@@ -324,7 +311,7 @@ export default function Home() {
                 Lihat Event Kami
               </a>
             </div>
-          </FadeUp>
+          </div>
         </section>
       </div>
     </div>
