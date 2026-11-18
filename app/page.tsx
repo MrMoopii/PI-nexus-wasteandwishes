@@ -1,6 +1,9 @@
 import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import EventSliderServer from "@/components/event-slider/EventSliderServer";
+import FadeInOnMount from "@/components/FadeInOnMount";
+import PageLoadingWrapper from "@/components/PageLoadingWrapper";
+import SmoothAnchor from "@/components/SmoothAnchor";
 import { Suspense } from "react";
 import EventSliderKerangka from "@/components/event-slider/EventSliderKerangka";
 
@@ -12,6 +15,7 @@ export default async function Home() {
 
 
   return (
+    <PageLoadingWrapper>
     <div className="relative min-h-screen bg-(--hx-canvas) text-(--hx-ink) font-(family-name:--font-inter) selection:bg-(--hx-accent)/20 selection:text-(--hx-accent-dark) overflow-hidden">
       {/* ── Background Image Layer (Bumi Hijau + Blur Halus) ── */}
       <div
@@ -48,6 +52,7 @@ export default async function Home() {
         {/* ══════════════════════════════════════════════════════════════
             1. BAGIAN ATAS (Hero Section): "Ubah Sampah Organik Menjadi Berkah"
            ══════════════════════════════════════════════════════════════ */}
+        <FadeInOnMount delay={100}>
         <section className="container mx-auto px-4 py-16 md:py-20 max-w-7xl">
           <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-center">
             {/* Kolom Kiri: Copywriting & Call to Action */}
@@ -78,12 +83,12 @@ export default async function Home() {
                 >
                   Mulai Berlangganan
                 </a>
-                <a
+                <SmoothAnchor
                   href="#layanan"
                   className="inline-flex items-center justify-center rounded-full border border-(--hx-pastel) bg-white/80 backdrop-blur-sm px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-(--hx-ink-2) hover:border-(--hx-accent) hover:text-(--hx-accent) hover:bg-white transition-colors"
                 >
                   Pelajari Layanan
-                </a>
+                </SmoothAnchor>
               </div>
             </div>
 
@@ -116,6 +121,7 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        </FadeInOnMount>
 
         {/* ══════════════════════════════════════════════════════════════
             2. BAGIAN TENGAH (Event Slider): Komponen Galeri Helix Drift
@@ -126,12 +132,14 @@ export default async function Home() {
         {/* ══════════════════════════════════════════════════════════════
             3. BAGIAN BAWAH: Layanan Utama Kami & Statistik
            ══════════════════════════════════════════════════════════════ */}
+        <FadeInOnMount delay={400}>
         <section
           id="layanan"
           className="relative py-16 md:py-24 border-t border-(--hx-pastel)/40"
         >
           <div className="container mx-auto px-4 max-w-7xl">
             {/* Header Layanan */}
+            <FadeInOnMount delay={0}>
             <div className="text-center mb-14 max-w-2xl mx-auto">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
                 Solusi Terpadu
@@ -146,8 +154,10 @@ export default async function Home() {
               </p>
               <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
             </div>
+            </FadeInOnMount>
 
             {/* Grid Kartu Layanan */}
+            <FadeInOnMount delay={150}>
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               {/* Card 1: Penjemputan Sampah Organik */}
               <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60 flex flex-col justify-between">
@@ -245,8 +255,10 @@ export default async function Home() {
                 </div>
               </div>
             </div>
+            </FadeInOnMount>
 
             {/* ── Komponen Statistik (Facts Grid Khas Helix Drift seperti di app/event/page) ── */}
+            <FadeInOnMount delay={300}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-(--hx-pastel)/40 rounded-2xl overflow-hidden border border-(--hx-pastel)/40 shadow-sm">
               <div className="bg-(--hx-canvas)/90 backdrop-blur-sm p-6 sm:p-8 text-center">
                 <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
@@ -276,9 +288,12 @@ export default async function Home() {
                 </span>
               </div>
             </div>
+            </FadeInOnMount>
           </div>
         </section>
+        </FadeInOnMount>
       </div>
     </div>
+    </PageLoadingWrapper>
   );
 }

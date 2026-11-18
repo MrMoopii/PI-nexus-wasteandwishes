@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import FadeInOnMount from "@/components/FadeInOnMount";
 
 /* ─── Bentuk data event untuk slider (dikirim dari app/page.tsx) ─── */
 export type SliderEvent = {
@@ -18,8 +19,89 @@ interface EventSliderProps {
   loggedIn: boolean;
 }
 
-/* ─── Komponen Event Slider (Gaya Drag Helix Drift 3D) ─── */
+/* ─── Wrapper: preload semua gambar dulu, baru render slider ─── */
 export default function EventSlider({ events, loggedIn }: EventSliderProps) {
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  useEffect(() => {
+    if (events.length === 0) {
+      window.setTimeout(() => setImagesLoaded(true), 0);
+      return;
+    }
+
+    const imageUrls = events
+      .map((ev) => ev.gambarUrl)
+      .filter((url): url is string => url !== null);
+
+    if (imageUrls.length === 0) {
+      window.setTimeout(() => setImagesLoaded(true), 0);
+      return;
+    }
+
+    let loadedCount = 0;
+    const totalImages = imageUrls.length;
+
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalImages) {
+        setImagesLoaded(true);
+      }
+    };
+
+    imageUrls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+      if (img.complete) {
+        checkAllLoaded();
+      } else {
+        img.onload = checkAllLoaded;
+        img.onerror = checkAllLoaded; // Continue even if some images fail
+      }
+    });
+  }, [events]);
+
+  if (!imagesLoaded) {
+    return (
+      <section
+        aria-busy="true"
+        className="relative py-16 md:py-24 border-y border-(--hx-pastel)/40"
+        style={{ visibility: "hidden", opacity: 0, pointerEvents: "none" }}
+      >
+        <div className="container mx-auto px-4 mb-8 text-center max-w-3xl">
+          <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
+            Dokumentasi Kegiatan
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
+            Galeri &amp; Event Terbaru
+          </h2>
+          <p className="mt-3 text-base text-(--hx-ink-2) leading-relaxed">
+            Geser atau seret gambar ke kiri dan kanan untuk melihat event kami.
+            Klik gambar di tengah untuk membuka detail event.
+          </p>
+          <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
+        </div>
+
+        <span className="sr-only">Memuat gambar event…</span>
+
+        <div className="flex h-[min(62vh,560px)] min-h-85 items-center justify-center px-4">
+          <div className="h-[85%] w-full max-w-md rounded-2xl bg-(--hx-pastel)/40 animate-pulse" />
+        </div>
+
+        <div className="hx-caption animate-pulse">
+          <div className="h-5 w-2/3 rounded bg-(--hx-pastel)/50" />
+          <div className="mt-3 h-3 w-full rounded bg-(--hx-pastel)/40" />
+          <div className="mt-2 h-3 w-5/6 rounded bg-(--hx-pastel)/40" />
+        </div>
+      </section>
+    );
+  }
+
+  return <EventSliderContent events={events} loggedIn={loggedIn} />;
+}
+
+/* ─── Konten slider (semua hook selalu dipanggil karena hanya dirender
+       setelah seluruh gambar siap) ─── */
+function EventSliderContent({ events, loggedIn }: EventSliderProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const capElRef = useRef<HTMLElement>(null);
   const capTitleRef = useRef<HTMLHeadingElement>(null);
@@ -353,75 +435,80 @@ export default function EventSlider({ events, loggedIn }: EventSliderProps) {
 
   return (
     <section className="relative py-16 md:py-24 border-y border-(--hx-pastel)/40">
-      <div className="container mx-auto px-4 mb-8 text-center max-w-3xl">
-        <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
-          Dokumentasi Kegiatan
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
-          Galeri &amp; Event Terbaru
-        </h2>
-        <p className="mt-3 text-base text-(--hx-ink-2) leading-relaxed">
-          Geser atau seret gambar ke kiri dan kanan untuk melihat event kami.
-          Klik gambar di tengah untuk membuka detail event.
-        </p>
-        <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
-      </div>
+      <FadeInOnMount waitForScroll delay={0}>
+        <div className="container mx-auto px-4 mb-8 text-center max-w-3xl">
+          <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-ink-3) uppercase mb-2">
+            Dokumentasi Kegiatan
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-(--hx-ink) font-(family-name:--font-plus-jakarta-sans)">
+            Galeri &amp; Event Terbaru
+          </h2>
+          <p className="mt-3 text-base text-(--hx-ink-2) leading-relaxed">
+            Geser atau seret gambar ke kiri dan kanan untuk melihat event kami.
+            Klik gambar di tengah untuk membuka detail event.
+          </p>
+          <div className="mx-auto bg-(--hx-accent) h-0.5 w-16 rounded-full mt-4" />
+        </div>
+      </FadeInOnMount>
 
-      {total === 0 ? (
-        <p className="px-4 text-center text-sm text-(--hx-ink-2)">
-          Belum ada event yang tersedia.
-        </p>
-      ) : (
-        <>
-          {/* 3D Spool Stage (Helix Drift) */}
-          <div
-            className="hx-stage select-none"
-            ref={stageRef}
-            role="group"
-            aria-label="Galeri event — geser kiri/kanan untuk menjelajahi"
-          >
-            {events.map((ev, i) => (
-              <div
-                key={ev.id}
-                className="hx-plate"
-                role="button"
-                tabIndex={0}
-                aria-label={`Event ${i + 1}, ${ev.judul}`}
-              >
-                <span
-                  className="hx-plate-media"
-                  style={
-                    ev.gambarUrl
-                      ? {
-                          backgroundImage: `url(${JSON.stringify(ev.gambarUrl)})`,
-                        }
-                      : undefined
-                  }
-                />
-                <div className="hx-plate-info">
-                  <h2>{ev.judul}</h2>
-                  <p>{ev.deskripsi}</p>
+      <FadeInOnMount waitForScroll delay={150}>
+        {total === 0 ? (
+          <p className="px-4 text-center text-sm text-(--hx-ink-2)">
+            Belum ada event yang tersedia.
+          </p>
+        ) : (
+          <>
+            {/* 3D Spool Stage (Helix Drift) */}
+            <div
+              className="hx-stage select-none"
+              ref={stageRef}
+              role="group"
+              aria-label="Galeri event — geser kiri/kanan untuk menjelajahi"
+            >
+              {events.map((ev, i) => (
+                <div
+                  key={ev.id}
+                  className="hx-plate"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Event ${i + 1}, ${ev.judul}`}
+                >
+                  <span
+                    className="hx-plate-media"
+                    style={
+                      ev.gambarUrl
+                        ? {
+                            backgroundImage: `url(${JSON.stringify(ev.gambarUrl)})`,
+                          }
+                        : undefined
+                    }
+                  />
+                  <div className="hx-plate-info">
+                    <h2>{ev.judul}</h2>
+                    <p>{ev.deskripsi}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Caption Section (Gaya Murni Helix Drift) */}
-          <section className="hx-caption" ref={capElRef} aria-live="polite">
-            <h3 className="hx-cap-title text-(--hx-accent)" ref={capTitleRef}>
-              {events[0].judul}
-            </h3>
-            <p className="hx-cap-desc" ref={capDescRef}>
-              {events[0].deskripsi}
-            </p>
-            <div className="hx-cap-meta" ref={capMetaRef}>
-              <span>Lokasi: {events[0].lokasi}</span>
-              <span>Tanggal: {events[0].tanggal}</span>
-              <span>Tipe: {events[0].jenis}</span>
+              ))}
             </div>
-          </section>
-        </>
-      )}
+          </>
+        )}
+      </FadeInOnMount>
+
+      <FadeInOnMount waitForScroll delay={300}>
+        <section className="hx-caption" ref={capElRef} aria-live="polite">
+          <h3 className="hx-cap-title text-(--hx-accent)" ref={capTitleRef}>
+            {events[0]?.judul}
+          </h3>
+          <p className="hx-cap-desc" ref={capDescRef}>
+            {events[0]?.deskripsi}
+          </p>
+          <div className="hx-cap-meta" ref={capMetaRef}>
+            <span>Lokasi: {events[0]?.lokasi}</span>
+            <span>Tanggal: {events[0]?.tanggal}</span>
+            <span>Tipe: {events[0]?.jenis}</span>
+          </div>
+        </section>
+      </FadeInOnMount>
     </section>
   );
 }

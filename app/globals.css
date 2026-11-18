@@ -31,6 +31,10 @@
   --font-display: var(--font-plus-jakarta-sans);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   background-color: var(--hx-canvas);
@@ -729,8 +733,8 @@ body.away .hx-panel {
   opacity: 0;
   transform: translateY(18px);
   transition:
-    opacity 0.55s var(--hx-ease),
-    transform 0.55s var(--hx-ease);
+    opacity 1.2s var(--hx-ease),
+    transform 1.2s var(--hx-ease);
 }
 
 .hx-rv.in {
