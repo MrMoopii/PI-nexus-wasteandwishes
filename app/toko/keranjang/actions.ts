@@ -171,7 +171,7 @@ export async function tambahKeKeranjang(input: {
     });
   }
 
-  revalidatePath("/store/keranjang");
+  revalidatePath("/toko/keranjang");
   return {
     ok: true,
     item: {
@@ -244,7 +244,7 @@ export async function ubahJumlahKeranjang(
     return { ok: false, error: "Produk tidak ada di keranjang.", status: 404 };
   }
 
-  revalidatePath("/store/keranjang");
+  revalidatePath("/toko/keranjang");
   return { ok: true };
 }
 
@@ -272,6 +272,6 @@ export async function hapusDariKeranjang(
       ),
     );
 
-  revalidatePath("/store/keranjang");
+  revalidatePath("/toko/keranjang");
   return { ok: true };
 }

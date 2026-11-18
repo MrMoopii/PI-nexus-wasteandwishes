@@ -1,14 +1,34 @@
 "use client";
 
-import { useState, useRef } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 
 // Komponen khusus untuk mengunggah satu poster event ke ImageKit.
-// Mengikuti pola ImageKitUpload produk, tetapi untuk satu gambar saja
-// sehingga cocok dengan kolom events.gambar_url / events.gambar_file_id.
+// Mengikuti pola deferred upload: file dipilih → masuk staging (preview
+// lokal, belum diupload). Form parent memanggil flushPending saat submit
+// agar foto baru terupload setelah semua field terisi.
 
 type PosterItem = {
   url: string;
   fileId: string;
+};
+
+export type ImageKitEventUploadHandle = {
+  /** Apakah ada file poster yang masih di-staging (belum diupload). */
+  hasPending: () => boolean;
+  /**
+   * Upload poster staging ke ImageKit. Dipanggil form parent saat submit,
+   * setelah validasi field lolos. Mengembalikan hasil (url + fileId) atau
+   * null jika tidak ada pending / gagal.
+   */
+  flushPending: () => Promise<{ url: string; fileId: string } | null>;
+  /** Hapus poster staging dan revoke preview (dipanggil saat batal). */
+  clearPending: () => void;
 };
 
 type UploadQueueItem = {
@@ -17,6 +37,12 @@ type UploadQueueItem = {
   progress: number;
   status: "compressing" | "uploading" | "error";
   errorPesan?: string;
+};
+
+type PendingPoster = {
+  tempId: string;
+  file: File;
+  previewUrl: string;
 };
 
 type ImageKitEventUploadProps = {
@@ -90,7 +116,6 @@ function uploadToImageKit({
   publicKey,
   folder,
   onProgress,
-  onXhrCreated,
 }: {
   blob: Blob;
   fileName: string;
@@ -98,7 +123,6 @@ function uploadToImageKit({
   publicKey: string;
   folder: string;
   onProgress: (percent: number) => void;
-  onXhrCreated: (xhr: XMLHttpRequest) => void;
 }): Promise<{ url: string; fileId: string }> {
   return new Promise((resolve, reject) => {
     const uniqueFileName = `${Math.floor(Date.now() / 1000)}_${fileName}`;
@@ -113,7 +137,6 @@ function uploadToImageKit({
     formData.append("useUniqueFileName", "true");
 
     const xhr = new XMLHttpRequest();
-    onXhrCreated(xhr);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -149,367 +172,430 @@ function uploadToImageKit({
   });
 }
 
-export function ImageKitEventUpload({
-  existingPoster,
-  onChange,
-  disabled = false,
-}: ImageKitEventUploadProps) {
-  const [poster, setPoster] = useState<PosterItem | null>(existingPoster);
-  const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const activeXhrMap = useRef<Map<string, XMLHttpRequest>>(new Map());
+const ImageKitEventUpload = forwardRef<ImageKitEventUploadHandle, ImageKitEventUploadProps>(
+  function ImageKitEventUpload(
+    { existingPoster, onChange, disabled = false },
+    ref,
+  ) {
+    const [poster, setPoster] = useState<PosterItem | null>(existingPoster);
+    const [pending, setPending] = useState<PendingPoster | null>(null);
+    const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const pendingRef = useRef<PendingPoster | null>(null);
+    pendingRef.current = pending;
 
-  const handleUploadFile = async (file: File, tempId: string) => {
-    try {
-      setUploadQueue((prev) =>
-        prev.map((item) =>
-          item.tempId === tempId ? { ...item, status: "compressing" } : item,
-        ),
-      );
-
-      const { blob, fileName } = await compressImage(file);
-
-      const authRes = await fetch("/api/admin/imagekit-auth");
-      if (!authRes.ok) {
-        const errorData = await authRes.json().catch(() => ({}));
-        throw new Error(
-          errorData.error || "Gagal mendapatkan izin upload dari server.",
-        );
-      }
-      const authData = await authRes.json();
-
-      const publicKey =
-        authData.publicKey ||
-        process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY ||
-        process.env.NEXT_PUBLIC_PUBLIC_KEY;
-      if (!publicKey) {
-        throw new Error(
-          "Public key ImageKit belum disetel di environment variables.",
-        );
-      }
-
-      setUploadQueue((prev) =>
-        prev.map((item) =>
-          item.tempId === tempId
-            ? { ...item, status: "uploading", progress: 0 }
-            : item,
-        ),
-      );
-
-      const result = await uploadToImageKit({
-        blob,
-        fileName,
-        authData,
-        publicKey,
-        folder: "/event/",
-        onProgress: (percent) => {
-          setUploadQueue((prev) =>
-            prev.map((item) =>
-              item.tempId === tempId ? { ...item, progress: percent } : item,
-            ),
-          );
-        },
-        onXhrCreated: (xhr) => {
-          activeXhrMap.current.set(tempId, xhr);
-        },
-      });
-
-      activeXhrMap.current.delete(tempId);
-
-      const newPoster: PosterItem = {
-        url: result.url,
-        fileId: result.fileId,
+    // Bersihkan preview object URL saat unmount
+    useEffect(() => {
+      return () => {
+        if (pendingRef.current) URL.revokeObjectURL(pendingRef.current.previewUrl);
       };
+    }, []);
 
-      setUploadQueue((prev) => prev.filter((item) => item.tempId !== tempId));
+    // EKSPOSE VIA REF — dipanggil form parent
+    useImperativeHandle(
+      ref,
+      () => ({
+        hasPending: () => pendingRef.current !== null,
 
-      // Ganti poster lama (fileId lama ikut dihapus dari ImageKit)
-      const deletedFileId =
-        poster && poster.fileId !== newPoster.fileId ? poster.fileId : null;
-      setPoster(newPoster);
-      onChange(newPoster, deletedFileId);
-    } catch (err: unknown) {
-      activeXhrMap.current.delete(tempId);
-      const pesan =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat upload.";
-      setUploadQueue((prev) =>
-        prev.map((item) =>
-          item.tempId === tempId
-            ? { ...item, status: "error", errorPesan: pesan }
-            : item,
-        ),
-      );
-    }
-  };
+        flushPending: async () => {
+          const p = pendingRef.current;
+          if (!p) return null;
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setValidationError(null);
+          try {
+            setUploadQueue((prev) => [
+              ...prev,
+              {
+                tempId: p.tempId,
+                file: p.file,
+                progress: 0,
+                status: "compressing",
+              },
+            ]);
 
-    // Hanya ambil file pertama; poster event bersifat tunggal
-    const file = files[0];
+            const { blob, fileName } = await compressImage(p.file);
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setValidationError(
-        `Format file "${file.name}" tidak didukung. Hanya file JPG, JPEG, PNG, dan WEBP yang diizinkan.`,
-      );
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      setValidationError(
-        `Ukuran file "${file.name}" melebihi batas maksimal 20 MB.`,
-      );
-      return;
-    }
-
-    const tempId = `upload-${crypto.randomUUID()}`;
-    setUploadQueue((prev) => [
-      ...prev,
-      {
-        tempId,
-        file,
-        progress: 0,
-        status: "compressing",
-      },
-    ]);
-
-    handleUploadFile(file, tempId);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (!disabled) setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (disabled) return;
-    handleFiles(e.dataTransfer.files);
-  };
-
-  const handleDeletePoster = () => {
-    const deletedFileId = poster?.fileId || null;
-    setPoster(null);
-    onChange(null, deletedFileId);
-  };
-
-  const handleRetryUpload = (item: UploadQueueItem) => {
-    setUploadQueue((prev) =>
-      prev.map((q) =>
-        q.tempId === item.tempId
-          ? {
-              ...q,
-              status: "compressing",
-              errorPesan: undefined,
-              progress: 0,
+            const authRes = await fetch("/api/admin/imagekit-auth");
+            if (!authRes.ok) {
+              const errorData = await authRes.json().catch(() => ({}));
+              const pesan =
+                errorData.error ||
+                "Gagal mendapatkan izin upload dari server.";
+              setUploadQueue((prev) =>
+                prev.map((q) =>
+                  q.tempId === p.tempId
+                    ? { ...q, status: "error", errorPesan: pesan }
+                    : q,
+                ),
+              );
+              return null;
             }
-          : q,
-      ),
+            const authData = await authRes.json();
+
+            const publicKey =
+              authData.publicKey ||
+              process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY ||
+              process.env.NEXT_PUBLIC_PUBLIC_KEY;
+            if (!publicKey) {
+              const pesan =
+                "Public key ImageKit belum disetel di environment variables.";
+              setUploadQueue((prev) =>
+                prev.map((q) =>
+                  q.tempId === p.tempId
+                    ? { ...q, status: "error", errorPesan: pesan }
+                    : q,
+                ),
+              );
+              return null;
+            }
+
+            setUploadQueue((prev) =>
+              prev.map((q) =>
+                q.tempId === p.tempId
+                  ? { ...q, status: "uploading", progress: 0 }
+                  : q,
+              ),
+            );
+
+            const result = await uploadToImageKit({
+              blob,
+              fileName,
+              authData,
+              publicKey,
+              folder: "/event/",
+              onProgress: (percent) => {
+                setUploadQueue((prev) =>
+                  prev.map((q) =>
+                    q.tempId === p.tempId ? { ...q, progress: percent } : q,
+                  ),
+                );
+              },
+            });
+
+            setUploadQueue((prev) =>
+              prev.filter((q) => q.tempId !== p.tempId),
+            );
+
+            // Ganti poster lama (fileId lama ikut dihapus dari ImageKit)
+            const newPoster: PosterItem = {
+              url: result.url,
+              fileId: result.fileId,
+            };
+            const deletedFileId =
+              poster && poster.fileId !== newPoster.fileId ? poster.fileId : null;
+
+            URL.revokeObjectURL(p.previewUrl);
+            setPending(null);
+            setPoster(newPoster);
+            onChange(newPoster, deletedFileId);
+
+            return { url: newPoster.url, fileId: newPoster.fileId };
+          } catch (err: unknown) {
+            const pesan =
+              err instanceof Error ? err.message : "Terjadi kesalahan saat upload.";
+            setUploadQueue((prev) =>
+              prev.map((q) =>
+                q.tempId === p.tempId
+                  ? { ...q, status: "error", errorPesan: pesan }
+                  : q,
+              ),
+            );
+            return null;
+          }
+        },
+
+        clearPending: () => {
+          if (pendingRef.current) {
+            URL.revokeObjectURL(pendingRef.current.previewUrl);
+            setPending(null);
+            setUploadQueue([]);
+          }
+        },
+      }),
+      [poster, onChange],
     );
-    handleUploadFile(item.file, item.tempId);
-  };
 
-  const handleCancelUpload = (tempId: string) => {
-    const xhr = activeXhrMap.current.get(tempId);
-    if (xhr) {
-      xhr.abort();
-      activeXhrMap.current.delete(tempId);
-    }
-    setUploadQueue((prev) => prev.filter((q) => q.tempId !== tempId));
-  };
+    const handleFiles = (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+      setValidationError(null);
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-slate-700">
-          Poster Event
-        </label>
-        <span className="text-xs text-slate-500">
-          {poster ? "1 poster tersimpan" : "Belum ada poster"}
-        </span>
-      </div>
+      // Hanya ambil file pertama; poster event bersifat tunggal
+      const file = files[0];
 
-      {/* Area Drag and Drop */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => !disabled && fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-          isDragging
-            ? "border-blue-500 bg-blue-50/50"
-            : "border-slate-300 hover:border-slate-400 bg-slate-50/60"
-        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      >
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={(e) => handleFiles(e.target.files)}
-          accept=".jpg,.jpeg,.png,.webp"
-          disabled={disabled}
-          className="hidden"
-        />
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setValidationError(
+          `Format file "${file.name}" tidak didukung. Hanya file JPG, JPEG, PNG, dan WEBP yang diizinkan.`,
+        );
+        return;
+      }
 
-        <div className="flex flex-col items-center justify-center space-y-2">
-          <svg
-            className="w-9 h-9 text-blue-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 7.5 4.5 6h3.75L10.5 8h4.5A1.5 1.5 0 0 1 16.5 9.5V17a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 17V7.5Z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 13.25h4m-4 2.5h2.5"
-            />
-          </svg>
-          <div>
-            <p className="text-sm font-semibold text-slate-700">
-              Seret dan lepaskan poster ke sini, atau{" "}
-              <span className="text-blue-600 hover:underline">pilih file</span>
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Mendukung JPG, JPEG, PNG, WEBP hingga 20 MB. Otomatis dikompresi
-              ke WebP sebelum diupload.
-            </p>
-          </div>
+      if (file.size > MAX_FILE_SIZE) {
+        setValidationError(
+          `Ukuran file "${file.name}" melebihi batas maksimal 20 MB.`,
+        );
+        return;
+      }
+
+      // Staging: buat preview, belum upload ke ImageKit
+      const tempId = `upload-${crypto.randomUUID()}`;
+      const previewUrl = URL.createObjectURL(file);
+      setPending({ tempId, file, previewUrl });
+    };
+
+    const handleRemovePending = () => {
+      setPending((prev) => {
+        if (prev) URL.revokeObjectURL(prev.previewUrl);
+        return null;
+      });
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!disabled) setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      if (disabled) return;
+      handleFiles(e.dataTransfer.files);
+    };
+
+    const handleDeletePoster = () => {
+      const deletedFileId = poster?.fileId || null;
+      setPoster(null);
+      onChange(null, deletedFileId);
+    };
+
+    const handleCancelUpload = (tempId: string) => {
+      setUploadQueue((prev) => prev.filter((q) => q.tempId !== tempId));
+    };
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-medium text-slate-700">
+            Poster Event
+          </label>
+          <span className="text-xs text-slate-500">
+            {poster ? "1 poster tersimpan" : "Belum ada poster"}
+            {pending && (
+              <span className="text-amber-600">
+                {" "}({pending.file.name} menunggu)
+              </span>
+            )}
+          </span>
         </div>
-      </div>
 
-      {/* Error Validasi Klien */}
-      {validationError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center justify-between">
-          <span>{validationError}</span>
-          <button
-            type="button"
-            onClick={() => setValidationError(null)}
-            className="text-red-500 hover:text-red-700 font-bold ml-2"
-          >
-            ×
-          </button>
-        </div>
-      )}
+        {/* Area Drag and Drop */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => !disabled && fileInputRef.current?.click()}
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+            isDragging
+              ? "border-blue-500 bg-blue-50/50"
+              : "border-slate-300 hover:border-slate-400 bg-slate-50/60"
+          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={(e) => {
+              handleFiles(e.target.files);
+              e.target.value = "";
+            }}
+            accept=".jpg,.jpeg,.png,.webp"
+            disabled={disabled}
+            className="hidden"
+          />
 
-      {/* Upload Queue */}
-      {uploadQueue.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-            Proses Upload
-          </h4>
-          <div className="grid grid-cols-1 gap-3">
-            {uploadQueue.map((item) => (
-              <div
-                key={item.tempId}
-                className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg shadow-xs"
-              >
-                <div className="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center text-slate-400 text-xs shrink-0 overflow-hidden">
-                  {item.file.name.slice(-4)}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate">
-                    {item.file.name}
-                  </p>
-
-                  {item.status === "compressing" && (
-                    <p className="text-[11px] text-amber-600">
-                      Mengompresi gambar...
-                    </p>
-                  )}
-
-                  {item.status === "uploading" && (
-                    <div className="space-y-1 mt-1">
-                      <div className="flex justify-between text-[11px] text-slate-500">
-                        <span>Mengunggah...</span>
-                        <span>{item.progress}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className="bg-blue-600 h-full transition-all duration-200"
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {item.status === "error" && (
-                    <p className="text-[11px] text-red-600 mt-1 truncate">
-                      {item.errorPesan || "Gagal mengunggah"}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1 shrink-0">
-                  {item.status === "error" && (
-                    <button
-                      type="button"
-                      onClick={() => handleRetryUpload(item)}
-                      title="Coba lagi"
-                      className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                    >
-                      Ulangi
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleCancelUpload(item.tempId)}
-                    title="Batal"
-                    className="p-1 text-slate-400 hover:text-slate-600 text-sm"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Poster Tersimpan */}
-      {poster && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Poster Saat Ini
-            </h4>
-            <button
-              type="button"
-              onClick={handleDeletePoster}
-              disabled={disabled}
-              className="text-xs text-red-500 hover:underline disabled:opacity-50"
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <svg
+              className="w-9 h-9 text-blue-500"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              Hapus Poster
-            </button>
-          </div>
-
-          <div className="relative bg-white border-2 border-blue-500 ring-2 ring-blue-200 rounded-xl overflow-hidden">
-            <div className="aspect-video bg-slate-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={poster.url}
-                alt="Poster event"
-                className="w-full h-full object-cover"
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7.5 4.5 6h3.75L10.5 8h4.5A1.5 1.5 0 0 1 16.5 9.5V17a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 17V7.5Z"
               />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10 13.25h4m-4 2.5h2.5"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold text-slate-700">
+                Seret dan lepaskan poster ke sini, atau{" "}
+                <span className="text-blue-600 hover:underline">
+                  pilih file
+                </span>
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Mendukung JPG, JPEG, PNG, WEBP hingga 20 MB. Poster akan
+                diunggah ke server setelah event disimpan.
+              </p>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
+
+        {/* Error Validasi Klien */}
+        {validationError && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center justify-between">
+            <span>{validationError}</span>
+            <button
+              type="button"
+              onClick={() => setValidationError(null)}
+              className="text-red-500 hover:text-red-700 font-bold ml-2"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Poster Staging (belum diupload) */}
+        {pending && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Menunggu Unggah
+              </h4>
+              <button
+                type="button"
+                onClick={handleRemovePending}
+                disabled={disabled}
+                className="text-xs text-red-500 hover:underline disabled:opacity-50"
+              >
+                Hapus
+              </button>
+            </div>
+
+            <div className="relative bg-white border-2 border-amber-400 ring-2 ring-amber-100 rounded-xl overflow-hidden">
+              <div className="aspect-video bg-slate-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pending.previewUrl}
+                  alt="Poster event (staging)"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="px-3 py-2 text-xs text-slate-500 bg-amber-50 border-t border-amber-100">
+                {pending.file.name} — akan diunggah saat event disimpan
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upload Queue (sedang di-upload / error, dari flushPending) */}
+        {uploadQueue.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+              Proses Upload
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              {uploadQueue.map((item) => (
+                <div
+                  key={item.tempId}
+                  className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg shadow-xs"
+                >
+                  <div className="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center text-slate-400 text-xs shrink-0 overflow-hidden">
+                    {item.file.name.slice(-4)}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-700 truncate">
+                      {item.file.name}
+                    </p>
+
+                    {item.status === "compressing" && (
+                      <p className="text-[11px] text-amber-600">
+                        Mengompresi gambar...
+                      </p>
+                    )}
+
+                    {item.status === "uploading" && (
+                      <div className="space-y-1 mt-1">
+                        <div className="flex justify-between text-[11px] text-slate-500">
+                          <span>Mengunggah...</span>
+                          <span>{item.progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-blue-600 h-full transition-all duration-200"
+                            style={{ width: `${item.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {item.status === "error" && (
+                      <p className="text-[11px] text-red-600 mt-1 truncate">
+                        {item.errorPesan || "Gagal mengunggah"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleCancelUpload(item.tempId)}
+                      title="Batal"
+                      className="p-1 text-slate-400 hover:text-slate-600 text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Poster Tersimpan (sudah di ImageKit) */}
+        {poster && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Poster Saat Ini
+              </h4>
+              <button
+                type="button"
+                onClick={handleDeletePoster}
+                disabled={disabled}
+                className="text-xs text-red-500 hover:underline disabled:opacity-50"
+              >
+                Hapus Poster
+              </button>
+            </div>
+
+            <div className="relative bg-white border-2 border-blue-500 ring-2 ring-blue-200 rounded-xl overflow-hidden">
+              <div className="aspect-video bg-slate-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={poster.url}
+                  alt="Poster event"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
+export default ImageKitEventUpload;

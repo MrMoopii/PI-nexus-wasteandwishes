@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
 import { toast } from "sonner";
 import type { produk } from "@/lib/db/schema";
-import { tambahKeKeranjang as tambahKeKeranjangServer } from "@/app/store/keranjang/actions";
+import { tambahKeKeranjang as tambahKeKeranjangServer } from "@/app/toko/keranjang/actions";
 
 type Produk = typeof produk.$inferSelect;
 
@@ -53,7 +53,9 @@ export default function DetailProdukClient({
         return;
       }
 
-      toast.success(`${produkUtama.namaProduk} berhasil ditambahkan ke keranjang!`);
+      toast.success(
+        `${produkUtama.namaProduk} berhasil ditambahkan ke keranjang!`,
+      );
     });
   }
 
@@ -70,7 +72,7 @@ export default function DetailProdukClient({
         </button>
 
         <nav className="mb-8 flex items-center gap-2 text-sm text-(--hx-ink-2)">
-          <Link href="/store" className="hover:text-(--hx-accent)">
+          <Link href="/toko" className="hover:text-(--hx-accent)">
             Toko
           </Link>
           <span>/</span>
@@ -197,7 +199,7 @@ export default function DetailProdukClient({
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Produk Lainnya</h2>
               <Link
-                href="/store"
+                href="/toko"
                 className="text-sm text-(--hx-accent) hover:underline"
               >
                 Lihat Semua
@@ -207,7 +209,7 @@ export default function DetailProdukClient({
               {produkLainnya.map((item) => (
                 <Link
                   key={item.idProduk}
-                  href={`/store/detail/${item.idProduk}`}
+                  href={`/toko/detail/${item.idProduk}`}
                   className="hx-card group p-3"
                 >
                   <div className="mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-(--hx-sunk)">

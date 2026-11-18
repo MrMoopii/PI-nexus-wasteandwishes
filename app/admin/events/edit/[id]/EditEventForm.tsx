@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ImageKitEventUpload } from "@/components/admin/ImageKitEventUpload";
+import ImageKitEventUpload, {
+  type ImageKitEventUploadHandle,
+} from "@/components/admin/ImageKitEventUpload";
 
 type PosterItem = {
   url: string;
@@ -58,6 +60,7 @@ export default function EditEventForm({
     return null;
   });
   const [deletedFileId, setDeletedFileId] = useState<string | null>(null);
+  const uploadRef = useRef<ImageKitEventUploadHandle>(null);
 
   const handlePosterChange = (p: PosterItem | null, d: string | null) => {
     setPoster(p);
@@ -87,9 +90,21 @@ export default function EditEventForm({
   const handleSubmit = async (formData: FormData) => {
     formData.set("statusEvent", finalStatus);
 
-    // Poster dari ImageKit (kosongkan jika dihapus)
-    formData.set("gambarUrl", poster?.url ?? "");
-    formData.set("gambarFileId", poster?.fileId ?? "");
+    // Cek apakah ada poster staging SEBELUM flush
+    const hasPending = uploadRef.current?.hasPending() ?? false;
+
+    // Flush poster staging: upload ke ImageKit hanya jika ada pending
+    const uploaded = await uploadRef.current?.flushPending();
+
+    // Jika ada pending tetapi flush gagal (jaringan / auth), hentikan
+    if (hasPending && !uploaded) {
+      console.error("Gagal mengunggah poster event.");
+      return;
+    }
+
+    // Poster dari ImageKit (hasil flush atau poster lama)
+    formData.set("gambarUrl", uploaded?.url ?? poster?.url ?? "");
+    formData.set("gambarFileId", uploaded?.fileId ?? poster?.fileId ?? "");
 
     // Sinyal file poster lama yang perlu dibersihkan dari ImageKit
     if (deletedFileId) {
@@ -239,6 +254,7 @@ export default function EditEventForm({
 
           <div className="md:col-span-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
             <ImageKitEventUpload
+              ref={uploadRef}
               existingPoster={poster}
               onChange={handlePosterChange}
             />

@@ -6,7 +6,7 @@ import {
   hapusDariKeranjang,
   ubahJumlahKeranjang,
   type ItemKeranjang,
-} from "@/app/store/keranjang/actions";
+} from "@/app/toko/keranjang/actions";
 
 const rupiah = (nilai: number): string => `Rp${nilai.toLocaleString("id-ID")}`;
 
@@ -64,11 +64,11 @@ export default function KeranjangClient({
             <p className="mb-6 text-sm text-(--hx-ink-2)">
               Belum ada produk di keranjang Anda. Yuk, mulai berbelanja!
             </p>
-            <Link href="/store" className="hx-btn-primary">
+            <Link href="/toko" className="hx-btn-primary">
               Belanja Sekarang
             </Link>
             <Link
-              href="/store"
+              href="/toko"
               className="mx-auto mt-4 flex w-fit items-center gap-2 text-sm font-medium text-(--hx-ink-2) transition-colors hover:text-(--hx-accent)"
             >
               <svg
@@ -125,7 +125,7 @@ export default function KeranjangClient({
         </button>
         <div className="mb-8">
           <nav className="mb-4 flex items-center gap-2 text-sm text-(--hx-ink-2)">
-            <Link href="/store" className="hover:text-(--hx-accent)">
+            <Link href="/toko" className="hover:text-(--hx-accent)">
               Toko
             </Link>
             <span>/</span>
@@ -153,7 +153,7 @@ export default function KeranjangClient({
                 className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-4 sm:p-5"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <Link href={`/store/detail/${item.id}`} className="shrink-0">
+                  <Link href={`/toko/detail/${item.id}`} className="shrink-0">
                     <div className="h-24 w-24 overflow-hidden rounded-xl bg-(--hx-sunk)">
                       {item.gambarUrl ? (
                         <img
@@ -170,7 +170,7 @@ export default function KeranjangClient({
                   </Link>
                   <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex-1">
-                      <Link href={`/store/detail/${item.id}`} className="group">
+                      <Link href={`/toko/detail/${item.id}`} className="group">
                         <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-(--hx-accent)">
                           {item.jenis}
                         </span>
@@ -246,7 +246,7 @@ export default function KeranjangClient({
             >
               Checkout
             </button>
-            <Link href="/store" className="hx-btn-outline w-full">
+            <Link href="/toko" className="hx-btn-outline w-full">
               Lanjut Belanja
             </Link>
           </aside>

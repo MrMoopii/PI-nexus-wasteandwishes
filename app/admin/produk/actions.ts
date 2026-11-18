@@ -120,7 +120,7 @@ export async function tambahProduk(formData: FormData) {
   }
 
   revalidatePath("/admin/produk");
-  revalidatePath("/store");
+  revalidatePath("/toko");
   return { success: true };
 }
 
@@ -219,8 +219,8 @@ export async function updateProduk(formData: FormData) {
   }
 
   revalidatePath("/admin/produk");
-  revalidatePath("/store");
-  revalidatePath(`/store/detail/${id}`);
+  revalidatePath("/toko");
+  revalidatePath(`/toko/detail/${id}`);
   return { success: true };
 }
 
@@ -252,6 +252,6 @@ export async function hapusProduk(formData: FormData) {
   await getDb().delete(produk).where(eq(produk.idProduk, id));
 
   revalidatePath("/admin/produk");
-  revalidatePath("/store");
+  revalidatePath("/toko");
   return { success: true };
 }

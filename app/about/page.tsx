@@ -147,7 +147,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {/* Pillar 1: Permasalahan */}
-            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60">
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 01 / Permasalahan
               </span>
@@ -162,7 +162,7 @@ export default function Home() {
             </div>
 
             {/* Pillar 2: Peluang */}
-            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60">
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 02 / Peluang
               </span>
@@ -177,7 +177,7 @@ export default function Home() {
             </div>
 
             {/* Pillar 3: Keharusan */}
-            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60">
+            <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm">
               <span className="block text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase mb-3">
                 03 / Keharusan
               </span>

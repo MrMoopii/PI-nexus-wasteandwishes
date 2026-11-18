@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Link from "next/link";
-import { ambilKeranjang } from "@/app/store/keranjang/actions";
-import KeranjangClient from "@/app/store/keranjang/keranjang-client";
+import { ambilKeranjang } from "@/app/toko/keranjang/actions";
+import KeranjangClient from "@/app/toko/keranjang/keranjang-client";
 
 export default function KeranjangPage() {
   return (
@@ -27,7 +27,7 @@ async function KeranjangData() {
     return (
       <div className="min-h-screen bg-(--hx-canvas) px-4 py-20 text-center text-(--hx-ink)">
         <div className="mb-6 flex justify-start px-4 container mx-auto max-w-7xl">
-          <Link href="/store" className="hx-btn-outline">
+          <Link href="/toko" className="hx-btn-outline">
             Kembali ke Toko
           </Link>
         </div>

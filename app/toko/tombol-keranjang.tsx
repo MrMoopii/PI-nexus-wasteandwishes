@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ambilKeranjang } from "@/app/store/keranjang/actions";
+import { ambilKeranjang } from "@/app/toko/keranjang/actions";
 
 const sumberGambarKeranjang =
   "/img/keranjang/istockphoto-1325904846-612x612-removebg-preview.png";
@@ -42,7 +42,7 @@ export default function TombolKeranjang() {
 
   return (
     <Link
-      href="/store/keranjang"
+      href="/toko/keranjang"
       aria-label={`Keranjang belanja, ${jumlahJenisProduk} jenis produk`}
       className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-(--hx-pastel) bg-white/80 shadow-[0_8px_30px_rgb(27,34,51,0.06)] transition-colors hover:border-(--hx-accent) hover:bg-white"
     >

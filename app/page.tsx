@@ -160,7 +160,7 @@ export default async function Home() {
             <FadeInOnMount delay={150}>
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               {/* Card 1: Penjemputan Sampah Organik */}
-              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60 flex flex-col justify-between">
+              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase">
@@ -208,7 +208,7 @@ export default async function Home() {
               </div>
 
               {/* Card 2: Edukasi & Pendampingan */}
-              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm transition hover:border-(--hx-accent)/60 flex flex-col justify-between">
+              <div className="rounded-2xl border border-(--hx-pastel)/60 bg-white/80 p-7 md:p-8 shadow-[0_8px_30px_rgb(27,34,51,0.04)] backdrop-blur-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[11px] font-semibold tracking-[0.2em] text-(--hx-accent) uppercase">
