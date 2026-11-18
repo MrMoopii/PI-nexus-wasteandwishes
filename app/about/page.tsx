@@ -1,7 +1,10 @@
 "use client";
 
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import FadeInOnMount from "@/components/FadeInOnMount";
+import PageLoadingWrapper from "@/components/PageLoadingWrapper";
 
 /* ─── Komponen Statistik Animasi Angka ─── */
 interface AnimatedCounterProps {

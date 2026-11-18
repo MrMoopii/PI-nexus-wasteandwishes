@@ -8,18 +8,22 @@ import { getDb } from "@/lib/db";
 import { dataLangganan, users } from "@/lib/db/schema";
 import { formatTanggal } from "@/lib/format-tanggal";
 import PaymentButton from "./payment-button";
+import PageLoadingWrapper from "@/components/PageLoadingWrapper";
+import FadeInOnMount from "@/components/FadeInOnMount";
 
 export default function LanggananPage() {
   return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
-          Memuat data langganan...
-        </main>
-      }
-    >
-      <LanggananContent />
-    </Suspense>
+    <PageLoadingWrapper>
+      <Suspense
+        fallback={
+          <main className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
+            Memuat data langganan...
+          </main>
+        }
+      >
+        <LanggananContent />
+      </Suspense>
+    </PageLoadingWrapper>
   );
 }
 
@@ -87,6 +91,7 @@ async function LanggananContent() {
 
       {/* ── Konten Utama ── */}
       <div className="relative z-10 mx-auto max-w-[820px] px-5 py-12 sm:py-20">
+        <FadeInOnMount delay={0}>
         <header className="mb-10 text-center">
           <span className="mb-2 block text-[0.68rem] uppercase tracking-[0.2em] text-[#93A0B2]">
             Dashboard
@@ -98,7 +103,9 @@ async function LanggananContent() {
             Kelola langganan pengambilan sampah organik Anda.
           </p>
         </header>
+        </FadeInOnMount>
 
+        <FadeInOnMount delay={300}>
         <section className="rounded-2xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_40px_rgba(27,34,51,0.06)] sm:p-8">
           <p className="text-xs uppercase tracking-[0.16em] text-[#93A0B2]">
             Status langganan
@@ -190,7 +197,9 @@ async function LanggananContent() {
             </div>
           </dl>
         </section>
+        </FadeInOnMount>
 
+        <FadeInOnMount delay={400}>
         <div className="mt-6 flex flex-wrap gap-4">
           <Link
             href="/"
@@ -205,6 +214,7 @@ async function LanggananContent() {
             Ubah Data Profil
           </Link>
         </div>
+        </FadeInOnMount>
       </div>
     </main>
   );

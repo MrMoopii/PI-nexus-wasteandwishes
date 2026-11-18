@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import LoadingPage from "./LoadingPage";
 
-export default function PageLoadingWrapper({ children }: { children: React.ReactNode }) {
+/* Wrapper: remount inner setiap ganti route supaya splash muncul lagi
+   setiap kali pengguna kembali ke halaman ini dari halaman lain. */
+export default function PageLoadingWrapper({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <PageLoadingWrapperInner key={pathname}>{children}</PageLoadingWrapperInner>
+  );
+}
+
+function PageLoadingWrapperInner({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  // LoadingPage akan memberitahu kapan aset (logo + font) selesai dimuat
+  const handleReady = () => {
+    // Beri jeda singkat 100ms agar tidak berkedip terlalu cepat
+    setTimeout(() => setShowSplash(false), 100);
+  };
 
-  if (showSplash) {
-    return <LoadingPage />;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      {showSplash ? <LoadingPage onReady={handleReady} /> : children}
+    </>
+  );
 }
