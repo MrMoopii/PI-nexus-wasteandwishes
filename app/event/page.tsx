@@ -11,6 +11,7 @@ import EventHeroBanner, {
   type HeroBannerEvent,
 } from "@/components/event/EventHeroBanner";
 import type { EventTimelineItem } from "@/components/event/EventTimelineClient";
+import FadeInOnMount from "@/components/FadeInOnMount";
 
 export const instant = false;
 
@@ -140,7 +141,8 @@ export default async function EventPage({
         {/* Hero Banner dengan rotasi otomatis */}
         <EventHeroBanner events={bannerEvents} />
 
-        <section aria-labelledby="events-heading" className="mb-10">
+        <FadeInOnMount waitForScroll={true}>
+          <section aria-labelledby="events-heading" className="mb-10">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2
@@ -202,6 +204,7 @@ export default async function EventPage({
             />
           )}
         </section>
+        </FadeInOnMount>
 
         {/* Information & Contact Lines (Helix Drift Style) */}
         <section className="mt-12 pt-8 border-t border-(--hx-pastel)/40 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-(--hx-ink-2)">

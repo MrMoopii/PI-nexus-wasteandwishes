@@ -1,8 +1,19 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 
-export default function LoadingPage() {
+interface LoadingPageProps {
+  onReady?: () => void;
+}
+
+export default function LoadingPage({ onReady }: LoadingPageProps) {
+  useEffect(() => {
+    // Tunggu sebentar supaya logo+font selesai dimuat (prioritas)
+    const timeout = setTimeout(() => onReady?.(), 2000); // 2 detik
+    return () => clearTimeout(timeout);
+  }, [onReady]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
       {/* Logo Waste & Wishes – lingkaran putih 80px */}
@@ -14,6 +25,7 @@ export default function LoadingPage() {
           height={80}
           className="object-contain w-full h-full"
           priority
+          onLoadingComplete={onReady}
         />
       </div>
 

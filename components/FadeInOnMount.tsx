@@ -49,6 +49,17 @@ function FadeInOnMountInner({
     };
 
     const onScroll = () => {
+      // Scroll apa pun menandai pengguna sudah mulai menggulir.
+      // Tanpa ambang px, supaya halaman pendek / gulir sedikit tetap memicu.
+      scrolled = true;
+      const rect = node.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        reveal();
+      }
+    };
+
+    // Jika pengguna sudah scroll dan elemen sudah di viewport, langsung reveal
+    const checkAlreadyVisible = () => {
       if (window.scrollY > 8) {
         scrolled = true;
         const rect = node.getBoundingClientRect();
@@ -71,6 +82,9 @@ function FadeInOnMountInner({
     if (waitForScroll) {
       window.addEventListener("scroll", onScroll, { passive: true });
     }
+
+    // Cek awal: jika sudah di-scroll dan elemen sudah terlihat, reveal langsung
+    checkAlreadyVisible();
 
     return () => {
       observer.disconnect();

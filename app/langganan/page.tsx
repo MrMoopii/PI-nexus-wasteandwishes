@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
@@ -8,18 +7,16 @@ import { getDb } from "@/lib/db";
 import { dataLangganan, users } from "@/lib/db/schema";
 import { formatTanggal } from "@/lib/format-tanggal";
 import PaymentButton from "./payment-button";
-import PageLoadingWrapper from "@/components/PageLoadingWrapper";
 import FadeInOnMount from "@/components/FadeInOnMount";
+import PageLoadingWrapper from "@/components/PageLoadingWrapper";
+import LoadingPage from "@/components/LoadingPage";
+import { Suspense } from "react";
 
 export default function LanggananPage() {
   return (
     <PageLoadingWrapper>
       <Suspense
-        fallback={
-          <main className="flex min-h-screen items-center justify-center bg-(--hx-canvas) text-sm text-[#5B6879]">
-            Memuat data langganan...
-          </main>
-        }
+        fallback={<LoadingPage />}
       >
         <LanggananContent />
       </Suspense>

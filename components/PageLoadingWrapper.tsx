@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import LoadingPage from "./LoadingPage";
 
@@ -16,9 +16,9 @@ export default function PageLoadingWrapper({ children }: { children: ReactNode }
 function PageLoadingWrapperInner({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
 
-  // LoadingPage akan memberitahu kapan aset (logo + font) selesai dimuat
+  // LoadingPage akan memberitahu kapan aset (logo + font) selesai dimuat.
+  // Jeda 100ms agar tidak berkedip terlalu cepat.
   const handleReady = () => {
-    // Beri jeda singkat 100ms agar tidak berkedip terlalu cepat
     setTimeout(() => setShowSplash(false), 100);
   };
 
