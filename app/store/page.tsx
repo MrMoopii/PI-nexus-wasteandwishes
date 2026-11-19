@@ -4,19 +4,17 @@ import { desc, eq } from "drizzle-orm";
 import { connection } from "next/server";
 import { getDb } from "@/lib/db";
 import { produk } from "@/lib/db/schema";
+import FadeInOnMount from "@/components/FadeInOnMount";
+import PageLoadingWrapper from "@/components/PageLoadingWrapper";
+import LoadingPage from "@/components/LoadingPage";
 
 export default function TokoPage() {
   return (
-    <Suspense
-      fallback={
-        <div
-          className="min-h-screen bg-(--hx-canvas)"
-          aria-label="Memuat toko"
-        />
-      }
-    >
-      <DaftarProduk />
-    </Suspense>
+    <PageLoadingWrapper>
+      <Suspense fallback={<LoadingPage />}>
+        <DaftarProduk />
+      </Suspense>
+    </PageLoadingWrapper>
   );
 }
 
@@ -28,5 +26,9 @@ async function DaftarProduk() {
     .where(eq(produk.statusProduk, "aktif"))
     .orderBy(desc(produk.createdAt));
 
-  return <EtalaseProduk produkList={produkAktif} />;
+  return (
+    <FadeInOnMount>
+      <EtalaseProduk produkList={produkAktif} />
+    </FadeInOnMount>
+  );
 }

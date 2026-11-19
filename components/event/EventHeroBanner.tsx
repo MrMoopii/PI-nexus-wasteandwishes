@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GambarEvent from "@/components/GambarEvent";
+import FadeInOnMount from "@/components/FadeInOnMount";
 
 export type HeroBannerEvent = {
   idEvent: number;
@@ -37,8 +38,9 @@ export default function EventHeroBanner({
   const currentEvent = events[currentIndex] ?? null;
 
   return (
-    <header className="mb-8">
-      {/* Compact Banner Image */}
+    <FadeInOnMount>
+      <header className="mb-8">
+        {/* Compact Banner Image */}
       <div className="relative aspect-24/9 sm:aspect-24/8 w-full overflow-hidden rounded-2xl border border-(--hx-pastel) bg-(--hx-sunk) shadow-[0_8px_25px_rgb(27,34,51,0.06)]">
         <div
           className={`h-full w-full transition-opacity duration-500 ease-in-out ${
@@ -93,5 +95,6 @@ export default function EventHeroBanner({
         </div>
       </div>
     </header>
+    </FadeInOnMount>
   );
 }
