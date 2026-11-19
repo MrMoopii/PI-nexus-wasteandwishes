@@ -16,7 +16,11 @@ export default function NavLink({
 
   return (
     <Link
-      className={`${navKelas} ${aktif ? "text-waste border-b-2 border-waste scale-105" : ""}`}
+      className={`${navKelas} border-b-2 ${
+        aktif
+          ? "text-waste border-waste scale-105"
+          : "border-transparent hover:border-waste/50"
+      }`}
       href={href}
     >
       {children}
