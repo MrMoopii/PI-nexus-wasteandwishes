@@ -79,3 +79,82 @@ BEGIN
 END
 $uji$;
 ```
+
+## EVT-02: Akses halaman daftar dan detail event tanpa login
+
+- **Kode tugas:** 3.2
+- **Peran:** publik (tanpa login)
+- **Persiapan data:** minimal ada 1 event berstatus `aktif` dengan tanggal pelaksanaan ≥ hari ini di database.
+- **Langkah:**
+  1. Buka browser dalam mode Incognito/Private (memastikan tidak ada sesi login).
+  2. Buka `http://localhost:3000/`. Periksa header: menu "Event" dan "Toko Terdekat" harus terlihat.
+  3. Klik menu "Event" (menuju `/event`).
+  4. Klik salah satu event di daftar untuk membuka `/event/detail/[id]`.
+- **Hasil yang diharapkan:**
+  - Halaman `/event` terbuka tanpa dialihkan ke `/auth/login`.
+  - Halaman `/event/detail/[id]` terbuka menampilkan poster, nama, tanggal, waktu, lokasi, penyelenggara, dan peran WW tanpa dialihkan ke `/auth/login`.
+  - Tidak ada tombol daftar atau tombol bayar di halaman detail maupun modal drawer.
+- **Keadaan gagal yang dicek:**
+  - Pengunjung belum login tetap bisa membuka halaman (tidak ada 401 atau redirect ke login).
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-03: Filter visibilitas status event (draft dan hidden)
+
+- **Kode tugas:** 3.2
+- **Peran:** publik
+- **Persiapan data:** siapkan 1 event berstatus `draft` dan 1 event berstatus `hidden` di database.
+- **Langkah:**
+  1. Buka `/event`. Cari nama event yang berstatus `draft` dan `hidden`.
+  2. Coba buka langsung URL `/event/detail/<id-draft>` dan `/event/detail/<id-hidden>`.
+- **Hasil yang diharapkan:**
+  - Event `draft` dan `hidden` tidak muncul di timeline maupun hero banner `/event`.
+  - Membuka URL langsung menghasilkan halaman 404 (`notFound()`).
+- **Keadaan gagal yang dicek:**
+  - Event yang tidak aktif tidak bocor ke publik lewat URL langsung.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-04: Validasi parameter ID pada URL detail event
+
+- **Kode tugas:** 3.2
+- **Peran:** publik
+- **Persiapan data:** tidak memerlukan data khusus.
+- **Langkah:**
+  1. Buka `/event/detail/abc`.
+  2. Buka `/event/detail/-5`.
+  3. Buka `/event/detail/0`.
+  4. Buka `/event/detail/99999999` (ID yang tidak ada di database).
+- **Hasil yang diharapkan:**
+  - Semua URL di atas menghasilkan halaman 404 (`notFound()`), bukan 500 error.
+- **Keadaan gagal yang dicek:**
+  - ID bukan angka, bernilai negatif, nol, atau tidak ditemukan di database.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-05: Pengalihan URL checkout dan bukti pendaftaran lama
+
+- **Kode tugas:** 3.2
+- **Peran:** publik / pelanggan
+- **Persiapan data:** siapkan 1 ID event valid.
+- **Langkah:**
+  1. Buka `/event/checkout/1` di browser.
+  2. Buka `/event/bukti/1` di browser.
+- **Hasil yang diharapkan:**
+  - Keduanya langsung dialihkan (HTTP 307/308 redirect) ke `/event`.
+- **Keadaan gagal yang dicek:**
+  - Pengguna tidak dapat mengakses form pendaftaran atau bukti pendaftaran lama.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-06: Penolakan Server Action pendaftaran lama
+
+- **Kode tugas:** 3.2
+- **Peran:** pelanggan
+- **Persiapan data:** akun user biasa yang sedang login.
+- **Langkah:**
+  1. Panggil `registerForEvent({ eventId: 1 })` atau `confirmEventRegistration(formData)` secara langsung.
+- **Hasil yang diharapkan:**
+  - `registerForEvent` mengembalikan `{ ok: false, error: "Pendaftaran event tidak lagi tersedia..." }`.
+  - `confirmEventRegistration` dan `mulaiPembayaranEvent` mengalihkan ke `/event`.
+  - Tidak ada baris baru yang tersimpan di tabel `pendaftaran_event` atau `pembayaran_event`.
+- **Keadaan gagal yang dicek:**
+  - Server Action menolak membuat pendaftaran walaupun dipanggil langsung via DevTools atau skrip.
+- **Hasil uji terakhir:** belum diuji
+

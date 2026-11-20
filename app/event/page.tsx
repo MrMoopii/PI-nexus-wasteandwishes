@@ -1,16 +1,16 @@
-import Link from "next/link";
 import { formatWaktu } from "@/lib/format-tanggal";
 import type { Metadata } from "next";
-import { getDb } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { asc } from "drizzle-orm";
 import { connection } from "next/server";
 import EventCalendarWrapper from "@/components/event/EventCalendarWrapper";
 import EventHeroBanner, {
   type HeroBannerEvent,
 } from "@/components/event/EventHeroBanner";
 import type { EventTimelineItem } from "@/components/event/EventTimelineClient";
+import {
+  getEventPublik,
+  tanggalHariIniJakarta,
+} from "@/features/event/queries/publik";
+import Link from "next/link";
 
 export const instant = false;
 
@@ -19,15 +19,6 @@ export const metadata: Metadata = {
   description:
     "Daftar kegiatan pelatihan, sosialisasi, dan aksi hijau pengelolaan limbah organik.",
 };
-
-function getTanggalHariIni(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jakarta",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
 
 function formatTanggalTimeline(tanggal: string): string {
   return new Intl.DateTimeFormat("id-ID", {
@@ -38,6 +29,10 @@ function formatTanggalTimeline(tanggal: string): string {
   }).format(new Date(`${tanggal}T00:00:00Z`));
 }
 
+/**
+ * Halaman daftar event publik (tanpa login).
+ * Hanya event aktif yang ditampilkan. Event draft dan hidden tidak muncul.
+ */
 export default async function EventPage({
   searchParams,
 }: {
@@ -46,19 +41,15 @@ export default async function EventPage({
     tab?: string;
   }>;
 }) {
-  let events: (typeof eventsTable.$inferSelect)[] = [];
   let gagalMuat = false;
+  let events: Awaited<ReturnType<typeof getEventPublik>> = [];
 
+  // 1. Ambil data dari query publik; error ditampilkan sebagai pesan, bukan crash.
   await connection();
-
   try {
-    events = await getDb()
-      .select()
-      .from(eventsTable)
-      .where(eq(eventsTable.statusEvent, "aktif"))
-      .orderBy(asc(eventsTable.tanggalPelaksanaan));
+    events = await getEventPublik();
   } catch (error) {
-    console.error("Error fetching events from database", error);
+    console.error("Gagal memuat daftar event publik:", error);
     gagalMuat = true;
   }
 
@@ -67,7 +58,9 @@ export default async function EventPage({
     typeof resolvedSearchParams.jenis === "string"
       ? resolvedSearchParams.jenis
       : "";
-  const today = getTanggalHariIni();
+
+  // 2. Hitung hari ini di Jakarta lalu saring event mendatang.
+  const today = tanggalHariIniJakarta();
   const totalEvents = events.filter(
     (event) => event.tanggalPelaksanaan >= today,
   ).length;
@@ -80,6 +73,8 @@ export default async function EventPage({
   const tabEvents = filteredEvents.filter(
     (event) => event.tanggalPelaksanaan >= today,
   );
+
+  // 3. Susun grup timeline per tanggal.
   const groupedDates = Array.from(
     new Set(tabEvents.map((event) => event.tanggalPelaksanaan)),
   );
@@ -99,12 +94,17 @@ export default async function EventPage({
           waktuSelesai: event.waktuSelesai,
           gambarUrl: event.gambarUrl,
           waktuLabel: formatWaktu(event.waktuMulai, event.waktuSelesai),
+          lokasi: event.lokasi,
+          penyelenggara: event.penyelenggara,
+          peranWw: event.peranWw,
+          tautanInfo: event.tautanInfo,
         }),
       ),
   }));
 
   const allEventDates = events.map((event) => event.tanggalPelaksanaan);
 
+  // 4. Susun data hero banner dari event bergambar.
   const heroBannerEvents: HeroBannerEvent[] = events
     .filter((event) => event.gambarUrl)
     .map((event) => ({
@@ -115,7 +115,7 @@ export default async function EventPage({
       gambarUrl: event.gambarUrl,
     }));
 
-  // Jika tidak ada event bergambar, tetap tampilkan satu event pertama tanpa gambar
+  // Jika tidak ada event bergambar, tampilkan satu event pertama tanpa gambar.
   const bannerEvents: HeroBannerEvent[] =
     heroBannerEvents.length > 0
       ? heroBannerEvents

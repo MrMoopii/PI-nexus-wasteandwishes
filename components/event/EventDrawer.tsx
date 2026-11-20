@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import GambarEvent from "@/components/GambarEvent";
+import { LABEL_PERAN_WW, type PeranWw } from "@/features/event/types";
 
 export type EventRingkas = {
   idEvent: number;
@@ -13,6 +14,10 @@ export type EventRingkas = {
   waktuMulai: string | null;
   waktuSelesai: string | null;
   gambarUrl: string | null;
+  lokasi?: string | null;
+  penyelenggara?: string | null;
+  peranWw?: PeranWw | null;
+  tautanInfo?: string | null;
 };
 
 function formatTanggalRingkas(tanggal: string): string {
@@ -162,58 +167,87 @@ export default function EventDrawer({
             >
               {event.namaEvent}
             </h2>
-            <p className="mt-3 text-sm font-medium text-(--hx-ink-2)">
-              Diselenggarakan oleh Waste &amp; Wishes
-            </p>
+            {event.penyelenggara ? (
+              <p className="mt-3 text-sm font-medium text-(--hx-ink-2)">
+                Diselenggarakan oleh{" "}
+                <span className="font-semibold">{event.penyelenggara}</span>
+                {event.peranWw && (
+                  <span className="ml-2 inline-flex rounded-full bg-(--hx-accent)/10 px-2 py-0.5 text-xs font-semibold text-(--hx-accent-dark)">
+                    WW sebagai {LABEL_PERAN_WW[event.peranWw]}
+                  </span>
+                )}
+              </p>
+            ) : (
+              <p className="mt-3 text-sm font-medium text-(--hx-ink-2)">
+                Diselenggarakan oleh Waste &amp; Wishes
+              </p>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 border-y border-(--hx-pastel) py-5 sm:grid-cols-2">
-            <div>
-              <span className="block text-[11px] font-semibold uppercase tracking-wider text-(--hx-ink-3)">
-                Tanggal
-              </span>
-              <p className="mt-1 text-sm font-semibold capitalize text-(--hx-ink)">
-                {formatTanggalRingkas(event.tanggalPelaksanaan)}
-              </p>
+          <div className="space-y-3 border-y border-(--hx-pastel) py-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-(--hx-ink-3)">
+                  Tanggal
+                </span>
+                <p className="mt-1 text-sm font-semibold capitalize text-(--hx-ink)">
+                  {formatTanggalRingkas(event.tanggalPelaksanaan)}
+                </p>
+              </div>
+              <div>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-(--hx-ink-3)">
+                  Waktu
+                </span>
+                <p className="mt-1 text-sm font-semibold text-(--hx-ink)">
+                  {formatWaktuRingkas(event.waktuMulai, event.waktuSelesai)}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="block text-[11px] font-semibold uppercase tracking-wider text-(--hx-ink-3)">
-                Waktu
-              </span>
-              <p className="mt-1 text-sm font-semibold text-(--hx-ink)">
-                {formatWaktuRingkas(event.waktuMulai, event.waktuSelesai)}
-              </p>
-            </div>
+            {event.lokasi && (
+              <div>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-(--hx-ink-3)">
+                  Lokasi
+                </span>
+                <p className="mt-1 text-sm text-(--hx-ink)">{event.lokasi}</p>
+              </div>
+            )}
           </div>
 
           <section className="rounded-2xl border border-(--hx-pastel) bg-(--hx-canvas) p-5">
             <h3 className="text-base font-semibold text-(--hx-ink)">
-              Pendaftaran
+              Informasi Event
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-(--hx-ink-2)">
               {isPast
-                ? "Event ini telah selesai sehingga pendaftaran tidak lagi tersedia."
-                : "Daftarkan diri Anda untuk mengikuti kegiatan ini."}
+                ? "Event ini telah selesai."
+                : "Buka detail untuk informasi lengkap dan tautan resmi kegiatan."}
             </p>
-            {isPast ? (
-              <p className="mt-4 rounded-xl bg-(--hx-sunk) px-4 py-3 text-center text-sm font-semibold text-(--hx-ink-3)">
-                Pendaftaran telah ditutup
-              </p>
-            ) : (
-              <Link
-                href={`/event/checkout/${event.idEvent}`}
-                className="hx-btn-primary mt-4 w-full justify-center"
-              >
-                Daftar Sekarang
-              </Link>
-            )}
             <Link
               href={`/event/detail/${event.idEvent}`}
-              className="hx-btn-outline mt-3 w-full justify-center"
+              className="hx-btn-primary mt-4 w-full justify-center"
             >
               Lihat Detail Event
             </Link>
           </section>
+
+          {event.tautanInfo && (
+            <section className="rounded-2xl border border-(--hx-pastel) bg-white p-5">
+              <h3 className="text-base font-semibold text-(--hx-ink)">
+                Informasi Lebih Lanjut
+              </h3>
+              <p className="mt-1 text-sm text-(--hx-ink-2)">
+                Kunjungi halaman resmi kegiatan untuk informasi selengkapnya.
+              </p>
+              <a
+                href={event.tautanInfo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hx-btn-outline mt-3 inline-flex w-full justify-center"
+              >
+                Buka Halaman Resmi Event
+              </a>
+            </section>
+          )}
 
           <section>
             <h3 className="border-b border-(--hx-pastel) pb-3 text-base font-semibold text-(--hx-ink)">

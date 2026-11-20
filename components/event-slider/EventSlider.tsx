@@ -266,13 +266,9 @@ function EventSliderContent({ events, loggedIn }: EventSliderProps) {
       }, AUTO_MS);
     }
 
-    /* ── Klik gambar utama → halaman detail event ──
-       Belum login → ke halaman login dulu, lalu kembali ke detail event. */
+    /* ── Klik gambar utama → halaman detail event (tanpa perlu login) ── */
     function goDetail(i: number) {
-      const dest = `/event/detail/${events[i].id}`;
-      window.location.href = loggedIn
-        ? dest
-        : `/auth/login?callbackUrl=${encodeURIComponent(dest)}`;
+      window.location.href = `/event/detail/${events[i].id}`;
     }
 
     /* Gambar di tengah → buka detail. Gambar di samping → geser ke tengah. */
