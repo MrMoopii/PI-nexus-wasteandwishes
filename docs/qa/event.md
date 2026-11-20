@@ -87,7 +87,7 @@ $uji$;
 - **Persiapan data:** minimal ada 1 event berstatus `aktif` dengan tanggal pelaksanaan ≥ hari ini di database.
 - **Langkah:**
   1. Buka browser dalam mode Incognito/Private (memastikan tidak ada sesi login).
-  2. Buka `http://localhost:3000/`. Periksa header: menu "Event" dan "Toko Terdekat" harus terlihat.
+  2. Buka `http://localhost:3000/`. Periksa header: menu "Event" dan "Mitra" harus terlihat.
   3. Klik menu "Event" (menuju `/event`).
   4. Klik salah satu event di daftar untuk membuka `/event/detail/[id]`.
 - **Hasil yang diharapkan:**
