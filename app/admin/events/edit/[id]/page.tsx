@@ -1,146 +1,73 @@
-import { requireAdmin } from "@/lib/require-admin";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { getDb } from "@/lib/db";
-import { events } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { connection } from "next/server";
-import { deleteImageKitFile } from "@/lib/imagekit";
-import EditEventForm from "./EditEventForm"; // Import form client component
+import { getEventAdmin } from "@/features/event/queries/admin";
+import { skemaIdEvent } from "@/features/event/validasi/admin";
+import { FormEvent } from "../../_components/form-event";
 
-export const instant = false;
+// Halaman ubah event admin /admin/events/edit/[id] (kode tugas 3.3).
+// Server Action-nya ada di features/event/actions/admin.ts.
 
+/**
+ * Halaman form ubah event. ID tidak valid atau event tidak ada → notFound().
+ * Admin sudah dijaga middleware /admin, dan Server Action ubahEvent()
+ * memeriksa lagi sesi admin saat menyimpan.
+ */
 export default async function EditEventPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{t?:string; from?:string; error?:string}>;
+  searchParams: Promise<{ from?: string }>;
 }) {
+  return (
+    <Suspense fallback={<KerangkaFormEvent />}>
+      <IsiFormEvent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+/** Isi halaman: validasi ID, ambil event, lalu susun form. */
+async function IsiFormEvent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
+}) {
+  // 1. Data runtime per permintaan (CONTRIBUTING 8 no. 2).
   await connection();
 
+  // 2. ID dari URL divalidasi dengan skema Zod (CONTRIBUTING 9.8).
   const resolvedParams = await params;
+  const hasilValidasi = skemaIdEvent.safeParse({ idEvent: resolvedParams.id });
+  if (!hasilValidasi.success) notFound();
+  const { idEvent } = hasilValidasi.data;
+
+  // 3. Ambil event; event yang tidak ada menghasilkan 404.
+  const event = await getEventAdmin(idEvent);
+  if (!event) notFound();
+
+  // 4. Tab asal harus tab yang dikenal, supaya tautan kembali tidak merusak filter.
   const resolvedSearch = await searchParams;
-  const eventId = Number(resolvedParams.id);
-  const editKey = resolvedSearch.t || "default";
   const fromTab = resolvedSearch.from || "aktif";
-  const pesanError = resolvedSearch.error;
-
-  if (!eventId || isNaN(eventId)) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-xl font-bold text-red-600">ID Event tidak valid.</h1>
-        <Link href="/admin/events" className="text-blue-600 mt-4 inline-block">
-          Kembali ke Dashboard
-        </Link>
-      </div>
-    );
+  if (!["aktif", "draft", "lalu"].includes(fromTab)) {
+    redirect(`/admin/events/edit/${idEvent}?from=aktif`);
   }
 
-  const dataEvent = await getDb()
-    .select()
-    .from(events)
-    .where(eq(events.idEvent, eventId));
-
-  const existingEvent = dataEvent[0];
-
-  if (!existingEvent) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold">Event tidak ditemukan!</h1>
-        <Link href="/admin/events" className="text-blue-600 mt-4 inline-block">
-          Kembali ke Dashboard
-        </Link>
-      </div>
-    );
-  }
-
-
-  async function updateEvent(formData: FormData) {
-    "use server";
-
-    const cek = await requireAdmin();
-    if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
-
-    const idEvent = Number(formData.get("idEvent"));
-    const namaEvent = formData.get("namaEvent") as string;
-    const jenisEvent = formData.get("jenisEvent") as string;
-    const biayaEvent = formData.get("biayaEvent") as string;
-    const kuotaPeserta = Number(formData.get("kuotaPeserta"));
-    const tanggalPelaksanaan = formData.get("tanggalPelaksanaan") as string;
-    const waktuMulai = formData.get("waktuMulai") as string;
-    const waktuSelesai = formData.get("waktuSelesai") as string;
-    const lokasi = formData.get("lokasi") as string;
-    const statusInput = formData.get("statusEvent") as string;
-    const gambarUrl = formData.get("gambarUrl") as string;
-    const gambarFileId = formData.get("gambarFileId") as string;
-    const deletedPosterFileId = formData.get("deletedPosterFileId") as string;
-    
-    const targetTab = fromTab;
-
-    if (!(Number.isInteger(kuotaPeserta) && kuotaPeserta >= 0)) {
-      redirect(
-        `/admin/events/edit/${idEvent}?from=${targetTab}&error=${encodeURIComponent("Kuota peserta harus berupa bilangan bulat 0 atau lebih.")}`,
-      );
-    }
-
-    const now = new Date();
-    let finalStatus = statusInput;
-
-    // Pengecekan ulang di backend agar lebih aman
-    if (finalStatus === "aktif" && tanggalPelaksanaan) {
-      const eventDate = new Date(tanggalPelaksanaan);
-      if (waktuSelesai) {
-        const [hours, minutes] = waktuSelesai.split(":");
-        eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
-      } else {
-        eventDate.setHours(23, 59, 59, 999);
-      }
-      if (eventDate < now) {
-        finalStatus = "lalu";
-      }
-    }
-
-    // Bersihkan poster lama yang diganti/dihapus sebelum menyimpan
-    if (deletedPosterFileId) {
-      await deleteImageKitFile(deletedPosterFileId);
-    }
-
-    await getDb()
-      .update(events)
-      .set({
-        namaEvent,
-        jenisEvent,
-        biayaEvent,
-        kuotaPeserta,
-        tanggalPelaksanaan,
-        waktuMulai: waktuMulai || null,
-        waktuSelesai: waktuSelesai || null,
-        lokasi,
-        statusEvent: finalStatus,
-        gambarUrl: gambarUrl || null,
-        gambarFileId: gambarFileId || null,
-      })
-      .where(eq(events.idEvent, idEvent));
-
-    revalidatePath(`/admin/events/edit/${idEvent}`, "page");
-    revalidatePath("/admin/events", "layout");
-    revalidatePath("/event", "page");
-    redirect(`/admin/events?tab=${targetTab}`);
-  }
-  
   return (
-    <div className="p-6 max-w-4xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
+    <div className="mx-auto max-w-4xl p-6 font-(family-name:--font-plus-jakarta-sans)">
+      <FormEvent event={event} fromTab={fromTab} />
+    </div>
+  );
+}
 
-      {/* Gunakan Client Component dan oper data & action-nya */}
-      <EditEventForm
-        key={editKey}
-        existingEvent={existingEvent}
-        updateEventAction={updateEvent}
-        fromTab={fromTab}
-        pesanError={pesanError}
-      />
+/** Kerangka dengan tinggi yang sama dengan isi asli, supaya tidak ada yang bergeser. */
+function KerangkaFormEvent() {
+  return (
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="mb-8 h-8 w-56 animate-pulse rounded bg-gray-200" />
+      <div className="h-96 animate-pulse rounded-xl border border-gray-200 bg-gray-100" />
     </div>
   );
 }
