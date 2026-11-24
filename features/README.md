@@ -13,6 +13,7 @@ features/<fitur>/
   aturan.ts                fungsi murni: tanpa database, tanpa sesi
   queries/<peran>.ts       membaca data; baris pertama import "server-only"
   actions/<peran>.ts       Server Action; baris pertama "use server"
+  validasi/<peran>.ts      skema Zod untuk input actions/ atau queries/ yang namanya sama
   components/<nama>.tsx    komponen yang dipakai lebih dari satu halaman fitur ini
 ```
 
@@ -21,6 +22,7 @@ features/<fitur>/
 - Nama file huruf kecil dengan tanda hubung. Nama komponen di dalamnya PascalCase.
 - Setiap file kode maksimal 300 baris. Jika mendekati batas, pecah per peran atau per proses.
 - Fitur tidak saling impor. Yang dipakai bersama naik ke `lib/`, `components/`, atau `hooks/`.
+- Setiap fungsi dan komponen yang di-export diberi komentar `/** … */` singkat, dan alur lebih dari dua langkah diberi komentar langkah bernomor (`CONTRIBUTING.md` bagian 9.9). Kerangka di bawah sudah memakai pola ini.
 
 ## Kerangka
 
@@ -63,6 +65,7 @@ Fungsi murni: menerima nilai, mengembalikan nilai. Tidak memanggil database, `au
 ```ts
 import type { StatusPengajuan } from "./types";
 
+/** Tombol bayar hanya aktif setelah harga disepakati dan diaktifkan admin. */
 export function bolehBayar(status: StatusPengajuan): boolean {
   return status === "siap_bayar";
 }
@@ -82,10 +85,16 @@ import { pengajuanLangganan } from "@/lib/db/schema";
 import { requireLogin } from "@/lib/require-login";
 import { isStatusPengajuan, type RingkasanPengajuan } from "../types";
 
+/**
+ * Pengajuan langganan milik pelanggan yang sedang login.
+ * Mengembalikan null jika belum pernah mengajukan; belum login dialihkan ke halaman login.
+ */
 export async function getPengajuanSaya(): Promise<RingkasanPengajuan | null> {
+  // 1. Pastikan login. idUser diambil dari sesi, bukan dari URL (bagian 7.2).
   const cek = await requireLogin();
   if (!cek.ok) redirect("/auth/login");
 
+  // 2. Ambil hanya kolom yang dipakai tampilan.
   const [baris] = await getDb()
     .select({
       idPengajuan: pengajuanLangganan.idPengajuan,
@@ -97,6 +106,7 @@ export async function getPengajuanSaya(): Promise<RingkasanPengajuan | null> {
     .where(eq(pengajuanLangganan.idUser, cek.idUser))
     .limit(1);
 
+  // 3. Ubah ke bentuk tampilan; status asing berarti data rusak, jadi dilempar.
   if (!baris) return null;
   if (!isStatusPengajuan(baris.status)) {
     throw new Error(`Status pengajuan tidak dikenal: ${baris.status}`);
@@ -113,9 +123,34 @@ export async function getPengajuanSaya(): Promise<RingkasanPengajuan | null> {
 
 Untuk admin, ganti `requireLogin()` dengan `requireAdmin()`, lalu `redirect(cek.status === 401 ? "/auth/login" : "/")`.
 
+### `validasi/admin.ts`
+
+Skema Zod untuk isian yang diterima `actions/admin.ts`. Tanpa `"use server"` dan tanpa `"server-only"`, jadi form klien boleh memakai skema yang sama untuk cek awal (`CONTRIBUTING.md` bagian 9.8). Zod dipasang lewat PR tersendiri oleh pemilik `package.json`; sebelum PR itu masuk, impor `zod` belum bisa dipakai.
+
+```ts
+import { z } from "zod";
+
+const ID_TIDAK_VALID = { error: "Pengajuan tidak valid." };
+
+/** Isian form admin saat mengirim harga penawaran untuk satu pengajuan. */
+export const skemaPenawaran = z.object({
+  idPengajuan: z.coerce
+    .number(ID_TIDAK_VALID)
+    .int(ID_TIDAK_VALID)
+    .positive(ID_TIDAK_VALID),
+  harga: z.coerce
+    .number({ error: "Harga harus berupa angka." })
+    .positive({ error: "Harga harus lebih dari 0." }),
+});
+
+export type InputPenawaran = z.infer<typeof skemaPenawaran>;
+```
+
+`idUser`, peran, jumlah yang dibayar, dan status tujuan tidak pernah masuk skema form. Nilai itu diambil dari sesi atau database.
+
 ### `actions/admin.ts`
 
-Server Action yang dipanggil dari komponen klien dan hasilnya dibaca. Polanya: cek peran, validasi input, ubah data dengan **satu perintah bersyarat**, lalu `revalidatePath`.
+Server Action yang dipanggil dari komponen klien dan hasilnya dibaca. Polanya: cek peran, validasi input dengan skema, ubah data dengan **satu perintah bersyarat**, lalu `revalidatePath`.
 
 ```ts
 "use server";
@@ -125,23 +160,33 @@ import { and, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { pengajuanLangganan } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/require-admin";
+import { skemaPenawaran } from "../validasi/admin";
 
 type HasilAksi = { ok: true } | { ok: false; pesan: string };
 
+/**
+ * Admin mengirim harga penawaran untuk satu pengajuan langganan.
+ * Hanya admin. Gagal jika isian salah atau status pengajuan sudah berubah.
+ */
 export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
+  // 1. Cek sesi admin sebelum membaca isian apa pun (CONTRIBUTING 7.2).
   const cek = await requireAdmin();
   if (!cek.ok) return { ok: false, pesan: cek.pesan };
 
-  const idPengajuan = Number(formData.get("idPengajuan"));
-  const harga = Number(formData.get("harga"));
-  if (!(Number.isInteger(idPengajuan) && idPengajuan > 0)) {
-    return { ok: false, pesan: "Pengajuan tidak valid." };
+  // 2. Validasi isian form dengan skema (CONTRIBUTING 9.8).
+  const hasil = skemaPenawaran.safeParse({
+    idPengajuan: formData.get("idPengajuan"),
+    harga: formData.get("harga"),
+  });
+  if (!hasil.success) {
+    return {
+      ok: false,
+      pesan: hasil.error.issues[0]?.message ?? "Isian tidak valid.",
+    };
   }
-  if (!(Number.isFinite(harga) && harga > 0)) {
-    return { ok: false, pesan: "Harga harus lebih dari 0." };
-  }
+  const { idPengajuan, harga } = hasil.data;
 
-  // Hanya berubah jika status asalnya diizinkan (CONTRIBUTING 6.2).
+  // 3. Ubah status hanya jika masih menunggu review atau negosiasi (CONTRIBUTING 6.2).
   const [berubah] = await getDb()
     .update(pengajuanLangganan)
     .set({ status: "ditawarkan", hargaFinal: String(harga) })
@@ -160,6 +205,7 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
     };
   }
 
+  // 4. Segarkan halaman detail supaya admin langsung melihat status baru.
   revalidatePath(`/admin/langganan/${idPengajuan}`);
   return { ok: true };
 }
@@ -180,6 +226,7 @@ import { KartuPenawaran } from "@/features/langganan/components/kartu-penawaran"
 import { FormPengajuan } from "./_components/form-pengajuan";
 import { KerangkaLangganan } from "./_components/kerangka-langganan";
 
+/** Halaman langganan pelanggan: form pengajuan, atau status penawaran jika sudah mengajukan. */
 export default function HalamanLangganan() {
   return (
     <Suspense fallback={<KerangkaLangganan />}>
@@ -188,6 +235,7 @@ export default function HalamanLangganan() {
   );
 }
 
+// Bagian yang membaca data per pengguna, dirender di dalam <Suspense>.
 async function IsiLangganan() {
   await connection();
   const pengajuan = await getPengajuanSaya();
@@ -209,6 +257,7 @@ import { useState, useTransition } from "react";
 import { kirimPengajuan } from "@/features/langganan/actions/pelanggan";
 import { Button } from "@/components/ui/button";
 
+/** Form pengajuan langganan. Pesan gagal dari server ditampilkan di bawah tombol. */
 export function FormPengajuan() {
   const [pesan, setPesan] = useState<string | null>(null);
   const [sedangMengirim, startTransition] = useTransition();

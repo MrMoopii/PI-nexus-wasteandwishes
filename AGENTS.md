@@ -18,6 +18,8 @@ Sebelum menulis atau mengubah kode di repo ini, baca **`CONTRIBUTING.md`** sampa
 - Bagian 8 (jebakan Next.js 16 dan Cache Components).
 - Bagian 9 (standar kode) dan bagian 11.3 (aturan untuk agent): jangan membuat kode "asal jalan" dengan `any`, data contoh, nilai cadangan palsu, `catch` kosong, atau `export const instant = false` hanya supaya build lolos. Untuk langganan, pakai fungsi di `lib/langganan.ts` dan aturan di bagian 9.7.
 - Bagian 9.5: kode status dan bentuk respons route API adalah kontrak. Cari semua pemanggilnya sebelum mengubahnya.
+- Bagian 9.8 (validasi): setiap input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/` setelah cek sesi, memakai `safeParse`. `idUser`, peran, jumlah bayar, dan status tujuan tidak pernah masuk skema form.
+- Bagian 9.9 (komentar): setiap fungsi, Server Action, query, hook, dan komponen yang di-export diberi komentar `/** … */` singkat (tujuan, siapa yang boleh memanggil, kapan gagal). Alur lebih dari dua langkah diberi komentar langkah bernomor. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode.
 
 Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
 

@@ -8,6 +8,7 @@ Laporan bulanan untuk admin: pilih bulan dan satu instansi atau semua, tampilkan
 | ---------------------------- | ----------------------------------------------------------------------------- | ---------- |
 | `types.ts`                   | Bentuk baris laporan dan ringkasan per instansi                               | 2.5        |
 | `queries/admin.ts`           | Rekap bulanan dari data kunjungan yang sudah ditimbang                        | 2.5        |
+| `validasi/admin.ts`          | Skema Zod filter bulan dan instansi dari URL                                  | 2.5        |
 | `components/`                | Tabel laporan per instansi (hanya menerima props)                             | 2.5        |
 | `app/admin/laporan-bulanan/` | Halaman pilih bulan dan instansi, tombol cetak (`window.print()` + CSS print) | 2.5        |
 

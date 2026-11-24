@@ -12,9 +12,12 @@ Kode tugas mengikuti rencana kerja tim. Satu file dipegang pemilik kode tugasnya
 | `aturan.ts`                                                        | Transisi status yang diizinkan, `bolehBayar()`                                        | 0.2        |
 | `queries/pelanggan.ts`                                             | Pengajuan dan riwayat negosiasi milik pelanggan yang login                            | 1.1        |
 | `actions/pelanggan.ts`                                             | Kirim dan batalkan pengajuan, setujui harga, tawar, kirim pesan                       | 1.1, 1.3   |
+| `validasi/pelanggan.ts`                                            | Skema Zod isian pengajuan, tawaran harga, dan pesan dari pelanggan                    | 1.1, 1.3   |
 | `queries/admin.ts`                                                 | Daftar pengajuan per status, jumlah yang menunggu admin, detail pengajuan             | 1.4        |
 | `actions/admin.ts`                                                 | Kirim penawaran, terima tawaran, aktifkan pembayaran, tolak, kirim pesan              | 1.5        |
+| `validasi/admin.ts`                                                | Skema Zod harga penawaran, alasan penolakan, dan pesan dari admin                     | 1.5        |
 | `actions/pembayaran.ts`                                            | Mulai pembayaran Midtrans dari harga final (pindahan dari `app/langganan/actions.ts`) | 1.6        |
+| `validasi/pembayaran.ts`                                           | Skema Zod ID pengajuan yang dibayar dan data notifikasi Midtrans yang dipakai         | 1.6        |
 | `components/`                                                      | Badge status pengajuan, kartu penawaran, riwayat negosiasi (hanya menerima props)     | 1.2        |
 | `app/langganan/` dan `app/langganan/_components/`                  | Halaman pelanggan                                                                     | 1.1        |
 | `app/admin/langganan/` dan `app/admin/langganan/[id]/_components/` | Halaman admin                                                                         | 1.4, 1.5   |

@@ -18,6 +18,7 @@ Panduan resmi: [React, Reusing Logic with Custom Hooks](https://react.dev/learn/
 - Tulis tipe kembalian secara eksplisit.
 - Setiap efek membersihkan dirinya (hapus listener, batalkan request) di fungsi cleanup.
 - Maksimal 300 baris per file.
+- Beri komentar `/** … */` singkat di atas hook: apa yang dikembalikan dan keadaan apa saja yang mungkin (`CONTRIBUTING.md` bagian 9.9).
 
 ## Kerangka
 
@@ -32,6 +33,7 @@ type Lokasi =
   | { keadaan: "ditolak" }
   | { keadaan: "ada"; latitude: number; longitude: number };
 
+/** Lokasi browser untuk mencari toko terdekat: memuat, ditolak pengguna, atau ada koordinatnya. */
 export function useLokasiBrowser(): Lokasi {
   const [lokasi, setLokasi] = useState<Lokasi>({ keadaan: "memuat" });
 

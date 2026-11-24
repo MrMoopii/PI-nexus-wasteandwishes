@@ -165,6 +165,7 @@ features/                     logika per fitur: langganan, kunjungan, laporan, d
     aturan.ts                 fungsi murni tanpa database (transisi status, perhitungan)
     queries/<peran>.ts        membaca data; baris pertama import "server-only"
     actions/<peran>.ts        Server Action ("use server"), tipis
+    validasi/<peran>.ts       skema Zod untuk input actions/ atau queries/ yang namanya sama
     components/               komponen fitur yang dipakai lebih dari satu halaman
 components/
   ui/                         komponen umum tanpa logika bisnis (button, badge, card, field)
@@ -172,6 +173,7 @@ components/
 hooks/                        hook klien yang dipakai lebih dari satu fitur
 lib/                          infrastruktur: db/, auth.ts, midtrans.ts, imagekit.ts, format-tanggal.ts, require-*.ts
 types/                        deklarasi tipe global (next-auth.d.ts)
+docs/                         dokumen teknis: kontrak API, skenario uji, design token (bagian 4.5)
 ```
 
 `<peran>` adalah `pelanggan`, `admin`, atau nama proses (misalnya `pembayaran`). Pemisahan per peran juga membuat setiap anggota memegang file sendiri, sehingga jarang konflik.
@@ -184,12 +186,14 @@ types/                        deklarasi tipe global (next-auth.d.ts)
 | Komponen umum lintas fitur, tanpa logika bisnis         | `components/ui/`                                                        |
 | Membaca data dari database                              | `features/<fitur>/queries/`                                             |
 | Mengubah data (Server Action)                           | `features/<fitur>/actions/`                                             |
+| Skema validasi input dari form, URL, atau body (Zod)    | `features/<fitur>/validasi/` (bagian 9.8)                               |
 | Aturan bisnis yang bisa dihitung tanpa database         | `features/<fitur>/aturan.ts`                                            |
 | Tipe untuk tampilan                                     | `features/<fitur>/types.ts`. Tipe tabel diambil dari skema (bagian 9.2) |
 | Hook klien yang dipakai lebih dari satu fitur           | `hooks/use-<nama>.ts`                                                   |
 | Koneksi, autentikasi, layanan luar, format umum         | `lib/`                                                                  |
 | Skema dan migrasi database                              | `lib/db/schema.ts` dan `drizzle/` (bagian 6)                            |
 | Fungsi bantu yang sudah ada                             | Cek tabel di bagian 9.1 sebelum menulis yang baru                       |
+| Kontrak route API, skenario uji, design token           | `docs/` (bagian 4.5)                                                    |
 
 **Kerangka setiap jenis file** (query, Server Action, halaman, komponen klien, komponen umum, hook) ada di `features/README.md`, `components/ui/README.md`, dan `hooks/README.md`. **Peta file setiap fitur** yang sedang dibangun, lengkap dengan kode tugasnya, ada di `features/<fitur>/README.md`. Baca README folder itu sebelum menambah file di dalamnya, dan perbarui peta filenya jika rencana berubah.
 
@@ -224,11 +228,31 @@ Tugas dibagi per kode tugas di rencana kerja tim (misalnya 0.2, 1.1, 2.4). Anggo
 - Jika butuh perubahan di file orang lain, kabari lewat grup tim atau buat issue di GitHub, lalu sepakati siapa yang mengerjakan.
 - Jika dua orang perlu mengubah file yang sama, sepakati urutan merge-nya dulu. Yang kedua memperbarui branch dari `development` setelah PR pertama masuk.
 
+**Pemilik file dicatat di `.github/CODEOWNERS`.** Saat PR mengubah file milik seseorang, GitHub otomatis meminta orang itu me-review. Setiap baris berisi pemilik kode tugas dan ketua tim, supaya PR yang dibuat pemiliknya sendiri tetap punya reviewer lain. File tanpa pemilik khusus (aturan, konfigurasi, skema, autentikasi) di-review ketua tim.
+
+- Saat kode tugas dipindahkan ke anggota lain, atau fitur baru dimulai (misalnya event dan toko), perbarui `CODEOWNERS` di PR yang sama dengan pembagian tugasnya.
+- `CODEOWNERS` dibaca dari branch tujuan PR, jadi perubahan baru berlaku setelah masuk `development`.
+- Nama di `CODEOWNERS` adalah nama akun GitHub (`@nama`), bukan nama tampilan. Baris dengan nama yang salah diabaikan GitHub tanpa pesan error.
+
 ### 4.4 Memindahkan dan mengganti nama file
 
 **Memindahkan atau mengganti nama file dan folder** (termasuk folder route di `app/`) dikerjakan di PR tersendiri, diumumkan ke tim lebih dulu, dan dilakukan saat tidak ada yang sedang mengedit file tersebut. Branch lain yang masih mengedit file di lokasi lama akan mengalami konflik "modify/delete" (bagian 3.3).
 
 File lama dipindahkan ke struktur 4.1 secara bertahap dengan cara ini, bukan sekaligus. Jangan memindahkan file lama di dalam PR fitur.
+
+### 4.5 Dokumen teknis di `docs/`
+
+`CONTRIBUTING.md` berisi aturan kerja. Catatan teknis yang dibutuhkan saat mengerjakan atau menguji fitur ditaruh di `docs/`:
+
+| Folder        | Isi                                                                                                                            | Kapan diperbarui                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| `docs/api/`   | Kontrak setiap route di `app/api/`: method, siapa yang boleh memanggil, input, respons sukses dan gagal beserta kode statusnya | Di PR yang membuat atau mengubah route itu (bagian 9.5)     |
+| `docs/qa/`    | Skenario uji per fitur: langkah, data uji, hasil yang diharapkan, termasuk keadaan gagal                                       | Di PR fitur, atau saat menemukan bug yang perlu diuji ulang |
+| `docs/ui-ux/` | Design token (warna, font) dan aturan tampilan bersama                                                                         | Saat menambah atau mengubah token di `app/globals.css`      |
+
+- Template setiap jenis dokumen ada di `README.md` folder masing-masing. Ikuti template itu supaya semua dokumen bentuknya sama.
+- Dokumen ditulis dari kode yang sebenarnya. Jangan menulis kontrak atau skenario untuk perilaku yang belum ada.
+- Rencana kerja dan keputusan mitra tetap di dokumen tim, bukan di repo.
 
 ## 5. Variabel lingkungan, rahasia, dan Vercel
 
@@ -477,6 +501,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
 
 ### 9.3 Validasi ID dan logika boolean
 
+- **Kode baru memvalidasi input dengan Zod (bagian 9.8).** Pola ID di bawah ditulis sebagai `z.coerce.number().int().positive()`. Aturan di bagian ini tetap berlaku untuk kode lama yang belum memakai Zod.
 - **ID dari URL atau form divalidasi ketat:** `const id = Number(teks)`, lalu tolak jika tidak `Number.isInteger(id) && id > 0`. Jangan memakai `parseInt` (`parseInt("3abc")` menghasilkan 3), dan **jangan pernah** memakai cadangan `|| 1`. ID tidak valid atau tidak ditemukan berarti `notFound()` di halaman, 400 atau 404 di API. ID `NaN` yang lolos ke Postgres menjadi error 500.
 - **Saat menulis syarat penolakan, tulis dulu syarat "valid", lalu bungkus dengan `!( … )`:**
   ```ts
@@ -518,6 +543,86 @@ Kode baru mengambil data di Server Component (bagian 4.2). Halaman lama yang mas
 - **Harga dan jumlah bayar selalu diambil dari database di server** (harga final hasil review admin), tidak pernah dari form atau props klien.
 - **Alur pengajuan langganan** (sedang dibangun): tombol bayar hanya untuk pengajuan yang sudah disepakati pelanggan dan diaktifkan admin. Syarat ini dicek di Server Action, bukan hanya di tampilan. Status pengajuan hanya berubah lewat satu `UPDATE … WHERE status IN (…)` yang menyebut status asal yang diizinkan (bagian 6.2).
 
+### 9.8 Validasi input dengan Zod
+
+Semua input dari luar divalidasi dengan skema Zod sebelum dipakai: `FormData` di Server Action, body JSON dan query string di route handler, serta `params` dan `searchParams` halaman yang dipakai untuk query. Dokumentasi Next.js 16 menyarankan library skema seperti Zod untuk validasi form di server (`node_modules/next/dist/docs/01-app/02-guides/forms.md`).
+
+- **Letak skema:** `features/<fitur>/validasi/<nama>.ts`, berpasangan dengan `actions/<nama>.ts` (atau `queries/<nama>.ts` untuk parameter URL) yang namanya sama dan dipegang pemilik yang sama. File ini tidak memakai `"use server"` maupun `import "server-only"`, jadi form klien boleh memakai skema yang sama untuk cek awal. Cek di server tetap wajib.
+- **Urutan di Server Action:** cek sesi (bagian 7.2 no. 1), lalu `safeParse`, baru query. Pakai `safeParse`, bukan `parse`, supaya input yang salah menjadi `HasilAksi` gagal, bukan exception yang membuka halaman error.
+- **Yang tidak pernah masuk skema form:** `idUser`, peran, jumlah yang dibayar, dan status tujuan. Nilai-nilai itu selalu dari sesi atau database (bagian 7.2 no. 3 dan 9.7).
+- **Pola isian:**
+  - ID: `z.coerce.number(pesan).int(pesan).positive(pesan)`. Isian `"3abc"`, kosong, desimal, dan isian yang tidak dikirim semuanya ditolak, sama ketatnya dengan bagian 9.3.
+  - Teks: `z.string().trim().min(1, { error: "… wajib diisi." }).max(…)`.
+  - Status atau pilihan tetap: `z.enum(STATUS_PENGAJUAN)` dari `types.ts`, bukan string bebas.
+  - Parameter opsional dari URL: `.optional()`. Kosong berarti nilai bawaan; diisi tetapi salah berarti ditolak (bagian 9.3).
+- **Pesan error** ditulis dalam Bahasa Indonesia dengan opsi `{ error: "…" }` (cara Zod 4). Server Action yang mengembalikan satu pesan memakai pesan pertama: `hasil.error.issues[0]?.message ?? "Isian tidak valid."`. Form yang menampilkan pesan per isian memakai `z.flattenError(hasil.error).fieldErrors`.
+- **Tipe input diturunkan dari skema** dengan `z.infer<typeof skemaPenawaran>`. Jangan menulis tipe yang sama dua kali.
+- **Webhook Midtrans:** pertahankan pemeriksaan ke Midtrans yang sudah ada (`transaction.notification`), lalu validasi bentuk data yang dipakai dengan Zod.
+- **Memasang Zod:** Zod belum ada di `package.json`. Pemilik `package.json` memasangnya satu kali lewat PR tersendiri (`pnpm add zod`), dan aturan ini adalah persetujuan dependensi yang dimaksud bagian 11.3 no. 7. Jangan memasangnya sendiri di branch fitur, karena `pnpm-lock.yaml` akan bentrok.
+
+Contoh skema (kerangka lengkap dengan Server Action-nya ada di `features/README.md`):
+
+```ts
+// features/langganan/validasi/admin.ts
+import { z } from "zod";
+
+const ID_TIDAK_VALID = { error: "Pengajuan tidak valid." };
+
+/** Isian form admin saat mengirim harga penawaran untuk satu pengajuan. */
+export const skemaPenawaran = z.object({
+  idPengajuan: z.coerce
+    .number(ID_TIDAK_VALID)
+    .int(ID_TIDAK_VALID)
+    .positive(ID_TIDAK_VALID),
+  harga: z.coerce
+    .number({ error: "Harga harus berupa angka." })
+    .positive({ error: "Harga harus lebih dari 0." }),
+});
+
+export type InputPenawaran = z.infer<typeof skemaPenawaran>;
+```
+
+### 9.9 Komentar penjelasan
+
+Tujuannya supaya setiap anggota bisa memahami kode anggota lain, dan kode yang ditulis agent, tanpa menelusuri seluruh isinya. Komentar ditulis dalam Bahasa Indonesia, singkat, dan menjelaskan **tujuan dan alasan**, bukan mengulang isi kode.
+
+1. **Setiap fungsi, Server Action, query, hook, dan komponen yang di-export** diberi komentar `/** … */` tepat di atasnya, 1–3 baris: apa tujuannya, siapa yang boleh memanggilnya (pelanggan, admin, atau publik) jika relevan, dan kapan gagal. VS Code menampilkan komentar ini saat kursor diarahkan ke nama fungsi di file lain.
+2. **Alur yang lebih dari dua langkah** (Server Action, route handler, webhook, query bertahap) diberi komentar langkah bernomor. Alurnya harus bisa dipahami hanya dengan membaca komentar-komentar itu.
+3. **Syarat bisnis yang tidak terlihat dari kodenya** diberi alasan singkat dan rujukan aturannya, misalnya `// Webhook tidak boleh menimpa status dihentikan (bagian 9.7).`
+4. **Yang tidak perlu dikomentari:** baris yang sudah jelas dari namanya (`// set loading true`), komentar yang hanya mengulang nama fungsi, dan kode lama yang dimatikan (hapus saja, bagian 9.1).
+5. **Saat kode berubah, komentarnya ikut diperbarui** di commit yang sama. Komentar yang tidak sesuai kode lebih menyesatkan daripada tanpa komentar.
+6. Komentar ikut dihitung dalam batas 300 baris (bagian 4.2 no. 9). Komentar yang perlu panjang biasanya tanda fungsinya terlalu besar dan perlu dipecah.
+
+```ts
+/**
+ * Admin mengirim harga penawaran untuk satu pengajuan langganan.
+ * Hanya admin. Gagal jika isian salah atau status pengajuan sudah berubah.
+ */
+export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
+  // 1. Cek sesi admin sebelum membaca isian apa pun (bagian 7.2).
+  const cek = await requireAdmin();
+  if (!cek.ok) return { ok: false, pesan: cek.pesan };
+
+  // 2. Validasi isian form dengan skema (bagian 9.8).
+  const hasil = skemaPenawaran.safeParse({
+    idPengajuan: formData.get("idPengajuan"),
+    harga: formData.get("harga"),
+  });
+  if (!hasil.success) {
+    return {
+      ok: false,
+      pesan: hasil.error.issues[0]?.message ?? "Isian tidak valid.",
+    };
+  }
+
+  // 3. Ubah status hanya jika masih menunggu review atau negosiasi (bagian 6.2).
+  // …
+
+  // 4. Segarkan halaman detail supaya admin langsung melihat status baru.
+  // …
+}
+```
+
 ## 10. Daftar periksa sebelum membuka PR
 
 - [ ] Branch sudah diperbarui dari `development` terbaru (bagian 3.2).
@@ -528,6 +633,8 @@ Kode baru mengambil data di Server Component (bagian 4.2). Halaman lama yang mas
 - [ ] Setiap Server Action memanggil `requireLogin()` (pengguna) atau `requireAdmin()` (admin) di awal, dan setiap route `/api/admin/*` memanggil `requireAdmin()`.
 - [ ] Setiap syarat penolakan sudah ditelusuri dengan pengguna yang sah (sesi aktif, ID valid) dan pengguna yang sah lolos. Bug syarat terbalik (`!` atau De Morgan) tidak selalu ketahuan lewat pengujian biasa.
 - [ ] Tidak ada `idUser` yang dibaca dari form atau URL.
+- [ ] Input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/`, setelah cek sesi (bagian 9.8).
+- [ ] Setiap fungsi dan komponen baru yang di-export punya komentar singkat, dan alur lebih dari dua langkah punya komentar langkah bernomor (bagian 9.9).
 - [ ] Jika mengubah skema: file migrasi ikut di-commit, kolom yang berubah disebut di deskripsi PR, dan tim diingatkan menjalankan `pnpm db:migrate`.
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari dan perubahannya disebut di deskripsi PR.
 - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (bagian 9.5).
@@ -567,6 +674,8 @@ AI agent boleh dipakai membantu, dengan syarat:
    - pengecekan `requireLogin()` atau `requireAdmin()` yang hilang atau dipindah ke bawah;
    - syarat yang dibalik (`!`, `&&` menjadi `||`, bagian 9.3);
    - perubahan kode status atau bentuk respons API (bagian 9.5);
+   - input yang dipakai tanpa lewat skema Zod (bagian 9.8);
+   - fungsi baru tanpa komentar, atau komentar yang tidak sesuai lagi dengan kodenya (bagian 9.9);
    - kode lama yang dikomentari, `console.log`, dan data contoh;
    - file yang diformat ulang seluruhnya padahal yang perlu berubah hanya beberapa baris.
 3. **Jalankan dan coba sendiri**: `pnpm lint`, `pnpm build`, lalu buka halamannya di browser. Coba juga keadaan gagal: belum login, sesi idle, akun bukan admin, ID salah di URL, dan data kosong. Untuk tampilan, cek juga di lebar layar HP.
@@ -582,7 +691,7 @@ Agent yang bekerja di repo ini wajib:
 1. Membaca dokumen ini dan `AGENTS.md` sebelum menulis kode, dan membaca dokumentasi Next.js 16 di `node_modules/next/dist/docs/` untuk API yang dipakai.
 2. Mengikuti bagian 7 untuk semua kode yang menyentuh sesi, peran, Server Action, atau `app/api/`.
 3. Memakai fungsi yang sudah ada di `lib/`, `components/`, `hooks/`, dan `features/` (tabel di bagian 9.1) sebelum membuat yang baru.
-4. **Meletakkan setiap file sesuai peta folder di bagian 4.1** dan mengikuti aturan di bagian 4.2: `page.tsx` tipis, query di `features/<fitur>/queries/`, Server Action di `features/<fitur>/actions/`, `"use client"` hanya untuk komponen kecil yang interaktif. Tidak membuat folder tingkat atas baru, atau folder seperti `utils/`, `helpers/`, dan `services/` di luar peta, tanpa persetujuan pengguna.
+4. **Meletakkan setiap file sesuai peta folder di bagian 4.1** dan mengikuti aturan di bagian 4.2: `page.tsx` tipis, query di `features/<fitur>/queries/`, Server Action di `features/<fitur>/actions/`, skema validasi di `features/<fitur>/validasi/`, `"use client"` hanya untuk komponen kecil yang interaktif. Tidak membuat folder tingkat atas baru, atau folder seperti `utils/`, `helpers/`, dan `services/` di luar peta, tanpa persetujuan pengguna.
 5. **Menjaga setiap file kode maksimal 300 baris** (bagian 4.2 no. 9). Jika perubahan akan membuat file melewati batas, pecah dulu sesuai struktur. Tidak menambah panjang file lama yang sudah melebihi batas. Setelah mengubah file, menjalankan `pnpm lint` dan memastikan tidak ada error `max-lines`.
 6. **Tidak membuat kode "asal jalan".** Jangan menghilangkan error dengan cara yang menyembunyikan masalah:
    - menambah `any`, `as`, `// @ts-ignore`, atau mematikan aturan lint;
@@ -604,7 +713,8 @@ Agent yang bekerja di repo ini wajib:
 12. Tidak memformat ulang seluruh file atau mengganti gaya penulisan kode yang tidak berhubungan dengan tugas, supaya diff tetap mudah diperiksa.
 13. Memperbaiki error dengan memahami penyebabnya terlebih dahulu, lalu menjelaskan penyebab itu ke pengguna. Jangan mencoba-coba perubahan acak sampai error hilang.
 14. Bertanya dulu jika maksud pengguna kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
-15. Setelah selesai, melaporkan:
+15. **Memvalidasi setiap input dengan skema Zod** (bagian 9.8) **dan menulis komentar penjelasan singkat** (bagian 9.9) untuk setiap fungsi, komponen, dan alur yang dibuat atau diubah. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode, dan ikut diperbarui saat kodenya berubah.
+16. Setelah selesai, melaporkan:
     - daftar file yang diubah, dibuat, dipindah, atau dihapus, beserta alasan masing-masing;
     - jumlah baris setiap file kode yang diubah atau dibuat;
     - cara menguji perubahannya, termasuk keadaan gagal;

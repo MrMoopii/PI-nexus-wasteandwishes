@@ -10,6 +10,7 @@ Komponen tampilan umum yang dipakai lintas fitur: tombol, badge, kartu, isian fo
 - **Props bertipe jelas.** Untuk elemen HTML, perluas tipe bawaannya (`ButtonHTMLAttributes`, `InputHTMLAttributes`) supaya atribut seperti `disabled` dan `aria-*` tetap bisa dipakai.
 - **Gaya mengikuti tampilan yang sudah ada.** Pakai Tailwind dengan warna tema `waste` (`bg-waste`, `text-waste`, `hover:bg-waste-dark`) dari `app/globals.css`. Font sudah diatur di `body`, jadi tidak perlu ditulis ulang.
 - **Satu komponen utama per file**, nama file huruf kecil dengan tanda hubung (`button.tsx`), nama komponen PascalCase (`Button`), dan maksimal 300 baris.
+- **Setiap komponen yang di-export diberi komentar singkat** dengan format `/** … */` tentang kegunaannya dan perilaku bawaan yang perlu diketahui pemakainya (`CONTRIBUTING.md` bagian 9.9).
 - Sebelum membuat komponen baru, cek dulu yang sudah ada di folder ini dan di tabel `CONTRIBUTING.md` bagian 9.1.
 
 ## Kerangka
@@ -29,6 +30,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   varian?: Varian;
 };
 
+/** Tombol umum bergaya tema waste. Bawaan type="button" supaya tidak mengirim form tanpa sengaja. */
 export function Button({
   varian = "utama",
   type = "button",
