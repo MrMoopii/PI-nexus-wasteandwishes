@@ -1,0 +1,37 @@
+# Pemeriksaan otomatis untuk setiap PR (CONTRIBUTING.md bagian 3.6).
+# Menjalankan pnpm lint, termasuk batas 300 baris per file kode.
+# Tidak memakai rahasia apa pun. Jangan diubah tanpa kesepakatan tim.
+name: Lint
+
+on:
+  pull_request:
+    branches: [development, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      # Versi pnpm dibaca dari "packageManager" di package.json.
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint

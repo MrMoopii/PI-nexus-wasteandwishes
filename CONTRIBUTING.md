@@ -133,6 +133,13 @@ Commit baru boleh dibuat setelah `git status` menulis _"All conflicts fixed but 
 - Sebelum menyetujui PR sinkronisasi, cek tab **Files changed**. Jika isinya 0 file, PR itu aman. Jika ada file yang berubah, berarti ada yang langsung masuk ke `main` tanpa lewat `development`, dan itu perlu ditanyakan dulu.
 - GitHub mengambil template PR (`.github/pull_request_template.md`) dari `main`, default branch repo ini. Perubahan template baru berlaku setelah dirilis ke `main`. Sampai saat itu, sesuaikan isi deskripsi PR secara manual.
 
+### 3.6 Pemeriksaan otomatis di GitHub (Lint)
+
+- Setiap PR ke `development` dan `main` menjalankan workflow **Lint** (`.github/workflows/lint.yml`): `pnpm install`, lalu `pnpm lint`, termasuk batas 300 baris per file kode. Workflow ini tidak memakai rahasia apa pun.
+- Pemeriksaan ini dijadikan _required status check_ di proteksi branch `development` dan `main`. PR yang gagal lint tidak bisa di-merge, siapa pun dan alat apa pun yang menulis kodenya.
+- Jika gagal, buka tab **Checks** di PR, baca error-nya, perbaiki di laptop, jalankan `pnpm lint` sampai bersih, lalu push lagi. Jangan mematikan aturan lint atau mengubah workflow supaya lolos.
+- Build belum diperiksa otomatis. Tetap jalankan `pnpm build` di laptop sebelum membuka PR (bagian 3.2).
+
 ## 4. Struktur folder dan pembagian kerja
 
 Struktur ini disepakati tim pada 23 November 2026. **Semua kode baru wajib mengikutinya**, supaya setiap anggota (dan AI agent-nya) tidak lagi membuat susunan sendiri-sendiri.
@@ -183,6 +190,8 @@ types/                        deklarasi tipe global (next-auth.d.ts)
 | Koneksi, autentikasi, layanan luar, format umum         | `lib/`                                                                  |
 | Skema dan migrasi database                              | `lib/db/schema.ts` dan `drizzle/` (bagian 6)                            |
 | Fungsi bantu yang sudah ada                             | Cek tabel di bagian 9.1 sebelum menulis yang baru                       |
+
+**Kerangka setiap jenis file** (query, Server Action, halaman, komponen klien, komponen umum, hook) ada di `features/README.md`, `components/ui/README.md`, dan `hooks/README.md`. **Peta file setiap fitur** yang sedang dibangun, lengkap dengan kode tugasnya, ada di `features/<fitur>/README.md`. Baca README folder itu sebelum menambah file di dalamnya, dan perbarui peta filenya jika rencana berubah.
 
 Folder fitur lama di `components/` tetap dipakai sampai dipindahkan (bagian 4.4):
 
@@ -524,6 +533,7 @@ Kode baru mengambil data di Server Component (bagian 4.2). Halaman lama yang mas
 - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (bagian 9.5).
 - [ ] Untuk perubahan tampilan yang memakai `<Suspense>`: tidak ada konten yang terdorong saat halaman pertama kali dimuat (bagian 8 no. 10).
 - [ ] Jika memakai AI agent: seluruh perubahannya sudah diperiksa dengan langkah di bagian 11.2.
+- [ ] Setelah PR dibuka, pemeriksaan **Lint** di PR berwarna hijau (bagian 3.6).
 - [ ] Tidak ada nilai rahasia di kode atau di screenshot.
 
 ## 11. Menggunakan AI agent

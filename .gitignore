@@ -41,3 +41,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pengaturan lokal AI agent: dibagikan terpisah, tidak masuk repo
+.claude/
+.gemini/
