@@ -58,7 +58,7 @@ export default function EditProfilForm({
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F4F7FA]">
+    <div className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas)">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{

@@ -1,0 +1,82 @@
+"use server";
+
+import { getDb } from "@/lib/db";
+import { dataLangganan } from "@/lib/db/schema";
+import { sql, eq, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { requireLogin } from "@/lib/require-login";
+import { kondisiLanggananAktif } from "@/lib/langganan";
+
+export async function ajukanJadwalJanjian(formData: FormData) {
+  const cek = await requireLogin();
+  if (!cek.ok) {
+    redirect("/auth/login");
+  }
+
+  if (cek.session.user.peran !== "user") {
+    redirect("/langganan");
+  }
+
+  const idUser = cek.idUser;
+
+  const jamPengambilan = formData.get("jamPengambilan");
+  const tanggalJanjian = formData.get("tanggalJanjian");
+  const keteranganTujuan = formData.get("keteranganTujuan");
+
+  const jamValid =
+    typeof jamPengambilan === "string" &&
+    /^(?:0[89]|1[0-4]):[0-5]\d$|^15:00$/.test(jamPengambilan);
+  const tujuanValid =
+    typeof keteranganTujuan === "string" &&
+    keteranganTujuan.trim().length >= 5 &&
+    keteranganTujuan.trim().length <= 500;
+  const tanggalValid =
+    typeof tanggalJanjian === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(tanggalJanjian) &&
+    new Date(`${tanggalJanjian}T00:00:00Z`).toISOString().slice(0, 10) ===
+      tanggalJanjian;
+
+  if (!(jamValid && tujuanValid && tanggalValid)) {
+    redirect("/langganan/buat-jadwal-janjian?status=input-tidak-valid");
+  }
+
+  const hariPengambilan = [
+    "Minggu",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+  ][new Date(`${tanggalJanjian}T00:00:00Z`).getUTCDay()];
+
+  const [langgananAktif] = await getDb()
+    .select({ idLangganan: dataLangganan.idLangganan })
+    .from(dataLangganan)
+    .where(and(eq(dataLangganan.userId, idUser), kondisiLanggananAktif()))
+    .limit(1);
+
+  if (!langgananAktif) {
+    redirect("/langganan/buat-jadwal-janjian?status=langganan-tidak-aktif");
+  }
+
+  await getDb().execute(sql`
+    WITH jadwal_baru AS (
+      INSERT INTO jadwal (langganan_id, hari_pengambilan, jam_pengambilan, jenis_jadwal)
+      VALUES (
+        ${langgananAktif.idLangganan},
+        ${hariPengambilan},
+        ${`${jamPengambilan}:00`},
+        'janjian'
+      )
+      RETURNING id_jadwal
+    )
+    INSERT INTO jadwal_janjian (jadwal_id, tanggal_janjian, keterangan_tujuan, status_konfirmasi)
+    SELECT id_jadwal, ${tanggalJanjian}::date, ${keteranganTujuan.trim()}, 'menunggu'
+    FROM jadwal_baru
+  `);
+
+  revalidatePath("/langganan/buat-jadwal-janjian");
+  redirect("/langganan/buat-jadwal-janjian?status=permintaan-terkirim");
+}

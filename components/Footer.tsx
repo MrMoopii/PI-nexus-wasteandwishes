@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="mt-5 border-t-4 border-teal-500 bg-gray-900 pb-4 pt-12 text-white font-(family-name:--font-plus-jakarta-sans)">
-      <div className="mx-auto grid w-full max-w-285 gap-8 px-3 text-center md:grid-cols-3 md:text-left">
+      <div className="mx-auto grid w-full gap-8 px-5 text-center md:grid-cols-3 md:text-left lg:px-8">
         <section>
           <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-waste">
             Waste &amp; Wishes
@@ -44,11 +44,11 @@ export default function Footer() {
             Hubungi Kami
           </h2>
           <p className="mb-3 text-base leading-6 text-white/60">
-            <strong className="text-white">📍 Alamat:</strong> Nglarang no 37,
+            <strong className="text-white">Alamat:</strong> Nglarang no 37,
             Malangrejo, RT 5/RW 35, Wedomartani, Ngemplak, Sleman
           </p>
           <p className="mb-3 text-base text-white/60">
-            <strong className="text-white">💬 WhatsApp:</strong>
+            <strong className="text-white">WhatsApp:</strong>
             <br />
             <a
               className="transition-colors hover:text-waste hover:[text-shadow:0_0_5px_rgb(23_175_176/30%)]"
@@ -60,7 +60,7 @@ export default function Footer() {
             </a>
           </p>
           <p className="text-base text-white/60">
-            <strong className="text-white">📸 Instagram:</strong>
+            <strong className="text-white">Instagram:</strong>
             <br />
             <a
               className="transition-colors hover:text-waste hover:[text-shadow:0_0_5px_rgb(23_175_176/30%)]"
@@ -73,7 +73,7 @@ export default function Footer() {
           </p>
         </section>
       </div>
-      <div className="mx-auto mt-8 w-full max-w-285 border-t border-white/15 px-3 pt-5 text-center text-sm text-white/50">
+      <div className="mx-auto mt-8 w-full border-t border-white/15 px-5 pt-5 text-center text-sm text-white/50 lg:px-8">
         © 2026 <strong className="text-teal-400">Waste &amp; Wishes</strong> x
         Kelompok Nexus. All Rights Reserved.
       </div>

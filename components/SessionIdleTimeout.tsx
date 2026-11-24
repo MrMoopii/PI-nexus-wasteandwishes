@@ -20,7 +20,10 @@ export default function SessionIdleTimeout() {
       if (signingOut) return;
       signingOut = true;
       window.localStorage.removeItem(LAST_ACTIVITY_KEY);
-      await signOut({ redirectTo: "/auth/login?reason=idle" });
+      await signOut({ redirect: false });
+      window.location.assign(
+        new URL("/auth/login?reason=idle", window.location.origin),
+      );
     };
 
     const scheduleTimeout = (lastActivity: number) => {

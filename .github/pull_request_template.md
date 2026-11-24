@@ -18,9 +18,11 @@
 
 - [ ] Branch sudah diperbarui dari `development` terbaru sebelum PR dibuka
 - [ ] `pnpm lint` dan `pnpm build` berhasil di laptop saya
+- [ ] File baru diletakkan sesuai struktur folder, dan tidak ada file kode lebih dari 300 baris (CONTRIBUTING.md bagian 4)
 - [ ] Tidak ada sisa penanda konflik, `console.log`, atau placeholder
 - [ ] Server Action dan route `/api/admin/*` baru memeriksa sesi atau peran di awal (lihat CONTRIBUTING.md bagian 7)
 - [ ] Tidak ada nilai rahasia (kunci API, password, connection string) di kode
 - [ ] Jika mengubah skema database: file migrasi ikut di-commit, kolom yang berubah disebut di ringkasan, dan tim diingatkan menjalankan `pnpm db:migrate`
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari
+- [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (CONTRIBUTING.md bagian 9.5)
 - [ ] Untuk perubahan tampilan: sertakan tangkapan layar

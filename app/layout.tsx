@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import Header from "@/components/Header";
+import HeaderKerangka from "@/components/header/HeaderKerangka";
+import Header from "@/components/header/Header";
 import Footer from "@/components/Footer";
 import HideOnAdmin from "@/components/HideOnAdmin";
 import SessionIdleTimeout from "@/components/SessionIdleTimeout";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -32,16 +28,17 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${plusJakartaSans.variable} ${inter.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-transparent">
+        <ToastProvider />
         <SessionIdleTimeout />
-        <HideOnAdmin>
-          <Suspense fallback={<div className="h-19 bg-gray-900" />}>
+        <HideOnAdmin fallback={<HeaderKerangka />}>
+          <Suspense fallback={<HeaderKerangka />}>
             <Header />
           </Suspense>
         </HideOnAdmin>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 bg-transparent">{children}</main>
         <HideOnAdmin>
           <Footer />
         </HideOnAdmin>

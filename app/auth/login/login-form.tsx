@@ -36,7 +36,9 @@ export default function LoginForm() {
 
   const pesan =
     error ||
-    (idleExpired ? "Sesi Anda berakhir setelah 30 menit tidak aktif. Silakan masuk kembali." : "") ||
+    (idleExpired
+      ? "Sesi Anda berakhir setelah 30 menit tidak aktif. Silakan masuk kembali."
+      : "") ||
     (urlError
       ? (pesanError[urlError] ?? "Terjadi kesalahan. Silakan coba lagi.")
       : "");
@@ -59,9 +61,16 @@ export default function LoginForm() {
         );
       } else {
         window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+        const callbackUrl = searchParams.get("callbackUrl");
         const response = await fetch("/api/auth/me", { cache: "no-store" });
         const data = response.ok ? await response.json() : null;
-        router.push(data?.user?.peran === "admin" ? "/admin" : "/");
+        const target =
+          callbackUrl && callbackUrl.startsWith("/")
+            ? callbackUrl
+            : data?.user?.peran === "admin"
+              ? "/admin"
+              : "/";
+        router.push(target);
         router.refresh();
       }
     } catch {
@@ -78,7 +87,13 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div
+      className="min-h-screen flex items-center justify-center bg-(--hx-canvas) px-4"
+      style={{
+        backgroundImage:
+          "radial-gradient(120vw 90vh at 8% -10%, rgba(185, 205, 229, 0.55), transparent 62%), radial-gradient(110vw 80vh at 98% 108%, rgba(221, 231, 242, 0.85), transparent 60%), linear-gradient(180deg, #f4f7fa 0%, #edf3f9 100%)",
+      }}
+    >
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Masuk</h1>

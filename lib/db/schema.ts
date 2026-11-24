@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   integer,
   numeric,
@@ -47,6 +48,7 @@ export const events = pgTable("events", {
   waktuSelesai: time("waktu_selesai"),
   lokasi: text("lokasi"),
   gambarUrl: text("gambar_url"),
+  gambarFileId: text("gambar_file_id"),
   statusEvent: text("status_event").notNull().default("draft"),
   biayaEvent: numeric("biaya_event", { precision: 12, scale: 2 })
     .notNull()
@@ -77,12 +79,56 @@ export const pendaftaranEvent = pgTable(
   ],
 );
 
+export const pembayaranEvent = pgTable("pembayaran_event", {
+  idPembayaranEvent: integer("id_pembayaran_event")
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+  eventId: integer("event_id")
+    .notNull()
+    .references(() => events.idEvent),
+  userId: integer("id_user")
+    .notNull()
+    .references(() => users.idUser),
+  orderId: text("order_id").notNull().unique(),
+  midtransTransactionId: text("midtrans_transaction_id"),
+  redirectUrl: text("redirect_url"),
+  jumlah: numeric("jumlah", { precision: 12, scale: 2 }).notNull(),
+  statusPembayaran: text("status_pembayaran").notNull(),
+  tanggalDibuat: timestamp("tanggal_dibuat", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  tanggalDibayar: timestamp("tanggal_dibayar", { withTimezone: true }),
+  tanggalKedaluwarsa: timestamp("tanggal_kedaluwarsa", { withTimezone: true })
+    .notNull(),
+});
+
 export const produk = pgTable("produk", {
   idProduk: integer("id_produk").primaryKey().generatedAlwaysAsIdentity(),
   namaProduk: text("nama_produk").notNull(),
   jenisProduk: text("jenis_produk").notNull(),
   hargaProduk: numeric("harga_produk", { precision: 12, scale: 2 }).notNull(),
   jumlahStok: integer("jumlah_stok").notNull().default(0),
+  deskripsi: text("deskripsi"),
+  gambarUrl: text("gambar_url"),
+  berat: text("berat"),
+  statusProduk: text("status_produk").notNull().default("aktif"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const fotoProduk = pgTable("foto_produk", {
+  idFoto: integer("id_foto").primaryKey().generatedAlwaysAsIdentity(),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => produk.idProduk, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  fileId: text("file_id").notNull(),
+  urutan: integer("urutan").notNull().default(0),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const transaksi = pgTable("transaksi", {
@@ -147,7 +193,29 @@ export const dataLangganan = pgTable("data_langganan", {
     .unique()
     .references(() => users.idUser),
   statusLangganan: text("status_langganan").notNull(),
+  tanggalMulaiLangganan: date("tanggal_mulai_langganan"),
+  tanggalAkhirLangganan: date("tanggal_akhir_langganan"),
 });
+
+export const pembayaranLangganan = pgTable(
+  "pembayaran_langganan",
+  {
+    idPembayaranLangganan: integer("id_pembayaran_langganan")
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    langgananId: integer("langganan_id")
+      .notNull()
+      .references(() => dataLangganan.idLangganan),
+    orderId: text("order_id").notNull().unique(),
+    midtransTransactionId: text("midtrans_transaction_id"),
+    jumlah: numeric("jumlah", { precision: 12, scale: 2 }).notNull(),
+    statusPembayaran: text("status_pembayaran").notNull(),
+    tanggalDibuat: timestamp("tanggal_dibuat", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    tanggalDibayar: timestamp("tanggal_dibayar", { withTimezone: true }),
+  },
+);
 
 export const jadwal = pgTable("jadwal", {
   idJadwal: integer("id_jadwal").primaryKey().generatedAlwaysAsIdentity(),
@@ -163,6 +231,7 @@ export const jadwalJanjian = pgTable("jadwal_janjian", {
   jadwalId: integer("jadwal_id")
     .primaryKey()
     .references(() => jadwal.idJadwal),
+  tanggalJanjian: date("tanggal_janjian"),
   keteranganTujuan: text("keterangan_tujuan").notNull(),
   statusKonfirmasi: text("status_konfirmasi").notNull(),
 });

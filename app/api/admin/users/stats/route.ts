@@ -4,6 +4,7 @@ import { users, dataLangganan } from "@/lib/db/schema";
 import { count, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { kondisiLanggananAktif } from "@/lib/langganan";
 
 export async function GET() {
   // Check apakah user adalah admin
@@ -24,7 +25,7 @@ export async function GET() {
     const [subscribedResult] = await getDb()
       .select({ count: count() })
       .from(dataLangganan)
-      .where(eq(dataLangganan.statusLangganan, "aktif"));
+      .where(kondisiLanggananAktif());
 
     return NextResponse.json({
       total: Number(totalResult.count) || 0,

@@ -12,7 +12,8 @@ export default function AdminLogoutPage() {
     setLoading(true);
     try {
       window.localStorage.removeItem("waste-wishes:last-activity");
-      await signOut({ redirectTo: "/" });
+        await signOut({ redirect: false });
+        window.location.assign(new URL("/", window.location.origin));
     } catch {
       setLoading(false);
     }

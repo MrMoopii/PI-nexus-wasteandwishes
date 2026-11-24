@@ -1,25 +1,93 @@
 import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { events } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, inArray } from "drizzle-orm";
 import { formatWaktu } from "@/lib/format-tanggal";
+import { connection } from "next/server";
+
+export const instant = false;
 
 export default async function AdminEventPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  await connection();
+
   const resolvedParams = await searchParams;
   const currentTab = resolvedParams.tab || "aktif";
 
-  const allEvents = await getDb()
+  let allEvents = await getDb()
     .select()
     .from(events)
     .orderBy(desc(events.idEvent));
 
   const now = new Date();
 
-  // Logika filter event berdasarkan waktu dan status
+  // --- LOGIKA AUTO-SWEEP DATABASE OTOMATIS ---
+  const toLaluIds: number[] = [];
+  const toAktifIds: number[] = [];
+
+  allEvents.forEach((event) => {
+    const eventEnd = new Date(event.tanggalPelaksanaan);
+    if (event.waktuSelesai) {
+      const [h, m] = event.waktuSelesai.split(":");
+      eventEnd.setHours(parseInt(h, 10), parseInt(m, 10), 0);
+    } else {
+      eventEnd.setHours(23, 59, 59, 999);
+    }
+
+    const eventStart = new Date(event.tanggalPelaksanaan);
+    if (event.waktuMulai) {
+      const [h, m] = event.waktuMulai.split(":");
+      eventStart.setHours(parseInt(h, 10), parseInt(m, 10), 0);
+    } else {
+      eventStart.setHours(0, 0, 0, 0);
+    }
+
+    // Jika aktif tapi waktu sudah lewat -> ubah ke 'lalu'
+    if (event.statusEvent === "aktif" && eventEnd < now) {
+      toLaluIds.push(event.idEvent);
+    }
+
+    // Jika draft tapi sudah waktunya tayang -> ubah ke 'aktif'
+    if (event.statusEvent === "draft" && eventStart <= now && eventEnd >= now) {
+      toAktifIds.push(event.idEvent);
+    }
+
+    // Jika draft tapi waktunya sudah lewat jauh -> ubah ke 'lalu'
+    if (event.statusEvent === "draft" && eventEnd < now) {
+      toLaluIds.push(event.idEvent);
+    }
+  });
+
+  let needsRefresh = false;
+
+  if (toLaluIds.length > 0) {
+    await getDb()
+      .update(events)
+      .set({ statusEvent: "lalu" })
+      .where(inArray(events.idEvent, toLaluIds));
+    needsRefresh = true;
+  }
+
+  if (toAktifIds.length > 0) {
+    await getDb()
+      .update(events)
+      .set({ statusEvent: "aktif" })
+      .where(inArray(events.idEvent, toAktifIds));
+    needsRefresh = true;
+  }
+
+  // Ambil ulang data terbaru dari database jika ada yang berubah otomatis
+  if (needsRefresh) {
+    allEvents = await getDb()
+      .select()
+      .from(events)
+      .orderBy(desc(events.idEvent));
+  }
+
+  // Logika filter event berdasarkan tab aktif
   const dataEvents = allEvents.filter((event) => {
     if (currentTab === "draft") {
       return event.statusEvent === "draft";
@@ -52,7 +120,7 @@ export default async function AdminEventPage({
   });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto font-(family-name:--font-plus-jakarta-sans)">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Event Saya</h1>
 
       {/* Tab Navigasi */}
@@ -61,7 +129,7 @@ export default async function AdminEventPage({
           href="?tab=aktif"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "aktif"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -71,7 +139,7 @@ export default async function AdminEventPage({
           href="?tab=draft"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "draft"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -81,7 +149,7 @@ export default async function AdminEventPage({
           href="?tab=lalu"
           className={`py-4 px-6 text-sm font-medium ${
             currentTab === "lalu"
-              ? "border-b-2 border-blue-600 text-blue-600"
+              ? "border-b-2 border-(--hx-accent) text-(--hx-accent)"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -91,18 +159,20 @@ export default async function AdminEventPage({
 
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Tombol Buat Event Baru */}
-        <Link
-          href="/admin/events/tambah"
-          className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer group"
-        >
-          <span className="text-5xl text-orange-500 font-light mb-4 group-hover:scale-110 transition-transform">
-            +
-          </span>
-          <span className="text-orange-500 font-semibold text-sm">
-            Buat Event Baru
-          </span>
-        </Link>
+        {/* Tombol Buat Event Baru (Disembunyikan di tab "lalu") */}
+        {currentTab !== "lalu" && (
+          <Link
+            href={`/admin/events/tambah?t=${crypto.randomUUID()}`}
+            className="flex flex-col items-center justify-center min-h-87.5 bg-white border-2 border-dashed border-(--hx-accent)/50 rounded-xl hover:border-(--hx-accent) hover:bg-[var(--hx-accent)]/5 transition-colors cursor-pointer group"
+          >
+            <span className="text-5xl text-(--hx-accent) font-light mb-4 group-hover:scale-110 transition-transform">
+              +
+            </span>
+            <span className="text-(--hx-accent) font-semibold text-sm">
+              Buat Event Baru
+            </span>
+          </Link>
+        )}
 
         {/* Pesan Kosong */}
         {dataEvents.length === 0 && (
@@ -146,7 +216,7 @@ export default async function AdminEventPage({
                   <h3 className="font-bold text-gray-900 text-lg mb-1 leading-tight line-clamp-2">
                     {event.namaEvent}
                   </h3>
-                  <p className="text-orange-500 text-xs font-medium mb-4">
+                  <p className="text-(--hx-accent) text-xs font-medium mb-4">
                     {event.jenisEvent}
                   </p>
 
@@ -175,7 +245,7 @@ export default async function AdminEventPage({
                 </div>
               </div>
 
-              {/* Footer Kartu (Di dalam container utama) */}
+              {/* Footer Kartu */}
               <div className="bg-gray-50 border-t border-gray-100 p-4 flex items-center justify-between mt-auto">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${
@@ -192,10 +262,12 @@ export default async function AdminEventPage({
                 </span>
 
                 <Link
-                  href={`/admin/events/edit/${event.idEvent}`}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  href={`/admin/events/edit/${event.idEvent}?from=${currentTab}&t=${crypto.randomUUID()}`}
+                  prefetch={false}
+                  className="inline-flex items-center gap-2 rounded-lg border border-(--hx-ink-6, #e5e7eb) bg-white px-4 py-2 text-xs font-semibold text-(--hx-ink-2) shadow-xs transition-all hover:bg-gray-50 hover:text-(--hx-accent) cursor-pointer"
                 >
-                  Edit Event ➔
+                  <span>Edit Event</span>
+                  <span aria-hidden="true">➔</span>
                 </Link>
               </div>
             </div>
