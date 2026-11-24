@@ -12,12 +12,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Sebelum menulis atau mengubah kode di repo ini, baca **`CONTRIBUTING.md`** sampai habis dan ikuti aturannya, terutama:
 
-- Bagian 4 (struktur folder): setiap file baru diletakkan sesuai peta folder di bagian 4.1. `page.tsx` tipis; query di `features/<fitur>/queries/` dengan `import "server-only"`; Server Action di `features/<fitur>/actions/`; komponen khusus satu route di `app/<route>/_components/`; komponen umum di `components/ui/`; `"use client"` hanya untuk komponen kecil yang interaktif. Jangan membuat folder di luar peta tanpa persetujuan pengguna.
+- Bagian 4 (struktur folder): setiap file baru diletakkan sesuai peta folder di bagian 4.1. `page.tsx` tipis; query di `features/<fitur>/queries/` dengan `import "server-only"`; Server Action di `features/<fitur>/actions/`; komponen khusus satu route di `app/<route>/_components/`; komponen umum di `components/ui/`; `"use client"` hanya untuk komponen kecil yang interaktif. Jangan membuat folder di luar peta tanpa persetujuan pengguna. Sebelum menambah file di `features/`, `components/ui/`, atau `hooks/`, baca `README.md` di folder itu: isinya kerangka setiap jenis file dan peta file per fitur.
 - **Batas 300 baris per file kode** (bagian 4.2 no. 9), dijaga aturan `max-lines` di `eslint.config.mjs`. Jika file akan melewati batas, pecah dulu sesuai bagian 4. Jangan menaikkan batas, menambah file ke daftar pengecualian, atau menambah `eslint-disable` untuk aturan itu.
 - Bagian 7 (autentikasi dan hak akses): setiap Server Action wajib memanggil `requireLogin()` (pengguna) atau `requireAdmin()` (admin) di baris pertamanya, setiap route `app/api/admin/*` wajib memanggil `requireAdmin()`, dan `idUser` selalu dibaca dari sesi, tidak pernah dari form.
 - Bagian 8 (jebakan Next.js 16 dan Cache Components).
 - Bagian 9 (standar kode) dan bagian 11.3 (aturan untuk agent): jangan membuat kode "asal jalan" dengan `any`, data contoh, nilai cadangan palsu, `catch` kosong, atau `export const instant = false` hanya supaya build lolos. Untuk langganan, pakai fungsi di `lib/langganan.ts` dan aturan di bagian 9.7.
 - Bagian 9.5: kode status dan bentuk respons route API adalah kontrak. Cari semua pemanggilnya sebelum mengubahnya.
+- Bagian 9.8 (validasi): setiap input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/` setelah cek sesi, memakai `safeParse`. `idUser`, peran, jumlah bayar, dan status tujuan tidak pernah masuk skema form.
+- Bagian 9.9 (komentar): setiap fungsi, Server Action, query, hook, dan komponen yang di-export diberi komentar `/** … */` singkat (tujuan, siapa yang boleh memanggil, kapan gagal). Alur lebih dari dua langkah diberi komentar langkah bernomor. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode.
 
 Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
 

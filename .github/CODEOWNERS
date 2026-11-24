@@ -1,0 +1,53 @@
+# Pemilik file untuk permintaan review otomatis (CONTRIBUTING.md bagian 4.3).
+# Baris yang paling bawah menang jika beberapa pola cocok dengan satu file.
+# Setiap baris berisi pemilik kode tugas dan ketua tim, supaya PR yang dibuat
+# pemiliknya sendiri tetap punya reviewer lain. Nama = akun GitHub, bukan nama tampilan.
+
+# Bawaan: aturan, konfigurasi, skema database, autentikasi, types.ts dan aturan.ts
+# setiap fitur (kode tugas 0.2 dan 2.1), serta semua file tanpa pemilik khusus.
+*                                                @MrMoopii
+
+# Mity-U: komponen UI dasar (0.3), komponen negosiasi (1.2), laporan bulanan (2.5)
+/components/ui/                                  @Mity-U @MrMoopii
+/features/langganan/components/                  @Mity-U @MrMoopii
+/features/laporan/                               @Mity-U @MrMoopii
+/app/admin/laporan-bulanan/                      @Mity-U @MrMoopii
+
+# cintasuryasakti9-svg: halaman dan aksi pelanggan (1.1, 1.3), tracker (2.4)
+/app/langganan/                                  @cintasuryasakti9-svg @MrMoopii
+/features/langganan/queries/pelanggan.ts         @cintasuryasakti9-svg @MrMoopii
+/features/langganan/actions/pelanggan.ts         @cintasuryasakti9-svg @MrMoopii
+/features/langganan/validasi/pelanggan.ts        @cintasuryasakti9-svg @MrMoopii
+/app/tracker/                                    @cintasuryasakti9-svg @MrMoopii
+/features/kunjungan/queries/pelanggan.ts         @cintasuryasakti9-svg @MrMoopii
+/features/kunjungan/actions/lapor-kendala.ts     @cintasuryasakti9-svg @MrMoopii
+/features/kunjungan/validasi/lapor-kendala.ts    @cintasuryasakti9-svg @MrMoopii
+/features/kunjungan/components/                  @cintasuryasakti9-svg @MrMoopii
+
+# Sanick69: admin langganan (1.4, 1.5), pencatatan harian (2.3)
+/app/admin/langganan/                            @Sanick69 @MrMoopii
+/features/langganan/queries/admin.ts             @Sanick69 @MrMoopii
+/features/langganan/actions/admin.ts             @Sanick69 @MrMoopii
+/features/langganan/validasi/admin.ts            @Sanick69 @MrMoopii
+/app/admin/kunjungan/                            @Sanick69 @MrMoopii
+/features/kunjungan/queries/admin.ts             @Sanick69 @MrMoopii
+/features/kunjungan/actions/pencatatan.ts        @Sanick69 @MrMoopii
+/features/kunjungan/validasi/pencatatan.ts       @Sanick69 @MrMoopii
+
+# jodi240506: pembayaran (1.6), halaman lama (1.7), jadwal dan hari libur (2.2), kendala (2.6)
+# Ditulis setelah /app/langganan/ supaya menimpa pemilik folder itu untuk file berikut.
+/features/langganan/actions/pembayaran.ts        @jodi240506 @MrMoopii
+/features/langganan/validasi/pembayaran.ts       @jodi240506 @MrMoopii
+/app/langganan/payment-button.tsx                @jodi240506 @MrMoopii
+/app/langganan/actions.ts                        @jodi240506 @MrMoopii
+/app/langganan/buat-jadwal-rutin/                @jodi240506 @MrMoopii
+/app/api/midtrans/                               @jodi240506 @MrMoopii
+/features/kunjungan/jadwal.ts                    @jodi240506 @MrMoopii
+/features/kunjungan/queries/hari-libur.ts        @jodi240506 @MrMoopii
+/features/kunjungan/actions/jadwal.ts            @jodi240506 @MrMoopii
+/features/kunjungan/validasi/jadwal.ts           @jodi240506 @MrMoopii
+/app/admin/hari-libur/                           @jodi240506 @MrMoopii
+/features/kunjungan/queries/kendala.ts           @jodi240506 @MrMoopii
+/features/kunjungan/actions/tanggapi-kendala.ts  @jodi240506 @MrMoopii
+/features/kunjungan/validasi/tanggapi-kendala.ts @jodi240506 @MrMoopii
+/app/admin/kendala/                              @jodi240506 @MrMoopii
