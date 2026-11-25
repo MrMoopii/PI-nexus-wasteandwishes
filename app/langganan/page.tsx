@@ -7,6 +7,8 @@ import { requireLogin } from "@/lib/require-login";
 import { getDb } from "@/lib/db";
 import { dataLangganan, users } from "@/lib/db/schema";
 import { formatTanggal } from "@/lib/format-tanggal";
+import { formatRupiah } from "@/lib/format-angka";
+import { getPengajuanSiapBayar } from "@/features/langganan/queries/pembayaran";
 import PaymentButton from "./payment-button";
 
 export default function LanggananPage() {
@@ -60,6 +62,8 @@ async function LanggananContent() {
     timeZone: "Asia/Jakarta",
   }).format(new Date());
   const aktif = Boolean(langganan?.akhir && langganan.akhir >= hariIni);
+  // Tombol bayar hanya untuk pengajuan siap_bayar; harganya dari harga_final (tugas 1.6).
+  const siapBayar = await getPengajuanSiapBayar();
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-(--hx-canvas) font-(family-name:--font-plus-jakarta-sans)">
@@ -131,10 +135,23 @@ async function LanggananContent() {
                 Aktifkan langganan untuk menggunakan layanan pengambilan sampah
                 organik. Pembayaran berlaku selama 30 hari.
               </p>
-              <p className="my-4 text-2xl font-semibold text-[#17AFB0]">
-                Rp30.000 <span className="text-sm font-normal text-[#5B6879]">/ 30 hari</span>
-              </p>
-              <PaymentButton />
+              {siapBayar ? (
+                <>
+                  <p className="my-4 text-2xl font-semibold text-[#17AFB0]">
+                    {formatRupiah(siapBayar.hargaFinal)}{" "}
+                    <span className="text-sm font-normal text-[#5B6879]">/ 30 hari</span>
+                  </p>
+                  <PaymentButton
+                    idPengajuan={siapBayar.idPengajuan}
+                    hargaFinal={siapBayar.hargaFinal}
+                  />
+                </>
+              ) : (
+                <p className="mt-3 text-sm text-[#5B6879]">
+                  Tombol bayar muncul setelah harga pengajuan Anda disepakati dan
+                  pembayaran diaktifkan admin.
+                </p>
+              )}
             </div>
           )}
           {aktif && (
@@ -156,11 +173,18 @@ async function LanggananContent() {
                   Ajukan Jadwal Janjian
                 </Link>
               )}
-              <p className="mb-4 text-sm text-[#5B6879]">
-                Perpanjangan dibayar manual. Pembayaran berhasil menambahkan 30
-                hari setelah masa aktif saat ini.
-              </p>
-              <PaymentButton />
+              {siapBayar && (
+                <>
+                  <p className="mb-4 text-sm text-[#5B6879]">
+                    Perpanjangan dibayar manual. Pembayaran berhasil menambahkan
+                    30 hari setelah masa aktif saat ini.
+                  </p>
+                  <PaymentButton
+                    idPengajuan={siapBayar.idPengajuan}
+                    hargaFinal={siapBayar.hargaFinal}
+                  />
+                </>
+              )}
             </div>
           )}
           <dl className="mt-6 grid gap-4 border-t border-[#B9CDE5]/50 pt-5 sm:grid-cols-2">
