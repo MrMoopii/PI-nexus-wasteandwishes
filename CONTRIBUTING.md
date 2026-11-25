@@ -55,7 +55,7 @@ Versi Next.js di proyek ini berbeda dari banyak tutorial di internet. Sebelum me
   Salinan lokal yang usang pernah membuat branch baru dibuat dari `development` lama, sehingga PR-nya tertinggal banyak commit dan berkonflik.
 - Penamaan branch: `feat/...` (fitur), `fix/...` (perbaikan), `chore/...` (konfigurasi), `docs/...` (dokumen).
 - Pesan commit singkat dan jelas dalam Bahasa Indonesia, menyebut apa yang berubah. Contoh: `feat: tambah halaman daftar event`, `fix: validasi id event di halaman detail`. Hindari pesan seperti `Fix` atau `revisi` saja.
-- Buka Pull Request ke `development`, isi template PR, dan minta **minimal 1 reviewer**. Penulis PR tidak bisa menyetujui PR-nya sendiri, dan persetujuan lama gugur kalau ada push baru.
+- Buka Pull Request ke `development` (default branch, jadi sudah terpilih otomatis), tulis `Closes #<nomor issue>` di deskripsinya (bagian 3.7), isi template PR, dan minta **minimal 1 reviewer**. Penulis PR tidak bisa menyetujui PR-nya sendiri, dan persetujuan lama gugur kalau ada push baru.
 - Jaga PR tetap kecil (satu fitur atau satu perbaikan). Pisahkan PR menurut tema, misalnya keamanan, tampilan, dan migrasi database masing-masing satu PR.
 - Gunakan **Draft PR** untuk pekerjaan yang belum selesai.
 - Setelah PR di-merge, hapus branch-nya. PR yang sudah tidak dipakai ditutup, jangan dibiarkan menggantung.
@@ -125,13 +125,18 @@ Commit baru boleh dibuat setelah `git status` menulis _"All conflicts fixed but 
 - Cek status deployment Vercel untuk commit `development` terbaru.
 - Jika PR membawa migrasi baru, semua anggota menjalankan `pnpm db:migrate` (lihat bagian 6).
 - Hapus branch yang sudah di-merge, di GitHub dan di laptop (`git branch -d nama-branch`).
+- Issue yang ditulis dengan `Closes #…` di deskripsi PR tertutup otomatis, dan kartunya di papan project pindah ke Done. Jika tidak tertutup, cek ejaan kata kuncinya, lalu tutup issue secara manual.
 
 ### 3.5 Rilis ke `main` dan sinkronisasi balik
 
 - Rilis dilakukan lewat PR `development` → `main`. PR ini di-merge dengan opsi **Create a merge commit**.
 - Merge commit itu hanya ada di `main`, sehingga GitHub menulis `development` "1 commit behind main", walaupun isi file keduanya sama. Sinkronkan lewat PR `main` → `development`, juga dengan **Create a merge commit**. Jangan memakai _Squash_ atau _Rebase_ untuk PR sinkronisasi, karena commit dari `main` tidak akan tercatat dan `development` tetap terlihat tertinggal.
 - Sebelum menyetujui PR sinkronisasi, cek tab **Files changed**. Jika isinya 0 file, PR itu aman. Jika ada file yang berubah, berarti ada yang langsung masuk ke `main` tanpa lewat `development`, dan itu perlu ditanyakan dulu.
-- GitHub mengambil template PR (`.github/pull_request_template.md`) dari `main`, default branch repo ini. Perubahan template baru berlaku setelah dirilis ke `main`. Sampai saat itu, sesuaikan isi deskripsi PR secara manual.
+- **Default branch repo ini adalah `development`**, sedangkan Production di Vercel tetap dibangun dari `main` (Vercel → Settings → Environments → Production → Branch Tracking). Akibatnya:
+  - PR baru otomatis mengarah ke `development`. PR rilis harus memilih base `main` secara manual.
+  - `Closes #…` di deskripsi PR menutup issue saat PR di-merge ke `development`.
+  - Template PR (`.github/pull_request_template.md`) dibaca dari `development`, jadi perubahannya langsung berlaku setelah masuk `development`.
+  - Jangan mengubah default branch atau Branch Tracking Vercel tanpa kesepakatan tim.
 
 ### 3.6 Pemeriksaan otomatis di GitHub (Lint)
 
@@ -139,6 +144,21 @@ Commit baru boleh dibuat setelah `git status` menulis _"All conflicts fixed but 
 - Pemeriksaan ini dijadikan _required status check_ di proteksi branch `development` dan `main`. PR yang gagal lint tidak bisa di-merge, siapa pun dan alat apa pun yang menulis kodenya.
 - Jika gagal, buka tab **Checks** di PR, baca error-nya, perbaiki di laptop, jalankan `pnpm lint` sampai bersih, lalu push lagi. Jangan mematikan aturan lint atau mengubah workflow supaya lolos.
 - Build belum diperiksa otomatis. Tetap jalankan `pnpm build` di laptop sebelum membuka PR (bagian 3.2).
+
+### 3.7 Issue dan papan project
+
+- Setiap tugas punya issue di GitHub berisi kode tugas, file yang dipegang, tugas yang ditunggu, dan kriteria selesai. Cari `is:open assignee:@me` di tab Issues untuk melihat tugasmu.
+- Satu issue = satu branch = satu PR. Tulis `Closes #<nomor issue>` di **deskripsi** PR, bukan di judul. Untuk beberapa issue: `Closes #136, closes #137`. Setelah PR dibuka, pastikan issue-nya muncul di bagian **Development** di sidebar PR.
+- Menyebut `(#<nomor>)` di pesan commit hanya menampilkan commit itu di riwayat issue, tidak menutupnya.
+- Kartu di papan project **digeser manual**:
+
+  | Status      | Kapan                                             | Yang menggeser                                |
+  | ----------- | ------------------------------------------------- | --------------------------------------------- |
+  | Backlog     | Issue baru, atau masih menunggu tugas lain        | Pembuat issue, saat menambahkannya ke project |
+  | Ready       | Tugas yang ditunggu sudah di-merge                | Ketua tim                                     |
+  | In progress | Mulai dikerjakan, atau reviewer meminta perbaikan | Pemegang issue                                |
+  | In review   | PR sudah dibuka dan pemeriksaan Lint hijau        | Pemegang issue                                |
+  | Done        | Issue tertutup karena PR di-merge                 | Otomatis (workflow Item closed)               |
 
 ## 4. Struktur folder dan pembagian kerja
 
@@ -626,6 +646,7 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
 ## 10. Daftar periksa sebelum membuka PR
 
 - [ ] Branch sudah diperbarui dari `development` terbaru (bagian 3.2).
+- [ ] Deskripsi PR menulis `Closes #<nomor issue>`, dan issue-nya muncul di bagian Development di sidebar PR (bagian 3.7).
 - [ ] Tidak ada sisa penanda konflik, blok ganda, `console.log`, atau placeholder.
 - [ ] `pnpm lint` dan `pnpm build` berhasil di laptop.
 - [ ] File baru diletakkan sesuai bagian 4, tidak ada file kode yang melebihi 300 baris (`pnpm lint` tanpa error `max-lines`), dan file lama yang sudah melebihi batas tidak bertambah panjang.
