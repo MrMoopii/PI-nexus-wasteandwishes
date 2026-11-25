@@ -2,12 +2,13 @@ import { Alert } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatRupiah } from "@/lib/format-angka";
-import { transisiValid } from "@/features/langganan/aturan";
+import { bolehBayar, transisiValid } from "@/features/langganan/aturan";
 import {
   LABEL_STATUS_PENGAJUAN,
   type DetailPengajuan,
   type StatusPengajuan,
 } from "@/features/langganan/types";
+import PaymentButton from "../payment-button";
 import { RincianPengajuan } from "./rincian-pengajuan";
 import { TombolBatal } from "./tombol-batal";
 
@@ -36,7 +37,7 @@ const PENJELASAN_STATUS: Record<StatusPengajuan, string> = {
   disetujui_pelanggan:
     "Anda sudah menyetujui harga. Tim Waste and Wishes akan mengaktifkan pembayaran.",
   siap_bayar:
-    "Harga dan jadwal sudah final. Lakukan pembayaran untuk mengaktifkan langganan 30 hari.",
+    "Harga dan jadwal sudah final. Bayar untuk mengaktifkan langganan 30 hari, atau untuk memperpanjangnya jika masih aktif.",
   ditolak:
     "Pengajuan Anda ditolak. Anda dapat mengirim pengajuan baru di bawah.",
   dibatalkan:
@@ -45,7 +46,7 @@ const PENJELASAN_STATUS: Record<StatusPengajuan, string> = {
 
 /**
  * Kartu pengajuan milik pelanggan: status, alasan penolakan, harga final,
- * rincian isian, dan tombol batal selama status masih mengizinkan.
+ * tombol bayar (siap_bayar), rincian isian, dan tombol batal selama status masih mengizinkan.
  */
 export function KartuStatusPengajuan({
   pengajuan,
@@ -85,7 +86,14 @@ export function KartuStatusPengajuan({
         </div>
       )}
 
-      {/* Tombol bayar untuk status siap_bayar dipasang di sini oleh tugas 1.6. */}
+      {/* Tombol bayar dari tugas 1.6, juga untuk perpanjangan karena status tetap
+          siap_bayar setelah dibayar. Jumlah yang ditagih dihitung ulang di server. */}
+      {bolehBayar(pengajuan.status) && pengajuan.hargaFinal !== null && (
+        <PaymentButton
+          idPengajuan={pengajuan.idPengajuan}
+          hargaFinal={pengajuan.hargaFinal}
+        />
+      )}
 
       <RincianPengajuan pengajuan={pengajuan} />
 

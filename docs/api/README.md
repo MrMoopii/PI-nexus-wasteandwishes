@@ -46,5 +46,5 @@ Daftar ini diambil dari `app/api/` saat folder `docs/` dibuat. Kontraknya belum 
 | GET          | `/api/admin/users/stats`                        | belum            |
 | POST         | `/api/auth/activity`                            | belum            |
 | GET          | `/api/auth/me`                                  | belum            |
-| POST         | `/api/midtrans/notification`                    | belum            |
+| POST         | `/api/midtrans/notification`                    | [midtrans.md](midtrans.md) |
 | GET POST     | `/api/auth/[...nextauth]`                       | dikelola Auth.js |

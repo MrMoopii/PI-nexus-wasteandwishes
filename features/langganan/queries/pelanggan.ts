@@ -7,6 +7,7 @@ import { dataLangganan, pengajuanLangganan, users } from "@/lib/db/schema";
 import { keadaanLangganan, type KeadaanLangganan } from "@/lib/langganan";
 import { requireLogin } from "@/lib/require-login";
 import { isProfilLengkap } from "@/lib/validasi-profil";
+import { bolehBayar } from "../aturan";
 import {
   isJenisInstansi,
   isJenisPelanggan,
@@ -147,6 +148,13 @@ export async function getPengajuanSaya(): Promise<DetailPengajuan | null> {
   }
   if (jenisPelanggan !== null && !isJenisPelanggan(jenisPelanggan)) {
     throw new Error(`Jenis pelanggan tidak dikenal: ${jenisPelanggan}`);
+  }
+  // harga_final diisi saat harga disepakati. Kosong di status yang boleh dibayar berarti
+  // data rusak; tanpa ini tombol bayar hilang diam-diam (sama dengan getPengajuanSiapBayar()).
+  if (bolehBayar(status) && baris.hargaFinal === null) {
+    throw new Error(
+      `Pengajuan ${baris.idPengajuan} berstatus siap_bayar tanpa harga_final.`,
+    );
   }
 
   return {

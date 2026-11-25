@@ -16,13 +16,36 @@ Kode tugas mengikuti rencana kerja tim. Satu file dipegang pemilik kode tugasnya
 | `queries/admin.ts`                                                 | Daftar pengajuan per status, jumlah yang menunggu admin, detail pengajuan             | 1.4        |
 | `actions/admin.ts`                                                 | Kirim penawaran, terima tawaran, aktifkan pembayaran, tolak, kirim pesan              | 1.5        |
 | `validasi/admin.ts`                                                | Skema Zod harga penawaran, alasan penolakan, dan pesan dari admin                     | 1.5        |
-| `actions/pembayaran.ts`                                            | Mulai pembayaran Midtrans dari harga final (pindahan dari `app/langganan/actions.ts`) | 1.6        |
-| `validasi/pembayaran.ts`                                           | Skema Zod ID pengajuan yang dibayar dan data notifikasi Midtrans yang dipakai         | 1.6        |
+| `queries/pembayaran.ts`                                            | `getPengajuanSiapBayar()`: pengajuan `siap_bayar` milik pelanggan yang login beserta harga finalnya, untuk tombol bayar | 1.6        |
+| `actions/pembayaran.ts`                                            | `mulaiPembayaranLangganan()`: mulai pembayaran Midtrans dari harga final. Menggantikan `app/langganan/actions.ts`, yang tidak dipakai lagi dan dihapus di PR tersendiri | 1.6        |
+| `validasi/pembayaran.ts`                                           | Skema Zod ID pengajuan yang dibayar, body notifikasi Midtrans, dan data transaksi hasil verifikasi Midtrans | 1.6        |
+| `app/langganan/payment-button.tsx`                                 | Tombol bayar (klien), props `idPengajuan` dan `hargaFinal`                            | 1.6        |
+| `app/api/midtrans/notification/route.ts`                           | Webhook Midtrans. Kontraknya di `docs/api/midtrans.md`                                | 1.6        |
 | `components/`                                                      | Badge status pengajuan, kartu penawaran, riwayat negosiasi (hanya menerima props)     | 1.2        |
-| `app/langganan/` dan `app/langganan/_components/`                  | Halaman pelanggan: `page.tsx`, `error.tsx`, `form-pengajuan`, `status-pengajuan`, `rincian-pengajuan`, `tombol-batal`, `keadaan-langganan`, `kerangka-langganan`. Tombol bayar dipasang 1.6 di `status-pengajuan.tsx`                                                                     | 1.1        |
+| `app/langganan/` dan `app/langganan/_components/`                  | Halaman pelanggan: `page.tsx`, `error.tsx`, `form-pengajuan`, `status-pengajuan`, `rincian-pengajuan`, `tombol-batal`, `keadaan-langganan`, `kerangka-langganan`. Tombol bayar (`payment-button.tsx`, 1.6) dipasang di `status-pengajuan.tsx` dari data `getPengajuanSaya()`                                                                     | 1.1        |
 | `app/admin/langganan/` dan `app/admin/langganan/[id]/_components/` | Halaman admin                                                                         | 1.4, 1.5   |
 
 Tabel database (`lib/db/schema.ts` dan migrasinya) hanya diubah pemilik skema (kode tugas 0.2), sesuai `CONTRIBUTING.md` bagian 6.3.
+
+## Memasang tombol bayar
+
+Tombol bayar hanya dipasang untuk pengajuan yang `bolehBayar(status)`. Jumlah yang ditagih tetap dihitung ulang di Server Action dari `harga_final`, jadi `hargaFinal` di props hanya label.
+
+```tsx
+import PaymentButton from "@/app/langganan/payment-button";
+import { getPengajuanSiapBayar } from "@/features/langganan/queries/pembayaran";
+
+const siapBayar = await getPengajuanSiapBayar();
+
+{siapBayar && (
+  <PaymentButton
+    idPengajuan={siapBayar.idPengajuan}
+    hargaFinal={siapBayar.hargaFinal}
+  />
+)}
+```
+
+Halaman yang sudah membaca pengajuan lewat `getPengajuanSaya()` boleh memakai datanya langsung: `bolehBayar(pengajuan.status) && pengajuan.hargaFinal !== null`.
 
 ## Yang dipakai dari luar fitur ini
 
