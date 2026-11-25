@@ -1,3 +1,9 @@
+## Issue
+
+Closes #
+
+<!-- Tulis nomor issue tepat setelah tanda #, misalnya "Closes #136". Untuk beberapa issue: "Closes #136, closes #137". Issue tertutup otomatis saat PR ini di-merge ke development (CONTRIBUTING.md bagian 3.7). -->
+
 ## Ringkasan
 
 <!-- Jelaskan singkat apa yang dikerjakan dan kenapa. -->
