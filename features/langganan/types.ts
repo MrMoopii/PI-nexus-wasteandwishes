@@ -25,6 +25,17 @@ export function isStatusPengajuan(nilai: string): nilai is StatusPengajuan {
   return STATUS_PENGAJUAN.some((status) => status === nilai);
 }
 
+/** Label tampilan setiap status pengajuan, dipakai halaman pelanggan dan admin. */
+export const LABEL_STATUS_PENGAJUAN: Record<StatusPengajuan, string> = {
+  menunggu_review: "Menunggu review",
+  ditawarkan: "Ditawarkan",
+  negosiasi: "Negosiasi",
+  disetujui_pelanggan: "Disetujui pelanggan",
+  siap_bayar: "Siap bayar",
+  ditolak: "Ditolak",
+  dibatalkan: "Dibatalkan",
+};
+
 /** Jenis instansi pelanggan. 'lainnya' disertai jenis_instansi_lain yang diketik pelanggan. */
 export const JENIS_INSTANSI = [
   "hotel",
