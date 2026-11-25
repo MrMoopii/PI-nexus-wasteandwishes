@@ -541,6 +541,7 @@ Kode baru mengambil data di Server Component (bagian 4.2). Halaman lama yang mas
 - **Durasi:** 1 pembayaran = 30 hari, dengan hari bayar sebagai hari pertama dan tanggal akhir masih aktif. Membayar pada atau sebelum tanggal akhir berarti perpanjangan (tanggal mulai tetap, tanggal akhir + 30). Selain itu dihitung sebagai langganan baru: tanggal akhir = (hari bayar − 1) + 30.
 - **Siapa yang boleh berlangganan:** hanya akun `user`. Admin dan pelanggan berstatus `dihentikan` ditolak di Server Action pembayaran. Route notifikasi Midtrans tidak boleh menimpa status `dihentikan` menjadi `aktif`.
 - **Harga dan jumlah bayar selalu diambil dari database di server** (harga final hasil review admin), tidak pernah dari form atau props klien.
+- **Harga tawaran dan harga final dipisah.** Setiap harga yang ditawarkan, baik oleh admin maupun oleh pelanggan, disimpan sebagai satu baris `pesan_negosiasi` dengan `harga_usulan`. `pengajuan_langganan.harga_final` baru diisi saat harga disepakati (status menjadi `disetujui_pelanggan`), dari `harga_usulan` terakhir. Mengirim penawaran tidak mengisi `harga_final`.
 - **Alur pengajuan langganan** (sedang dibangun): tombol bayar hanya untuk pengajuan yang sudah disepakati pelanggan dan diaktifkan admin. Syarat ini dicek di Server Action, bukan hanya di tampilan. Status pengajuan hanya berubah lewat satu `UPDATE … WHERE status IN (…)` yang menyebut status asal yang diizinkan (bagian 6.2).
 
 ### 9.8 Validasi input dengan Zod
@@ -558,7 +559,7 @@ Semua input dari luar divalidasi dengan skema Zod sebelum dipakai: `FormData` di
 - **Pesan error** ditulis dalam Bahasa Indonesia dengan opsi `{ error: "…" }` (cara Zod 4). Server Action yang mengembalikan satu pesan memakai pesan pertama: `hasil.error.issues[0]?.message ?? "Isian tidak valid."`. Form yang menampilkan pesan per isian memakai `z.flattenError(hasil.error).fieldErrors`.
 - **Tipe input diturunkan dari skema** dengan `z.infer<typeof skemaPenawaran>`. Jangan menulis tipe yang sama dua kali.
 - **Webhook Midtrans:** pertahankan pemeriksaan ke Midtrans yang sudah ada (`transaction.notification`), lalu validasi bentuk data yang dipakai dengan Zod.
-- **Memasang Zod:** Zod belum ada di `package.json`. Pemilik `package.json` memasangnya satu kali lewat PR tersendiri (`pnpm add zod`), dan aturan ini adalah persetujuan dependensi yang dimaksud bagian 11.3 no. 7. Jangan memasangnya sendiri di branch fitur, karena `pnpm-lock.yaml` akan bentrok.
+- **Versi Zod:** Zod 4 sudah terpasang di `package.json`. Impor dengan `import { z } from "zod"`. Jangan memasang ulang atau mengubah versinya di branch fitur (bagian 11.3 no. 7).
 
 Contoh skema (kerangka lengkap dengan Server Action-nya ada di `features/README.md`):
 
