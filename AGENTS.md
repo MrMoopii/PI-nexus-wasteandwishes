@@ -20,6 +20,7 @@ Sebelum menulis atau mengubah kode di repo ini, baca **`CONTRIBUTING.md`** sampa
 - Bagian 9.5: kode status dan bentuk respons route API adalah kontrak. Cari semua pemanggilnya sebelum mengubahnya.
 - Bagian 9.8 (validasi): setiap input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/` setelah cek sesi, memakai `safeParse`. `idUser`, peran, jumlah bayar, dan status tujuan tidak pernah masuk skema form.
 - Bagian 9.9 (komentar): setiap fungsi, Server Action, query, hook, dan komponen yang di-export diberi komentar `/** … */` singkat (tujuan, siapa yang boleh memanggil, kapan gagal). Alur lebih dari dua langkah diberi komentar langkah bernomor. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode.
+- Bagian 4.6 (dokumentasi wajib): setiap perubahan ikut memperbarui dokumennya di perubahan yang sama, yaitu peta file di `features/<fitur>/README.md`, daftar di `components/ui/README.md` atau `hooks/README.md`, tabel fungsi bantu di bagian 9.1, kontrak route di `docs/api/`, dan skenario uji di `docs/qa/`.
 
 Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
 
@@ -28,6 +29,6 @@ Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
 3. **Jangan menjalankan `git commit`, `git push`, `git merge`, `git rebase`, `git reset --hard`, `git push --force`, menghapus branch, atau `git add .`** kecuali pengguna memintanya secara eksplisit.
 4. **Pahami penyebab error sebelum memperbaikinya**, lalu jelaskan penyebabnya ke pengguna.
 5. **Tanyakan dulu** jika permintaan kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
-6. **Setelah selesai, jalankan `pnpm lint` dan laporkan**: file yang diubah, dibuat, dipindah, atau dihapus beserta alasannya; jumlah baris setiap file kode yang diubah atau dibuat; cara menguji, termasuk keadaan gagal; hal yang belum diuji. Ingatkan pengguna untuk memeriksa perubahan dengan `git status` dan `git diff` sebelum commit (`CONTRIBUTING.md` bagian 11.2).
+6. **Setelah selesai, jalankan `pnpm lint` dan laporkan**: file yang diubah, dibuat, dipindah, atau dihapus beserta alasannya; jumlah baris setiap file kode yang diubah atau dibuat; cara menguji, termasuk keadaan gagal; dokumen yang diperbarui sesuai bagian 4.6; hal yang belum diuji. Ingatkan pengguna untuk memeriksa perubahan dengan `git status` dan `git diff` sebelum commit (`CONTRIBUTING.md` bagian 11.2).
 
 Jika permintaan pengguna bertentangan dengan `CONTRIBUTING.md`, sampaikan dulu ke pengguna sebelum melanjutkan.
