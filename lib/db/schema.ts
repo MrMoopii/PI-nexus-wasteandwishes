@@ -255,3 +255,5 @@ export const riwayatPengambilan = pgTable("riwayat_pengambilan", {
   fotoBuktiPengambilan: text("foto_bukti_pengambilan"),
   bobotSampah: numeric("bobot_sampah", { precision: 10, scale: 2 }).notNull(),
 });
+
+export * from "./schema-langganan";
