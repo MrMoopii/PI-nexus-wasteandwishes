@@ -63,3 +63,7 @@ export function useLokasiBrowser(): Lokasi {
   return lokasi;
 }
 ```
+
+## Daftar hook
+
+Belum ada hook bersama di folder ini. Tambahkan baris di sini setiap kali membuat hook baru (`CONTRIBUTING.md` bagian 4.6): nama, file, yang dikembalikan, dan siapa yang memakainya.

@@ -1,0 +1,126 @@
+diff --git a/.github/pull_request_template.md b/.github/pull_request_template.md
+index 19ff2a2..f47363d 100644
+--- a/.github/pull_request_template.md
++++ b/.github/pull_request_template.md
+@@ -29,6 +29,7 @@ Closes #
+ - [ ] Server Action dan route `/api/admin/*` baru memeriksa sesi atau peran di awal (lihat CONTRIBUTING.md bagian 7)
+ - [ ] Input dari form, URL, atau body divalidasi dengan skema Zod (CONTRIBUTING.md bagian 9.8)
+ - [ ] Fungsi dan komponen baru diberi komentar singkat, dan alur penting diberi komentar langkah (CONTRIBUTING.md bagian 9.9)
++- [ ] Dokumen yang terkena perubahan sudah diperbarui (CONTRIBUTING.md bagian 4.6), atau alasannya ditulis di ringkasan
+ - [ ] Tidak ada nilai rahasia (kunci API, password, connection string) di kode
+ - [ ] Jika mengubah skema database: file migrasi ikut di-commit, kolom yang berubah disebut di ringkasan, dan tim diingatkan menjalankan `pnpm db:migrate`
+ - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari
+diff --git a/AGENTS.md b/AGENTS.md
+index 617c498..d1466f6 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -20,6 +20,7 @@ Sebelum menulis atau mengubah kode di repo ini, baca **`CONTRIBUTING.md`** sampa
+ - Bagian 9.5: kode status dan bentuk respons route API adalah kontrak. Cari semua pemanggilnya sebelum mengubahnya.
+ - Bagian 9.8 (validasi): setiap input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/` setelah cek sesi, memakai `safeParse`. `idUser`, peran, jumlah bayar, dan status tujuan tidak pernah masuk skema form.
+ - Bagian 9.9 (komentar): setiap fungsi, Server Action, query, hook, dan komponen yang di-export diberi komentar `/** … */` singkat (tujuan, siapa yang boleh memanggil, kapan gagal). Alur lebih dari dua langkah diberi komentar langkah bernomor. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode.
++- Bagian 4.6 (dokumentasi wajib): setiap perubahan ikut memperbarui dokumennya di perubahan yang sama, yaitu peta file di `features/<fitur>/README.md`, daftar di `components/ui/README.md` atau `hooks/README.md`, tabel fungsi bantu di bagian 9.1, kontrak route di `docs/api/`, dan skenario uji di `docs/qa/`.
+ 
+ Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
+ 
+@@ -28,6 +29,6 @@ Cara bekerja yang wajib diikuti (detailnya di `CONTRIBUTING.md` bagian 11.3):
+ 3. **Jangan menjalankan `git commit`, `git push`, `git merge`, `git rebase`, `git reset --hard`, `git push --force`, menghapus branch, atau `git add .`** kecuali pengguna memintanya secara eksplisit.
+ 4. **Pahami penyebab error sebelum memperbaikinya**, lalu jelaskan penyebabnya ke pengguna.
+ 5. **Tanyakan dulu** jika permintaan kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
+-6. **Setelah selesai, jalankan `pnpm lint` dan laporkan**: file yang diubah, dibuat, dipindah, atau dihapus beserta alasannya; jumlah baris setiap file kode yang diubah atau dibuat; cara menguji, termasuk keadaan gagal; hal yang belum diuji. Ingatkan pengguna untuk memeriksa perubahan dengan `git status` dan `git diff` sebelum commit (`CONTRIBUTING.md` bagian 11.2).
++6. **Setelah selesai, jalankan `pnpm lint` dan laporkan**: file yang diubah, dibuat, dipindah, atau dihapus beserta alasannya; jumlah baris setiap file kode yang diubah atau dibuat; cara menguji, termasuk keadaan gagal; dokumen yang diperbarui sesuai bagian 4.6; hal yang belum diuji. Ingatkan pengguna untuk memeriksa perubahan dengan `git status` dan `git diff` sebelum commit (`CONTRIBUTING.md` bagian 11.2).
+ 
+ Jika permintaan pengguna bertentangan dengan `CONTRIBUTING.md`, sampaikan dulu ke pengguna sebelum melanjutkan.
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index 964672c..6715340 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -274,6 +274,25 @@ File lama dipindahkan ke struktur 4.1 secara bertahap dengan cara ini, bukan sek
+ - Dokumen ditulis dari kode yang sebenarnya. Jangan menulis kontrak atau skenario untuk perilaku yang belum ada.
+ - Rencana kerja dan keputusan mitra tetap di dokumen tim, bukan di repo.
+ 
++### 4.6 Dokumentasi wajib di setiap PR
++
++Dokumentasi ditulis **di PR yang sama** dengan kodenya, bukan menyusul. PR yang menambah atau mengubah hal di kolom kiri tetapi tidak memperbarui dokumen di kolom kanan belum boleh di-merge.
++
++| Jika PR ini menambah atau mengubah                               | Perbarui                                                                                                  |
++| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
++| Fungsi, Server Action, query, hook, atau komponen yang di-export | Komentar `/** … */` di atasnya (bagian 9.9)                                                               |
++| File di `features/<fitur>/`                                      | Peta file di `features/<fitur>/README.md`: nama file, isinya, dan kode tugasnya sesuai keadaan sebenarnya |
++| Komponen di `components/ui/`                                     | Daftar komponen di `components/ui/README.md`: nama, varian atau props penting, dan perilaku bawaannya     |
++| Hook di `hooks/`                                                 | Daftar hook di `hooks/README.md`                                                                          |
++| Fungsi bantu di `lib/`                                           | Tabel fungsi bantu di bagian 9.1                                                                          |
++| Route di `app/api/`                                              | Kontrak route di `docs/api/` (bagian 4.5 dan 9.5)                                                         |
++| Alur yang bisa dicoba pengguna (halaman, form, aksi)             | Skenario uji di `docs/qa/<fitur>.md`, termasuk keadaan gagal                                              |
++| Warna, font, atau token di `app/globals.css`                     | `docs/ui-ux/design-tokens.md`                                                                             |
++
++- Ikuti template di `README.md` setiap folder `docs/`. Tulis dari kode yang sebenarnya, bukan dari rencana.
++- Jika PR memang tidak butuh dokumen baru (misalnya hanya perbaikan tampilan kecil), tulis alasannya di deskripsi PR.
++- Reviewer memeriksa tabel ini di setiap PR, sama seperti memeriksa kodenya.
++
+ ## 5. Variabel lingkungan, rahasia, dan Vercel
+ 
+ - Nama semua variabel terdaftar di `.env.example`. Nilai asli hanya di `.env.local` (tidak ikut Git, jangan pernah di-commit).
+@@ -473,6 +492,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
+   | Kebutuhan                          | Pakai                                                                                     |
+   | ---------------------------------- | ----------------------------------------------------------------------------------------- |
+   | Format tanggal, jam, rentang waktu | `formatTanggal`, `formatJam`, `formatWaktu` di `lib/format-tanggal.ts`                    |
++  | Format harga Rupiah                | `formatRupiah()` di `lib/format-angka.ts`                                                 |
+   | Tanggal hari ini (zona Jakarta)    | `tanggalHariIniJakarta()` di `lib/format-tanggal.ts`                                      |
+   | Syarat "langganan aktif" di query  | `kondisiLanggananAktif()` di `lib/langganan.ts`, dipanggil dengan kurung (lihat di bawah) |
+   | Label keadaan langganan            | `keadaanLangganan()` di `lib/langganan.ts`                                                |
+@@ -656,6 +676,7 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
+ - [ ] Tidak ada `idUser` yang dibaca dari form atau URL.
+ - [ ] Input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/`, setelah cek sesi (bagian 9.8).
+ - [ ] Setiap fungsi dan komponen baru yang di-export punya komentar singkat, dan alur lebih dari dua langkah punya komentar langkah bernomor (bagian 9.9).
++- [ ] Dokumen yang terkena perubahan sudah diperbarui di PR ini sesuai tabel bagian 4.6, atau alasannya ditulis di deskripsi PR.
+ - [ ] Jika mengubah skema: file migrasi ikut di-commit, kolom yang berubah disebut di deskripsi PR, dan tim diingatkan menjalankan `pnpm db:migrate`.
+ - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari dan perubahannya disebut di deskripsi PR.
+ - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (bagian 9.5).
+@@ -735,9 +756,11 @@ Agent yang bekerja di repo ini wajib:
+ 13. Memperbaiki error dengan memahami penyebabnya terlebih dahulu, lalu menjelaskan penyebab itu ke pengguna. Jangan mencoba-coba perubahan acak sampai error hilang.
+ 14. Bertanya dulu jika maksud pengguna kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
+ 15. **Memvalidasi setiap input dengan skema Zod** (bagian 9.8) **dan menulis komentar penjelasan singkat** (bagian 9.9) untuk setiap fungsi, komponen, dan alur yang dibuat atau diubah. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode, dan ikut diperbarui saat kodenya berubah.
+-16. Setelah selesai, melaporkan:
++16. **Memperbarui dokumentasi di perubahan yang sama** sesuai tabel bagian 4.6: peta file fitur, daftar komponen atau hook, tabel fungsi bantu, kontrak API, dan skenario uji. Jangan menunda dokumentasi ke tugas berikutnya.
++17. Setelah selesai, melaporkan:
+     - daftar file yang diubah, dibuat, dipindah, atau dihapus, beserta alasan masing-masing;
+     - jumlah baris setiap file kode yang diubah atau dibuat;
+     - cara menguji perubahannya, termasuk keadaan gagal;
++    - dokumen yang diperbarui sesuai bagian 4.6, atau alasan jika tidak ada;
+     - hal yang **belum** diuji atau masih diragukan;
+     - pengingat bahwa pengguna perlu memeriksa perubahan dengan langkah di bagian 11.2 sebelum commit.
+diff --git a/components/ui/README.md b/components/ui/README.md
+index 0054d5f..fdc9059 100644
+--- a/components/ui/README.md
++++ b/components/ui/README.md
+@@ -47,6 +47,16 @@ export function Button({
+ }
+ ```
+ 
+-## Komponen yang direncanakan (kode tugas 0.3)
++## Daftar komponen
+ 
+-`button.tsx`, `badge.tsx`, `card.tsx`, `field.tsx` (label, input, dan pesan error), `alert.tsx`.
++Perbarui tabel ini setiap kali menambah atau mengubah komponen di folder ini (`CONTRIBUTING.md` bagian 4.6).
++
++| Komponen | File         | Varian / props penting                                              | Perilaku bawaan                                                                                          |
++| -------- | ------------ | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
++| `Button` | `button.tsx` | `varian`: `utama` (bawaan), `garis`. Semua atribut `<button>`       | `type="button"` supaya tidak mengirim form tanpa sengaja. Untuk tombol kirim, tulis `type="submit"`      |
++| `Badge`  | `badge.tsx`  | `varian`: `netral` (bawaan), `sukses`, `peringatan`, `bahaya`       | Label kecil berbentuk pil. Pemetaan status ke varian dilakukan pemanggil                                 |
++| `Card`   | `card.tsx`   | Semua atribut `<div>`                                               | Wadah dengan border, latar putih, sudut membulat                                                         |
++| `Field`  | `field.tsx`  | `label`, `error`, satu elemen isian sebagai `children`              | Memasang `id`, `htmlFor`, `aria-invalid`, dan `aria-describedby` ke isian. Pesan `error` tampil di bawah |
++| `Alert`  | `alert.tsx`  | `varian`: `info` (bawaan), `sukses`, `gagal`. Semua atribut `<div>` | `role="alert"` untuk `gagal`, `role="status"` untuk varian lain                                          |
++
++Format harga Rupiah ada di `formatRupiah()` (`lib/format-angka.ts`), bukan di folder ini.
+diff --git a/hooks/README.md b/hooks/README.md
+index 03ebff3..93b6b08 100644
+--- a/hooks/README.md
++++ b/hooks/README.md
+@@ -63,3 +63,7 @@ export function useLokasiBrowser(): Lokasi {
+   return lokasi;
+ }
+ ```
++
++## Daftar hook
++
++Belum ada hook bersama di folder ini. Tambahkan baris di sini setiap kali membuat hook baru (`CONTRIBUTING.md` bagian 4.6): nama, file, yang dikembalikan, dan siapa yang memakainya.

@@ -47,6 +47,16 @@ export function Button({
 }
 ```
 
-## Komponen yang direncanakan (kode tugas 0.3)
+## Daftar komponen
 
-`button.tsx`, `badge.tsx`, `card.tsx`, `field.tsx` (label, input, dan pesan error), `alert.tsx`.
+Perbarui tabel ini setiap kali menambah atau mengubah komponen di folder ini (`CONTRIBUTING.md` bagian 4.6).
+
+| Komponen | File         | Varian / props penting                                              | Perilaku bawaan                                                                                          |
+| -------- | ------------ | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `Button` | `button.tsx` | `varian`: `utama` (bawaan), `garis`. Semua atribut `<button>`       | `type="button"` supaya tidak mengirim form tanpa sengaja. Untuk tombol kirim, tulis `type="submit"`      |
+| `Badge`  | `badge.tsx`  | `varian`: `netral` (bawaan), `sukses`, `peringatan`, `bahaya`       | Label kecil berbentuk pil. Pemetaan status ke varian dilakukan pemanggil                                 |
+| `Card`   | `card.tsx`   | Semua atribut `<div>`                                               | Wadah dengan border, latar putih, sudut membulat                                                         |
+| `Field`  | `field.tsx`  | `label`, `error`, satu elemen isian sebagai `children`              | Memasang `id`, `htmlFor`, `aria-invalid`, dan `aria-describedby` ke isian. Pesan `error` tampil di bawah |
+| `Alert`  | `alert.tsx`  | `varian`: `info` (bawaan), `sukses`, `gagal`. Semua atribut `<div>` | `role="alert"` untuk `gagal`, `role="status"` untuk varian lain                                          |
+
+Format harga Rupiah ada di `formatRupiah()` (`lib/format-angka.ts`), bukan di folder ini.

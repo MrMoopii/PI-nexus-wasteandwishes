@@ -254,6 +254,25 @@ File lama dipindahkan ke struktur 4.1 secara bertahap dengan cara ini, bukan sek
 - Dokumen ditulis dari kode yang sebenarnya. Jangan menulis kontrak atau skenario untuk perilaku yang belum ada.
 - Rencana kerja dan keputusan mitra tetap di dokumen tim, bukan di repo.
 
+### 4.6 Dokumentasi wajib di setiap PR
+
+Dokumentasi ditulis **di PR yang sama** dengan kodenya, bukan menyusul. PR yang menambah atau mengubah hal di kolom kiri tetapi tidak memperbarui dokumen di kolom kanan belum boleh di-merge.
+
+| Jika PR ini menambah atau mengubah                               | Perbarui                                                                                                  |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Fungsi, Server Action, query, hook, atau komponen yang di-export | Komentar `/** … */` di atasnya (bagian 9.9)                                                               |
+| File di `features/<fitur>/`                                      | Peta file di `features/<fitur>/README.md`: nama file, isinya, dan kode tugasnya sesuai keadaan sebenarnya |
+| Komponen di `components/ui/`                                     | Daftar komponen di `components/ui/README.md`: nama, varian atau props penting, dan perilaku bawaannya     |
+| Hook di `hooks/`                                                 | Daftar hook di `hooks/README.md`                                                                          |
+| Fungsi bantu di `lib/`                                           | Tabel fungsi bantu di bagian 9.1                                                                          |
+| Route di `app/api/`                                              | Kontrak route di `docs/api/` (bagian 4.5 dan 9.5)                                                         |
+| Alur yang bisa dicoba pengguna (halaman, form, aksi)             | Skenario uji di `docs/qa/<fitur>.md`, termasuk keadaan gagal                                              |
+| Warna, font, atau token di `app/globals.css`                     | `docs/ui-ux/design-tokens.md`                                                                             |
+
+- Ikuti template di `README.md` setiap folder `docs/`. Tulis dari kode yang sebenarnya, bukan dari rencana.
+- Jika PR memang tidak butuh dokumen baru (misalnya hanya perbaikan tampilan kecil), tulis alasannya di deskripsi PR.
+- Reviewer memeriksa tabel ini di setiap PR, sama seperti memeriksa kodenya.
+
 ## 5. Variabel lingkungan, rahasia, dan Vercel
 
 - Nama semua variabel terdaftar di `.env.example`. Nilai asli hanya di `.env.local` (tidak ikut Git, jangan pernah di-commit).
@@ -453,6 +472,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
   | Kebutuhan                          | Pakai                                                                                     |
   | ---------------------------------- | ----------------------------------------------------------------------------------------- |
   | Format tanggal, jam, rentang waktu | `formatTanggal`, `formatJam`, `formatWaktu` di `lib/format-tanggal.ts`                    |
+  | Format harga Rupiah                | `formatRupiah()` di `lib/format-angka.ts`                                                 |
   | Tanggal hari ini (zona Jakarta)    | `tanggalHariIniJakarta()` di `lib/format-tanggal.ts`                                      |
   | Syarat "langganan aktif" di query  | `kondisiLanggananAktif()` di `lib/langganan.ts`, dipanggil dengan kurung (lihat di bawah) |
   | Label keadaan langganan            | `keadaanLangganan()` di `lib/langganan.ts`                                                |
@@ -635,6 +655,7 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
 - [ ] Tidak ada `idUser` yang dibaca dari form atau URL.
 - [ ] Input dari form, URL, atau body divalidasi dengan skema Zod di `features/<fitur>/validasi/`, setelah cek sesi (bagian 9.8).
 - [ ] Setiap fungsi dan komponen baru yang di-export punya komentar singkat, dan alur lebih dari dua langkah punya komentar langkah bernomor (bagian 9.9).
+- [ ] Dokumen yang terkena perubahan sudah diperbarui di PR ini sesuai tabel bagian 4.6, atau alasannya ditulis di deskripsi PR.
 - [ ] Jika mengubah skema: file migrasi ikut di-commit, kolom yang berubah disebut di deskripsi PR, dan tim diingatkan menjalankan `pnpm db:migrate`.
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari dan perubahannya disebut di deskripsi PR.
 - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (bagian 9.5).
@@ -714,9 +735,11 @@ Agent yang bekerja di repo ini wajib:
 13. Memperbaiki error dengan memahami penyebabnya terlebih dahulu, lalu menjelaskan penyebab itu ke pengguna. Jangan mencoba-coba perubahan acak sampai error hilang.
 14. Bertanya dulu jika maksud pengguna kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
 15. **Memvalidasi setiap input dengan skema Zod** (bagian 9.8) **dan menulis komentar penjelasan singkat** (bagian 9.9) untuk setiap fungsi, komponen, dan alur yang dibuat atau diubah. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode, dan ikut diperbarui saat kodenya berubah.
-16. Setelah selesai, melaporkan:
+16. **Memperbarui dokumentasi di perubahan yang sama** sesuai tabel bagian 4.6: peta file fitur, daftar komponen atau hook, tabel fungsi bantu, kontrak API, dan skenario uji. Jangan menunda dokumentasi ke tugas berikutnya.
+17. Setelah selesai, melaporkan:
     - daftar file yang diubah, dibuat, dipindah, atau dihapus, beserta alasan masing-masing;
     - jumlah baris setiap file kode yang diubah atau dibuat;
     - cara menguji perubahannya, termasuk keadaan gagal;
+    - dokumen yang diperbarui sesuai bagian 4.6, atau alasan jika tidak ada;
     - hal yang **belum** diuji atau masih diragukan;
     - pengingat bahwa pengguna perlu memeriksa perubahan dengan langkah di bagian 11.2 sebelum commit.
