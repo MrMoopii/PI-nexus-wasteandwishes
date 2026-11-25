@@ -44,6 +44,19 @@ function teksJenisInstansi(pengajuan: DetailPengajuanAdmin): string {
   return LABEL_JENIS_INSTANSI[pengajuan.jenisInstansi];
 }
 
+/**
+ * Teks rentang jam. Jam kosong setelah admin menetapkan syarat berarti
+ * jam menyesuaikan WW (keputusan mitra); sebelum itu berarti belum diatur.
+ */
+function teksJam(pengajuan: DetailPengajuanAdmin): string {
+  if (pengajuan.jamMulai === null && pengajuan.jamSelesai === null) {
+    return pengajuan.jenisPelanggan === null
+      ? "Belum diatur"
+      : "Jam menyesuaikan WW";
+  }
+  return formatWaktu(pengajuan.jamMulai, pengajuan.jamSelesai);
+}
+
 /** Teks hari pengambilan; hari kosong atau asing ditampilkan apa adanya. */
 function teksHari(hari: number[] | null): string {
   if (!hari || hari.length === 0) return "Belum diatur admin";
@@ -131,11 +144,7 @@ export function DetailPengajuan({
             <Fakta label="Hari pengambilan">
               {teksHari(pengajuan.hariPengambilan)}
             </Fakta>
-            <Fakta label="Rentang jam">
-              {pengajuan.jamMulai === null && pengajuan.jamSelesai === null
-                ? "Belum diatur"
-                : formatWaktu(pengajuan.jamMulai, pengajuan.jamSelesai)}
-            </Fakta>
+            <Fakta label="Rentang jam">{teksJam(pengajuan)}</Fakta>
             <Fakta label="Jumlah ember">
               {pengajuan.jumlahEmber === null
                 ? "Belum ditetapkan"
