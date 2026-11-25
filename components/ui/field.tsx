@@ -1,4 +1,4 @@
-import { Children, cloneElement, useId, type JSX, type ReactNode } from "react";
+import { Children, cloneElement, useId, isValidElement, type HTMLAttributes, type ReactNode } from "react";
 
 type FieldProps = {
   /** Label teks di atas isian. */
@@ -20,7 +20,11 @@ export function Field({ label, children, error, className = "" }: FieldProps) {
   const idError = `${idBawaan}-error`;
 
   // 1. Ambil anak pertama dan pastikan itu elemen React yang bisa di-clone.
-  const anak = Children.only(children) as JSX.Element;
+  //    isValidElement sebagai type guard (bukan as) agar TypeScript masih mengecek tipe.
+  const anak = Children.only(children);
+  if (!isValidElement<HTMLAttributes<unknown>>(anak)) {
+    throw new Error("Anak komponen harus merupakan elemen React yang valid.");
+  }
 
   // 2. Gunakan ID dari props anak jika ada, kalau tidak pakai idBawaan.
   const id = anak.props.id || idBawaan;
