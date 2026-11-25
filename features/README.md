@@ -125,7 +125,7 @@ Untuk admin, ganti `requireLogin()` dengan `requireAdmin()`, lalu `redirect(cek.
 
 ### `validasi/admin.ts`
 
-Skema Zod untuk isian yang diterima `actions/admin.ts`. Tanpa `"use server"` dan tanpa `"server-only"`, jadi form klien boleh memakai skema yang sama untuk cek awal (`CONTRIBUTING.md` bagian 9.8). Zod dipasang lewat PR tersendiri oleh pemilik `package.json`; sebelum PR itu masuk, impor `zod` belum bisa dipakai.
+Skema Zod untuk isian yang diterima `actions/admin.ts`. Tanpa `"use server"` dan tanpa `"server-only"`, jadi form klien boleh memakai skema yang sama untuk cek awal (`CONTRIBUTING.md` bagian 9.8).
 
 ```ts
 import { z } from "zod";
@@ -152,13 +152,14 @@ export type InputPenawaran = z.infer<typeof skemaPenawaran>;
 
 Server Action yang dipanggil dari komponen klien dan hasilnya dibaca. Polanya: cek peran, validasi input dengan skema, ubah data dengan **satu perintah bersyarat**, lalu `revalidatePath`.
 
+Harga yang ditawarkan admin disimpan sebagai pesan di `pesan_negosiasi.harga_usulan`, bukan di `harga_final`. `harga_final` baru diisi saat harga disepakati (`CONTRIBUTING.md` bagian 9.7). Karena status pengajuan dan pesan harus berubah bersama, dan `neon-http` tidak punya transaksi, keduanya ditulis dalam satu perintah `WITH … UPDATE … RETURNING` lalu `INSERT … SELECT` (`CONTRIBUTING.md` bagian 6.2).
+
 ```ts
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, inArray } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { pengajuanLangganan } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/require-admin";
 import { skemaPenawaran } from "../validasi/admin";
 
@@ -186,19 +187,25 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
   }
   const { idPengajuan, harga } = hasil.data;
 
-  // 3. Ubah status hanya jika masih menunggu review atau negosiasi (CONTRIBUTING 6.2).
-  const [berubah] = await getDb()
-    .update(pengajuanLangganan)
-    .set({ status: "ditawarkan", hargaFinal: String(harga) })
-    .where(
-      and(
-        eq(pengajuanLangganan.idPengajuan, idPengajuan),
-        inArray(pengajuanLangganan.status, ["menunggu_review", "negosiasi"]),
-      ),
+  // 3. Dalam satu perintah: ubah status hanya jika masih menunggu review atau
+  //    negosiasi, lalu catat harga tawaran sebagai pesan admin. harga_final tidak diisi.
+  //    Syarat penawaran lain (hari, jam, jumlah ember) ikut di SET yang sama.
+  const hasilUbah = await getDb().execute<{ id_pesan: number }>(sql`
+    WITH ubah AS (
+      UPDATE pengajuan_langganan
+      SET status = 'ditawarkan', diperbarui_pada = now()
+      WHERE id_pengajuan = ${idPengajuan}
+        AND status IN ('menunggu_review', 'negosiasi')
+      RETURNING id_pengajuan
     )
-    .returning({ idPengajuan: pengajuanLangganan.idPengajuan });
+    INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan)
+    SELECT id_pengajuan, 'admin', ${cek.idUser}, ${harga}
+    FROM ubah
+    RETURNING id_pesan
+  `);
 
-  if (!berubah) {
+  // Tidak ada baris berarti status sudah diubah di tab lain: jangan menimpa.
+  if (hasilUbah.rows.length === 0) {
     return {
       ok: false,
       pesan: "Status pengajuan sudah berubah. Muat ulang halaman.",
