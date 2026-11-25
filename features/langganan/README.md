@@ -13,9 +13,10 @@ Kode tugas mengikuti rencana kerja tim. Satu file dipegang pemilik kode tugasnya
 | `queries/pelanggan.ts`                                             | `getPengajuanSaya()`: pengajuan terbaru milik pelanggan yang login. `getAkunLanggananSaya()`: syarat boleh mengajukan (peran `user`, profil lengkap), isian awal dari profil, dan keadaan langganan yang sudah dibayar. Riwayat negosiasi belum ada                            | 1.1        |
 | `actions/pelanggan.ts`                                             | `kirimPengajuan()` dan `batalkanPengajuan()` untuk `useActionState` (1.1). Setujui harga, tawar, kirim pesan menyusul (1.3)                       | 1.1, 1.3   |
 | `validasi/pelanggan.ts`                                            | `skemaPengajuan` dan `skemaBatalPengajuan` (1.1). Skema tawaran harga dan pesan menyusul (1.3)                    | 1.1, 1.3   |
-| `queries/admin.ts`                                                 | Daftar pengajuan per status, jumlah yang menunggu admin, detail pengajuan             | 1.4        |
-| `actions/admin.ts`                                                 | Kirim penawaran, terima tawaran, aktifkan pembayaran, tolak, kirim pesan              | 1.5        |
-| `validasi/admin.ts`                                                | Skema Zod harga penawaran, alasan penolakan, dan pesan dari admin                     | 1.5        |
+| `queries/admin.ts`                                                 | Daftar pengajuan per status, jumlah yang menunggu admin, detail pengajuan (1.4). `getPesanNegosiasi()`: riwayat pesan satu pengajuan, urut dari yang terlama, berbentuk `PesanNegosiasiTampilan` (1.5)             | 1.4, 1.5        |
+| `actions/admin.ts`                                                 | Aksi admin yang menulis pesan: `kirimPenawaran()` (syarat di pengajuan, harga sebagai pesan admin dengan `harga_usulan`, tanpa `harga_final`) dan `kirimPesan()`. Status dan pesan ditulis dalam satu perintah `WITH … UPDATE … INSERT`. Juga tipe `HasilAksiAdmin` dan `HasilKirimPenawaran`              | 1.5        |
+| `actions/admin-status.ts`                                          | Aksi admin yang hanya mengubah status: `terimaTawaran()` (`harga_final` dari tawaran pelanggan terakhir, hanya jika tawaran yang tampil masih yang terakhir), `aktifkanPembayaran()`, `tolakPengajuan()` | 1.5        |
+| `validasi/admin.ts`                                                | Filter status dan ID halaman admin (1.4). `skemaPenawaran`, `skemaTerimaTawaran`, `skemaAktifkanPembayaran`, `skemaTolak`, `skemaPesanAdmin` untuk kedua file actions admin (1.5)                     | 1.4, 1.5        |
 | `queries/pembayaran.ts`                                            | `getPengajuanSiapBayar()`: pengajuan `siap_bayar` milik pelanggan yang login beserta harga finalnya, untuk tombol bayar | 1.6        |
 | `actions/pembayaran.ts`                                            | `mulaiPembayaranLangganan()`: mulai pembayaran Midtrans dari harga final. Menggantikan `app/langganan/actions.ts`, yang tidak dipakai lagi dan dihapus di PR tersendiri | 1.6        |
 | `validasi/pembayaran.ts`                                           | Skema Zod ID pengajuan yang dibayar, body notifikasi Midtrans, dan data transaksi hasil verifikasi Midtrans | 1.6        |
@@ -23,7 +24,7 @@ Kode tugas mengikuti rencana kerja tim. Satu file dipegang pemilik kode tugasnya
 | `app/api/midtrans/notification/route.ts`                           | Webhook Midtrans. Kontraknya di `docs/api/midtrans.md`                                | 1.6        |
 | `components/`                                                      | Badge status pengajuan, kartu penawaran, riwayat negosiasi (hanya menerima props)     | 1.2        |
 | `app/langganan/` dan `app/langganan/_components/`                  | Halaman pelanggan: `page.tsx`, `error.tsx`, `form-pengajuan`, `status-pengajuan`, `rincian-pengajuan`, `tombol-batal`, `keadaan-langganan`, `kerangka-langganan`. Tombol bayar (`payment-button.tsx`, 1.6) dipasang di `status-pengajuan.tsx` dari data `getPengajuanSaya()`                                                                     | 1.1        |
-| `app/admin/langganan/` dan `app/admin/langganan/[id]/_components/` | Halaman admin                                                                         | 1.4, 1.5   |
+| `app/admin/langganan/` dan `app/admin/langganan/[id]/_components/` | Halaman admin: daftar dan detail (1.4). Di detail, `panel-aksi` menampilkan harga terakhir kedua pihak dan aksi yang diizinkan status: `form-penawaran`, `tombol-status` (terima tawaran, aktifkan pembayaran), `form-pesan`, `form-tolak` (1.5)                                                                         | 1.4, 1.5   |
 
 Tabel database (`lib/db/schema.ts` dan migrasinya) hanya diubah pemilik skema (kode tugas 0.2), sesuai `CONTRIBUTING.md` bagian 6.3.
 
@@ -46,6 +47,10 @@ const siapBayar = await getPengajuanSiapBayar();
 ```
 
 Halaman yang sudah membaca pengajuan lewat `getPengajuanSaya()` boleh memakai datanya langsung: `bolehBayar(pengajuan.status) && pengajuan.hargaFinal !== null`.
+
+## Memasang riwayat negosiasi di halaman admin
+
+Halaman detail admin sudah membaca riwayat lewat `getPesanNegosiasi()` dan meneruskannya ke `DetailPengajuan` sebagai prop `pesan` (`PesanNegosiasiTampilan[]`). Setelah komponen riwayat 1.2 masuk, pasang di `app/admin/langganan/[id]/_components/detail-pengajuan.tsx` dengan data itu. Action dan query tidak perlu diubah. Ringkasan "terakhir" di `panel-aksi.tsx` tetap dipakai untuk tombol terima tawaran.
 
 ## Yang dipakai dari luar fitur ini
 

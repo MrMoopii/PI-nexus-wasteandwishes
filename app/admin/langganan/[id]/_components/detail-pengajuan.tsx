@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { LABEL_JENIS_INSTANSI } from "@/features/langganan/types";
+import {
+  LABEL_JENIS_INSTANSI,
+  type PesanNegosiasiTampilan,
+} from "@/features/langganan/types";
 import type { DetailPengajuanAdmin } from "@/features/langganan/queries/admin";
 import { formatRupiah } from "@/lib/format-angka";
 import { formatWaktu } from "@/lib/format-tanggal";
 import { StatusPengajuanBadge } from "../../_components/status-pengajuan";
+import { PanelAksi } from "./panel-aksi";
 
 const FORMAT_WAKTU = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "long",
@@ -65,13 +69,16 @@ function teksHari(hari: number[] | null): string {
 
 /**
  * Detail satu pengajuan langganan untuk review admin: data pelanggan,
- * instansi, perkiraan ember, syarat pengambilan, dan catatan pelanggan.
- * Tombol aksi review ada di tugas 1.5.
+ * instansi, perkiraan ember, syarat pengambilan, catatan pelanggan, dan
+ * panel tindakan admin (kode tugas 1.5).
  */
 export function DetailPengajuan({
   pengajuan,
+  pesan,
 }: {
   pengajuan: DetailPengajuanAdmin;
+  /** Riwayat pesan negosiasi, urut dari yang terlama. */
+  pesan: PesanNegosiasiTampilan[];
 }) {
   return (
     <div className="mx-auto w-full max-w-5xl font-(family-name:--font-plus-jakarta-sans)">
@@ -178,6 +185,8 @@ export function DetailPengajuan({
           </dl>
         </section>
       </div>
+
+      <PanelAksi pengajuan={pengajuan} pesan={pesan} />
     </div>
   );
 }
