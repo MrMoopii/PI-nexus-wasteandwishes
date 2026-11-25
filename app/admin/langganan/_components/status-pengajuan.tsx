@@ -1,16 +1,8 @@
 import { Badge, type BadgeProps } from "@/components/ui/badge";
-import type { StatusPengajuan } from "@/features/langganan/types";
-
-/** Label Bahasa Indonesia untuk setiap status pengajuan. */
-export const LABEL_STATUS_PENGAJUAN: Record<StatusPengajuan, string> = {
-  menunggu_review: "Menunggu review",
-  ditawarkan: "Ditawarkan",
-  negosiasi: "Negosiasi",
-  disetujui_pelanggan: "Disetujui pelanggan",
-  siap_bayar: "Siap bayar",
-  ditolak: "Ditolak",
-  dibatalkan: "Dibatalkan",
-};
+import {
+  LABEL_STATUS_PENGAJUAN,
+  type StatusPengajuan,
+} from "@/features/langganan/types";
 
 type VarianBadge = NonNullable<BadgeProps["varian"]>;
 
