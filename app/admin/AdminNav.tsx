@@ -6,6 +6,7 @@ import Link from "next/dist/client/link";
 const adminNavigation = [
   { name: "Dashboard", href: "/admin", category: "NAVIGATION" },
   { name: "Data Pengguna", href: "/admin/users", category: "NAVIGATION" },
+  { name: "Langganan", href: "/admin/langganan", category: "NAVIGATION" },
   {
     name: "Jadwal Pengambilan",
     href: "/admin/jadwal-pengambilan",
