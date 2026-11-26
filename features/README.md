@@ -8,7 +8,7 @@ Peta file untuk fitur yang sedang dibangun ada di `README.md` masing-masing fold
 
 ```text
 features/<fitur>/
-  README.md                peta file fitur ini dan kode tugasnya
+  README.md                peta file, kode tugas, dan catatan antar-tugas
   types.ts                 tipe status dan bentuk data untuk tampilan
   aturan.ts                fungsi murni: tanpa database, tanpa sesi
   queries/<peran>.ts       membaca data; baris pertama import "server-only"

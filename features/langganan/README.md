@@ -56,3 +56,9 @@ Halaman yang sudah membaca pengajuan lewat `getPengajuanSaya()` boleh memakai da
 - `kondisiLanggananAktif()` dan `keadaanLangganan()` dari `lib/langganan.ts` untuk keadaan langganan yang sudah dibayar.
 - `getMidtransSnap()` dari `lib/midtrans.ts`.
 - Komponen umum dari `components/ui/`.
+
+## Catatan antar-tugas
+
+Catatan untuk tugas lain yang belum di-merge. Format entri dan cara menulisnya ada di `CONTRIBUTING.md` bagian 4.7. Hapus entri di PR yang mengerjakannya.
+
+Belum ada.
