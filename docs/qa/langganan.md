@@ -1,6 +1,6 @@
 # Skenario uji: langganan
 
-Nomor `LGN-01` sampai `LGN-19` disediakan untuk alur pengajuan, negosiasi dari sisi pelanggan, dan daftar admin (kode tugas 1.1–1.4). Nomor `LGN-20` sampai `LGN-39` untuk pembayaran (kode tugas 1.6). Nomor `LGN-40` ke atas untuk aksi admin di halaman detail pengajuan (kode tugas 1.5).
+Nomor `LGN-01` sampai `LGN-19` disediakan untuk alur pengajuan, negosiasi dari sisi pelanggan, dan daftar admin (kode tugas 1.1–1.4). Nomor `LGN-20` sampai `LGN-39` untuk pembayaran (kode tugas 1.6). Nomor `LGN-40` ke atas untuk aksi admin di halaman detail pengajuan (kode tugas 1.5), dan `LGN-49` sampai `LGN-50` untuk halaman jadwal lama yang sudah dialihkan (kode tugas 1.7).
 
 Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian 6.5). Siapkan:
 
@@ -605,4 +605,30 @@ FROM pengajuan_langganan WHERE id_pengajuan = <id pengajuan>;
   - Di panel tindakan, "Penawaran terakhir admin" Rp 175.000 dan "Tawaran terakhir pelanggan" Rp 150.000. Pesan tanpa harga tidak menggeser ringkasan ini.
   - Langkah 3: pesan admin Rp 160.000 muncul paling bawah setelah aksi selesai, dan "Penawaran terakhir admin" menjadi Rp 160.000.
 - **Keadaan gagal yang dicek:** belum ada pesan, waktu simpan yang sama persis, pesan tanpa harga, pesan tanpa teks, teks bergaris baru.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-49: URL lama jadwal rutin dan janjian dialihkan ke /langganan
+
+- **Kode tugas:** 1.7
+- **Peran:** pelanggan
+- **Persiapan data:** tidak ada.
+- **Langkah:**
+  1. Login sebagai A, buka `/langganan/buat-jadwal-rutin`.
+  2. Buka `/langganan/buat-jadwal-janjian`.
+  3. Logout, buka `/langganan/buat-jadwal-rutin` dan `/langganan/buat-jadwal-janjian` lagi.
+- **Hasil yang diharapkan:** langkah 1 dan 2 langsung dialihkan ke `/langganan`, tanpa form jadwal, tanpa tabel permintaan, dan tanpa pesan status. Langkah 3 dulu dialihkan ke halaman login, lalu ke `/langganan`. URL tidak menampilkan form yang bisa dipakai membuat jadwal.
+- **Keadaan gagal yang dicek:** belum login, sesi idle.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-50: Server Action jadwal lama menolak semua panggilan
+
+- **Kode tugas:** 1.7
+- **Peran:** pelanggan
+- **Persiapan data:** tidak ada.
+- **Langkah:**
+  1. Login sebagai A. Lewat DevTools di `/langganan`, kirim `simpanJadwalRutin` (action `buat-jadwal-rutin`) dengan isian apa pun, misalnya `hari1=Senin`, `jam1=08:00`, `hari2=Rabu`, `jam2=09:00`, `mode=baru`.
+  2. Ulangi untuk `ajukanJadwalJanjian` (action `buat-jadwal-janjian`) dengan isian `tanggalJanjian`, `jamPengambilan`, dan `keteranganTujuan` apa pun.
+  3. Periksa database.
+- **Hasil yang diharapkan:** kedua panggilan langsung mengalihkan ke `/langganan` tanpa menyimpan apa pun. Tidak ada baris baru di `jadwal`, `jadwal_rutin`, maupun `jadwal_janjian`.
+- **Keadaan gagal yang dicek:** input valid dan tidak valid sama-sama ditolak; Server Action dipanggil langsung tanpa halaman (CONTRIBUTING 7.1).
 - **Hasil uji terakhir:** belum diuji
