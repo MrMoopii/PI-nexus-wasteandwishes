@@ -117,3 +117,58 @@ export const skemaBatalPengajuan = z.object({
     .int(ID_TIDAK_VALID)
     .positive(ID_TIDAK_VALID),
 });
+
+// ── Negosiasi (1.3) ───────────────────────────────────────────────
+
+const HARGA_TIDAK_VALID = { error: "Harga tawaran tidak valid." };
+
+/** ID pengajuan untuk aksi negosiasi. Kepemilikan dicek di Server Action. */
+export const skemaIdPengajuan = z.object({
+  idPengajuan: z.coerce
+    .number(ID_TIDAK_VALID)
+    .int(ID_TIDAK_VALID)
+    .positive(ID_TIDAK_VALID),
+});
+
+/**
+ * Tawaran harga pelanggan untuk satu pengajuan: ID pengajuan, harga usulan,
+ * dan pesan yang menyertainya. Kepemilikan dan status dicek di Server Action.
+ */
+export const skemaTawarHarga = z.object({
+  idPengajuan: z.coerce
+    .number(ID_TIDAK_VALID)
+    .int(ID_TIDAK_VALID)
+    .positive(ID_TIDAK_VALID),
+  // Kolom harga_usulan numeric(12,2): dua desimal adalah batas database (CONTRIBUTING 9.8).
+  hargaUsulan: z.coerce
+    .number(HARGA_TIDAK_VALID)
+    .int(HARGA_TIDAK_VALID)
+    .positive({ error: "Harga harus lebih dari 0." })
+    .max(999999999999, {
+      error: "Harga terlalu besar, maksimal 999.999.999.999.",
+    }),
+  catatan: z
+    .string()
+    .trim()
+    .max(500, { error: "Catatan paling banyak 500 karakter." })
+    .nullish()
+    .transform((nilai) => (nilai ? nilai : null)),
+});
+
+export type InputTawarHarga = z.infer<typeof skemaTawarHarga>;
+
+/**
+ * Pesan pelanggan tanpa harga untuk satu pengajuan, saat status masih
+ * menunggu_review, ditawarkan, atau negosiasi. Status tidak berubah (aturan.ts).
+ */
+export const skemaKirimPesan = z.object({
+  idPengajuan: z.coerce
+    .number(ID_TIDAK_VALID)
+    .int(ID_TIDAK_VALID)
+    .positive(ID_TIDAK_VALID),
+  pesan: z
+    .string()
+    .trim()
+    .min(1, { error: "Pesan wajib diisi." })
+    .max(500, { error: "Pesan paling banyak 500 karakter." }),
+});

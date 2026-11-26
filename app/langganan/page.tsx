@@ -6,6 +6,9 @@ import {
   getAkunLanggananSaya,
   getPengajuanSaya,
 } from "@/features/langganan/queries/pelanggan";
+import {
+  getRiwayatPesanNegosiasi,
+} from "@/features/langganan/queries/negosiasi";
 import { FormPengajuan } from "./_components/form-pengajuan";
 import { KartuKeadaanLangganan } from "./_components/keadaan-langganan";
 import { KerangkaLangganan } from "./_components/kerangka-langganan";
@@ -45,6 +48,11 @@ async function IsiLangganan() {
     pengajuan.status === "ditolak" ||
     pengajuan.status === "dibatalkan";
 
+  // Riwayat negosiasi untuk pengajuan berjalan (1.3); kosong jika belum ada pesan.
+  const daftarPesan = pengajuan
+    ? ((await getRiwayatPesanNegosiasi(pengajuan.idPengajuan)) ?? [])
+    : [];
+
   return (
     <div className="space-y-6">
       {akun.langganan.keadaan !== "belum_berlangganan" && (
@@ -55,7 +63,12 @@ async function IsiLangganan() {
         />
       )}
 
-      {pengajuan && <KartuStatusPengajuan pengajuan={pengajuan} />}
+      {pengajuan && (
+        <KartuStatusPengajuan
+          pengajuan={pengajuan}
+          daftarPesan={daftarPesan}
+        />
+      )}
 
       {bolehMengajukanLagi && akun.halangan === "bukan_pelanggan" && (
         <Alert>Akun admin tidak dapat mengajukan langganan.</Alert>
