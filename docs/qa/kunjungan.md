@@ -340,32 +340,38 @@ $uji$;
   - Edit berat saat status masih `diambil` (misalnya form Edit lama dikirim dari tab lain) ditolak dengan pesan bahwa berat hanya bisa diubah setelah ditimbang.
 - **Hasil uji terakhir:** belum diuji
 
-## KJG-14: Admin menandai kunjungan tertunda, satu atau banyak
+## KJG-14: Admin menandai, mengubah, dan membatalkan penundaan
 
 - **Kode tugas:** 2.3
 - **Peran:** admin
-- **Persiapan data:** data uji KJG-13 (tiga kunjungan `dijadwalkan`, minimal dua pada tanggal yang sama). Jika KJG-13 sudah dijalankan dan statusnya berubah, buat ulang datanya dengan skrip di sana.
+- **Persiapan data:** data uji KJG-13 (kunjungan `dijadwalkan`). Jika KJG-13 sudah dijalankan dan statusnya berubah, buat ulang datanya dengan skrip di sana.
 - **Langkah:**
-  1. Buka `/admin/kunjungan?tanggal=<Senin minggu depan>`. Centang dua kunjungan berstatus Dijadwalkan, isi alasan "Truk pengangkut rusak", isi tanggal paling lambat satu hari setelah tanggal kunjungan, lalu klik **Tandai tertunda**.
+  1. Buka `/admin/kunjungan?tanggal=<Senin minggu depan>`. Centang satu kunjungan berstatus Dijadwalkan. Pastikan **hanya** dropdown **Tandai tertunda** yang tampil (aksi pencatatan lain hilang). Coba pilih tanggal paling lambat = tanggal kunjungan (ketik manual di DevTools): harus ditolak. Lalu isi alasan "Truk pengangkut rusak", isi tanggal paling lambat satu hari setelah tanggal kunjungan, dan klik **Tandai tertunda**.
   2. Jalankan query dari KJG-13 langkah 6.
-  3. Di halaman yang sama, centang satu kunjungan yang baru ditandai tertunda, lalu klik **Tandai tertunda**.
-  4. Pilih tanggal paling lambat sebelum tanggal kunjungan (ketik manual di DevTools jika pemilih tanggal menolaknya), lalu kirim.
-  5. Isi alasan hanya spasi, lalu kirim.
-  6. Kosongkan semua centang, lalu periksa tombol **Tandai tertunda**.
-  7. Buka halaman di dua tab: tandai tertunda satu kunjungan di tab pertama, lalu kirim form yang sama dari tab kedua.
-  8. Di DevTools, ubah hidden input `idKunjungan` menjadi `abc`, lalu menjadi `999999`, dan kirim.
+  3. Setelah tersimpan, pastikan checkbox baris itu **tercentang tetapi nonaktif** dan tidak bisa diubah. Baris menampilkan **Edit penundaan** dan tombol **Batalkan penundaan**.
+  4. Buka **Edit penundaan**, ubah alasan dan tanggal paling lambat, lalu simpan.
+  5. Klik **Batalkan penundaan** tanpa dialog browser apa pun.
+  6. Jalankan ulang query KJG-13 langkah 6.
+  7. Tandai tertunda satu kunjungan lagi, lalu di baris itu pilih tanggal paling lambat sama dengan tanggal kunjungan (ketik manual di DevTools) dan kirim.
+  8. Isi alasan hanya spasi, lalu kirim.
+  9. Buka halaman di dua tab: batalkan penundaan satu kunjungan di tab pertama, lalu kirim form penundaan yang sama dari tab kedua.
+  10. Di DevTools, ubah hidden input `idKunjungan` pada **Batalkan penundaan** menjadi `abc`, lalu menjadi `999999`, dan kirim.
+  11. Lepas centang pada baris yang masih `dijadwalkan`, lalu pastikan dropdown **Tandai tertunda** hilang dan aksi pencatatan muncul lagi.
 
 - **Hasil yang diharapkan:**
-  - Langkah 1: pesan "2 kunjungan ditandai tertunda.", kedua baris berstatus Tertunda, dan di bawah nama instansi tampil alasan beserta "paling lambat <tanggal>".
-  - Langkah 2: kedua baris berstatus `tertunda` dengan `alasan_kendala` dan `tanggal_paling_lambat` terisi.
-  - Langkah 3: kunjungan `tertunda` tidak bisa dicentang lagi (checkbox nonaktif), jadi tidak ada baris yang berubah.
-  - Langkah 4: "Tidak ada kunjungan yang bisa ditandai tertunda…" dan tidak ada data yang berubah.
-  - Langkah 5: "Alasan tertunda wajib diisi."
-  - Langkah 6: tombol nonaktif, dengan teks "Belum ada kunjungan yang dicentang."
-  - Langkah 7: tab kedua menampilkan "Tidak ada kunjungan yang bisa ditandai tertunda…" karena statusnya sudah berubah.
-  - Langkah 8: `abc` menampilkan "Kunjungan tidak valid."; `999999` menampilkan pesan bahwa tidak ada kunjungan yang bisa ditandai tertunda.
+  - Langkah 1: pesan "1 kunjungan ditandai tertunda.", baris berstatus Tertunda, dan di bawah nama instansi tampil alasan beserta "paling lambat <tanggal>". Selama dicentang hanya dropdown **Tandai tertunda** yang terlihat.
+  - Langkah 2: baris berstatus `tertunda` dengan `alasan_kendala` dan `tanggal_paling_lambat` terisi.
+  - Langkah 3: checkbox **tercentang** dan nonaktif, dan hanya tombol **Batalkan penundaan** yang bisa mengembalikan status.
+  - Langkah 4: pesan "Penundaan diperbarui.", dan alasan/tanggal paling lambat di baris ikut berubah.
+  - Langkah 5: notifikasi in-app "Penundaan dibatalkan. Kunjungan kembali dijadwalkan.", tanpa dialog `confirm` browser. Status kembali Dijadwalkan dan checkbox kembali kosong serta bisa dicentang lagi.
+  - Langkah 6: baris berstatus `dijadwalkan` dengan `alasan_kendala` dan `tanggal_paling_lambat` bernilai `NULL`.
+  - Langkah 7: "Tanggal paling lambat harus setelah tanggal kunjungan." dan tidak ada data yang berubah.
+  - Langkah 8: "Alasan tertunda wajib diisi."
+  - Langkah 9: tab kedua menampilkan "Status kunjungan sudah berubah. Muat ulang halaman lalu coba lagi."
+  - Langkah 10: `abc` menampilkan notifikasi gagal "Kunjungan tidak valid."; `999999` menampilkan "Status kunjungan sudah berubah. Muat ulang halaman lalu coba lagi."
+  - Langkah 11: dropdown **Tandai tertunda** hilang saat centang dilepas, dan aksi pencatatan tampil lagi.
 - **Keadaan gagal yang dicek:**
   - Belum login, akun bukan admin, dan sesi idle (sama seperti KJG-13).
-  - Tanggal paling lambat sebelum tanggal kunjungan, alasan kosong, dan ID yang tidak valid.
-  - Sebagian baris sudah berubah status: pesan menyebut jumlah yang berhasil dan yang dilewati.
+  - Tanggal paling lambat sama dengan atau sebelum tanggal kunjungan, alasan kosong, dan ID yang tidak valid.
+  - Edit atau batalkan penundaan pada kunjungan yang statusnya sudah berubah (misalnya sudah diambil).
 - **Hasil uji terakhir:** belum diuji

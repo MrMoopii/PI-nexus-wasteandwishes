@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { tambahHari } from "../jadwal";
 import { tanggalWajib } from "./jadwal";
 
 // Skema input actions/pencatatan.ts dan parameter ?tanggal= halaman
@@ -113,17 +114,48 @@ export const skemaUbahPencatatan = z
     }
   });
 
+/** Isian alasan dan tanggal paling lambat, dipakai tandai dan ubah penundaan. */
+const alasanTertunda = z
+  .string({ error: "Alasan tertunda wajib diisi." })
+  .trim()
+  .min(1, { error: "Alasan tertunda wajib diisi." })
+  .max(300, { error: "Alasan paling banyak 300 karakter." });
+
+/**
+ * Tanggal paling lambat tercepat yang boleh dipilih: satu hari setelah tanggal
+ * kunjungan. Contoh kunjungan 7 Des 2026, paling cepat 8 Des 2026.
+ * Dipakai sebagai atribut min di form; server mengecek ulang lewat WHERE.
+ */
+export function tanggalPalingLambatMin(tanggalKunjungan: string): string {
+  return tambahHari(tanggalKunjungan, 1);
+}
+
+/**
+ * Tanggal paling lambat harus berupa tanggal kalender yang valid. Aturan
+ * "harus setelah tanggal kunjungan" dicek di Server Action, karena skema ini
+ * tidak tahu tanggal kunjungan tiap baris (lihat tandaiTertunda/ubahTertunda).
+ */
+const tanggalPalingLambatWajib = tanggalWajib("Tanggal paling lambat");
+
 /** Isian tandai tertunda untuk satu atau banyak kunjungan sekaligus. */
 export const skemaTandaiTertunda = z.object({
   idKunjungan: z
     .array(idKunjungan, { error: "Pilih minimal satu kunjungan." })
     .min(1, { error: "Pilih minimal satu kunjungan." }),
-  alasan: z
-    .string({ error: "Alasan tertunda wajib diisi." })
-    .trim()
-    .min(1, { error: "Alasan tertunda wajib diisi." })
-    .max(300, { error: "Alasan paling banyak 300 karakter." }),
-  tanggalPalingLambat: tanggalWajib("Tanggal paling lambat"),
+  alasan: alasanTertunda,
+  tanggalPalingLambat: tanggalPalingLambatWajib,
+});
+
+/** Isian ubah penundaan satu kunjungan: alasan dan tanggal paling lambat baru. */
+export const skemaUbahTertunda = z.object({
+  idKunjungan,
+  alasan: alasanTertunda,
+  tanggalPalingLambat: tanggalPalingLambatWajib,
+});
+
+/** ID satu kunjungan yang penundaannya dibatalkan. */
+export const skemaBatalkanTertunda = z.object({
+  idKunjungan,
 });
 
 /** Nama isian form langkah 1; sama dengan atribut name di form. */
@@ -137,3 +169,6 @@ export type IsianUbahPencatatan = keyof z.input<typeof skemaUbahPencatatan>;
 
 /** Nama isian form tandai tertunda; sama dengan atribut name di form. */
 export type IsianTandaiTertunda = keyof z.input<typeof skemaTandaiTertunda>;
+
+/** Nama isian form ubah penundaan; sama dengan atribut name di form. */
+export type IsianUbahTertunda = keyof z.input<typeof skemaUbahTertunda>;

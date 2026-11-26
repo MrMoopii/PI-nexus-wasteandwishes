@@ -17,8 +17,8 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `validasi/hari-libur.ts`       | `skemaHariLibur` (tanggal, keterangan, aturan) dan `skemaIdHariLibur`                  | 2.2        |
 | `queries/admin.ts`             | `getKunjunganPerTanggal()`: daftar kunjungan satu tanggal beserta nama instansi      | 2.3        |
 | `actions/pencatatan.ts`        | `catatEmber()`, `catatBerat()`, `ubahPencatatan()`                                     | 2.3        |
-| `actions/tertunda.ts`          | `tandaiTertunda()`: satu atau banyak kunjungan sekaligus                               | 2.3        |
-| `validasi/pencatatan.ts`       | `skemaFilterTanggal`, `skemaCatatEmber`, `skemaCatatBerat`, `skemaUbahPencatatan`, `skemaTandaiTertunda` | 2.3 |
+| `actions/tertunda.ts`          | `tandaiTertunda()`, `ubahTertunda()`, `batalkanTertunda()`                             | 2.3        |
+| `validasi/pencatatan.ts`       | `skemaFilterTanggal`, `skemaCatatEmber`, `skemaCatatBerat`, `skemaUbahPencatatan`, `skemaTandaiTertunda`, `skemaUbahTertunda`, `skemaBatalkanTertunda` | 2.3 |
 | `queries/pelanggan.ts`         | Status hari ini, jadwal berikutnya, riwayat, total ember dan kg milik pelanggan        | 2.4        |
 | `actions/lapor-kendala.ts`     | Pelanggan melaporkan kendala                                                           | 2.4        |
 | `validasi/lapor-kendala.ts`    | Skema Zod isi laporan kendala                                                          | 2.4        |
@@ -80,7 +80,7 @@ Didefinisikan di `lib/db/schema-kunjungan.ts` (2.1) dan diekspor ulang dari `lib
 
 Syarat lain di `kunjungan_pengambilan`:
 
-- `tertunda`: `alasan_kendala` dan `tanggal_paling_lambat` wajib terisi. `tanggal_paling_lambat` tidak boleh sebelum `tanggal`.
+- `tertunda`: `alasan_kendala` dan `tanggal_paling_lambat` wajib terisi. Database hanya mewajibkan `tanggal_paling_lambat >= tanggal`; aplikasi (2.3) lebih ketat, yaitu harus **setelah** tanggal kunjungan.
 - `diambil` dan `ditimbang`: `jumlah_ember` wajib terisi.
 - `ditimbang`: `berat_kg` dan `ditimbang_pada` wajib terisi.
 - `foto_bukti` dan `foto_bukti_file_id` diisi atau dikosongkan bersama (`kunjungan_pengambilan_foto_berpasangan`).
@@ -109,12 +109,20 @@ Cara memakainya:
 | `ubahPencatatan()` | `diambil` | `diambil` | jumlah ember; foto opsional (kosong = foto lama) |
 | `ubahPencatatan()` | `ditimbang` | `ditimbang` | jumlah ember, berat kg; foto opsional (kosong = foto lama) |
 | `tandaiTertunda()` | `dijadwalkan` | `tertunda` | alasan, tanggal paling lambat |
+| `ubahTertunda()` | `tertunda` | `tertunda` | alasan, tanggal paling lambat |
+| `batalkanTertunda()` | `tertunda` | `dijadwalkan` | — (alasan dan tanggal dikosongkan) |
 
 - Setiap aksi memakai satu `UPDATE … WHERE status IN (…) RETURNING …` (CONTRIBUTING 6.2). `RETURNING` kosong berarti status sudah berubah di tab lain; pesannya "Status kunjungan sudah berubah…" dan tidak ada data yang ditimpa.
 - `catatEmber()` dari status `tertunda` mengosongkan `alasan_kendala` dan `tanggal_paling_lambat`, karena kunjungan itu akhirnya diambil. Kedua status asal belum punya foto, jadi tidak ada file ImageKit lama yang perlu dihapus.
 - Tombol simpan `catatEmber()` dan `ubahPencatatan()` baru aktif jika jumlah ember terisi (dan foto untuk langkah 1). Isian jumlah ember sengaja kosong, bukan `0`: skema memvalidasi teks lalu mengubahnya ke angka, karena `z.coerce.number("")` menghasilkan `0` sehingga isian kosong lolos.
 - Tombol **Edit** muncul setelah kunjungan tersimpan. Status `diambil` menampilkan Edit jumlah ember + foto; status `ditimbang` menampilkan Edit jumlah ember + foto + berat. Foto baru yang menggantikan foto lama dihapus dari ImageKit lewat `deleteImageKitFile()`; foto kosong berarti foto lama dipertahankan. Berat hanya boleh diubah saat status `ditimbang` (dicek di `WHERE`), dan `ditimbang_pada` tidak ditulis ulang karena itu waktu penimbangan asli, bukan waktu koreksi.
 - `tandaiTertunda()` menerima banyak ID sekaligus. Syarat `tanggal <= tanggal_paling_lambat` ikut di `WHERE`, supaya satu baris yang tanggalnya sesudah tanggal paling lambat tidak membuat seluruh `UPDATE` gagal karena CHECK. Baris yang dilewati dilaporkan jumlahnya.
+- Hanya kunjungan `dijadwalkan` yang bisa dicentang. Saat dicentang, **hanya** dropdown **Tandai tertunda** (alasan + tanggal paling lambat) yang tampil; aksi pencatatan lain disembunyikan sampai centang dilepas. Status baru berubah saat form disimpan.
+- Tanggal paling lambat **harus setelah tanggal kunjungan**. Contoh: kunjungan 7 Des 2026, tanggal paling lambat paling cepat 8 Des 2026. Batas bawah form memakai `tanggalPalingLambatMin()` di `validasi/pencatatan.ts` (tanggal kunjungan + 1 hari), dan Server Action memakai syarat `tanggal < tanggal_paling_lambat` di `WHERE`, jadi aturan ini tetap berlaku walau form dilewati.
+- Setelah tersimpan menjadi `tertunda`, checkbox baris itu **selalu tampil tercentang tetapi nonaktif**. Satu-satunya jalan membatalkan adalah tombol **Batalkan penundaan** di baris tersebut, yang mengembalikan status ke `dijadwalkan`, mengosongkan alasan/tanggal paling lambat, dan mereset centang.
+- Hasil pembatalan (berhasil maupun gagal) ditampilkan sebagai notifikasi in-app (`toast` sonner lewat `ToastProvider` di root layout), bukan dialog `window.confirm`.
+- Baris `tertunda` juga punya **Edit penundaan** (alasan dan tanggal) di luar mode centang.
+- Tidak ada lagi form tandai tertunda massal di bawah tabel; penundaan dilakukan per baris.
 - Kunjungan `batal` dan `dilewati` tetap tampil di daftar, tanpa aksi.
 - Foto diunggah lebih dulu lewat `ImageKitReportUpload` (memakai `/api/admin/imagekit-auth` dan `getImageKitAuthParams()`), lalu url dan fileId dikirim sebagai hidden input. Server hanya menerima URL `https`.
 

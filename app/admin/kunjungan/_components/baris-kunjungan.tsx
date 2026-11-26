@@ -9,10 +9,15 @@ import type { KunjunganHarian } from "@/features/kunjungan/queries/admin";
 import { formatJam, formatTanggal } from "@/lib/format-tanggal";
 import { FormCatatBerat } from "./form-catat-berat";
 import { FormCatatEmber } from "./form-catat-ember";
+import { FormTandaiTertunda } from "./form-tandai-tertunda";
 import { FormUbahPencatatan } from "./form-ubah-pencatatan";
+import { FormUbahTertunda } from "./form-ubah-tertunda";
+import { TombolBatalkanTertunda } from "./tombol-batalkan-tertunda";
 
 type BarisKunjunganProps = {
   kunjungan: KunjunganHarian;
+  /** Tanggal halaman ("YYYY-MM-DD"), batas bawah tanggal paling lambat. */
+  tanggal: string;
   dipilih: boolean;
   onPilih: (id: number, dicentang: boolean) => void;
 };
@@ -38,12 +43,16 @@ function teksJam(kunjungan: KunjunganHarian): string {
 /** Satu baris tabel pencatatan: data kunjungan dan aksi sesuai statusnya. */
 export function BarisKunjungan({
   kunjungan,
+  tanggal,
   dipilih,
   onPilih,
 }: BarisKunjunganProps) {
+  // Checkbox hanya bisa diklik untuk kunjungan dijadwalkan. Baris tertunda
+  // ditampilkan selalu tercentang tapi nonaktif, dan pembatalannya hanya lewat
+  // tombol Batalkan penundaan di baris itu (permintaan bos).
   const bisaDipilih = kunjungan.status === "dijadwalkan";
-  const perluLangkah1 =
-    kunjungan.status === "dijadwalkan" || kunjungan.status === "tertunda";
+  const tertunda = kunjungan.status === "tertunda";
+  const perluLangkah1 = kunjungan.status === "dijadwalkan";
 
   return (
     <tr className="align-top hover:bg-gray-50/60">
@@ -51,7 +60,7 @@ export function BarisKunjungan({
         <input
           type="checkbox"
           aria-label={`Pilih ${kunjungan.namaInstansi} untuk ditandai tertunda`}
-          checked={dipilih}
+          checked={tertunda || dipilih}
           disabled={!bisaDipilih}
           onChange={(event) => onPilih(kunjungan.idKunjungan, event.target.checked)}
         />
@@ -78,57 +87,100 @@ export function BarisKunjungan({
         {kunjungan.beratKg === null ? "-" : `${kunjungan.beratKg} kg`}
       </td>
       <td className="p-3">
-        {perluLangkah1 && (
-          <details>
-            <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
-              Catat ember &amp; foto
+        {/* Dicentang: hanya dropdown tandai tertunda yang tampil, berisi alasan
+            dan tanggal paling lambat. Status baru berubah saat form disimpan. */}
+        {dipilih ? (
+          <details open>
+            <summary className="cursor-pointer text-sm font-medium text-amber-800">
+              Tandai tertunda
             </summary>
-            <div className="mt-3 min-w-72 rounded-lg border border-gray-100 bg-gray-50 p-4">
-              <FormCatatEmber idKunjungan={kunjungan.idKunjungan} />
-            </div>
-          </details>
-        )}
-        {kunjungan.status === "diambil" && (
-          <details>
-            <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
-              Catat berat
-            </summary>
-            <div className="mt-3 min-w-64 rounded-lg border border-gray-100 bg-gray-50 p-4">
-              <FormCatatBerat idKunjungan={kunjungan.idKunjungan} />
-            </div>
-          </details>
-        )}
-        {kunjungan.status === "ditimbang" && (
-          <p className="text-xs text-gray-500">Pencatatan selesai.</p>
-        )}
-        {(kunjungan.status === "diambil" || kunjungan.status === "ditimbang") && (
-          <details className="mt-2">
-            <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
-              Edit
-            </summary>
-            <div className="mt-3 min-w-72 rounded-lg border border-gray-100 bg-gray-50 p-4">
-              <FormUbahPencatatan
+            <div className="mt-3 min-w-72 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <FormTandaiTertunda
                 idKunjungan={kunjungan.idKunjungan}
-                jumlahEmber={kunjungan.jumlahEmber}
-                beratKg={kunjungan.beratKg}
-                fotoBukti={kunjungan.fotoBukti}
-                bolehUbahBerat={kunjungan.status === "ditimbang"}
+                tanggal={tanggal}
               />
             </div>
           </details>
-        )}
-        {(kunjungan.status === "batal" || kunjungan.status === "dilewati") && (
-          <p className="text-xs text-gray-500">Tidak ada aksi.</p>
-        )}
-        {kunjungan.fotoBukti !== null && (
-          <a
-            href={kunjungan.fotoBukti}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 block text-xs font-medium text-(--hx-accent) hover:underline"
-          >
-            Lihat foto bukti
-          </a>
+        ) : (
+          <>
+            {perluLangkah1 && (
+              <details>
+                <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
+                  Catat ember &amp; foto
+                </summary>
+                <div className="mt-3 min-w-72 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                  <FormCatatEmber idKunjungan={kunjungan.idKunjungan} />
+                </div>
+              </details>
+            )}
+            {kunjungan.status === "diambil" && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
+                  Catat berat
+                </summary>
+                <div className="mt-3 min-w-64 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                  <FormCatatBerat idKunjungan={kunjungan.idKunjungan} />
+                </div>
+              </details>
+            )}
+            {kunjungan.status === "ditimbang" && (
+              <p className="mt-2 text-xs text-gray-500">Pencatatan selesai.</p>
+            )}
+            {(kunjungan.status === "diambil" ||
+              kunjungan.status === "ditimbang") && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
+                  Edit pencatatan
+                </summary>
+                <div className="mt-3 min-w-72 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                  <FormUbahPencatatan
+                    idKunjungan={kunjungan.idKunjungan}
+                    jumlahEmber={kunjungan.jumlahEmber}
+                    beratKg={kunjungan.beratKg}
+                    fotoBukti={kunjungan.fotoBukti}
+                    bolehUbahBerat={kunjungan.status === "ditimbang"}
+                  />
+                </div>
+              </details>
+            )}
+            {kunjungan.status === "tertunda" && (
+              <>
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-sm font-medium text-(--hx-accent)">
+                    Edit penundaan
+                  </summary>
+                  <div className="mt-3 min-w-72 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                    <FormUbahTertunda
+                      idKunjungan={kunjungan.idKunjungan}
+                      alasan={kunjungan.alasanKendala}
+                      tanggalPalingLambat={kunjungan.tanggalPalingLambat}
+                      tanggal={tanggal}
+                    />
+                  </div>
+                </details>
+                {/* Pembatalan penundaan hanya lewat tombol ini; centang baris
+                    sudah tidak bisa dipakai untuk kunjungan tertunda. */}
+                <TombolBatalkanTertunda
+                  idKunjungan={kunjungan.idKunjungan}
+                  namaInstansi={kunjungan.namaInstansi}
+                />
+              </>
+            )}
+            {(kunjungan.status === "batal" ||
+              kunjungan.status === "dilewati") && (
+              <p className="mt-2 text-xs text-gray-500">Tidak ada aksi.</p>
+            )}
+            {kunjungan.fotoBukti !== null && (
+              <a
+                href={kunjungan.fotoBukti}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 block text-xs font-medium text-(--hx-accent) hover:underline"
+              >
+                Lihat foto bukti
+              </a>
+            )}
+          </>
         )}
       </td>
     </tr>
