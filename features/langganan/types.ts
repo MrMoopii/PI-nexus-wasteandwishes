@@ -71,7 +71,10 @@ export function isJenisPelanggan(nilai: string): nilai is JenisPelanggan {
   return JENIS_PELANGGAN.some((jenis) => jenis === nilai);
 }
 
-/** Pihak yang menulis pesan negosiasi atau menjalankan aksi pada pengajuan. */
+/**
+ * Pihak yang menulis pesan negosiasi atau menjalankan aksi pada pengajuan.
+ * Harus sama dengan CHECK pesan_negosiasi_pengirim_valid di lib/db/schema-langganan.ts.
+ */
 export const PENGIRIM_PESAN = ["pelanggan", "admin"] as const;
 
 export type PengirimPesan = (typeof PENGIRIM_PESAN)[number];
