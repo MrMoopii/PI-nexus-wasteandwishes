@@ -246,14 +246,18 @@ VALUES
 
 - **Kode tugas:** 1.3
 - **Peran:** pelanggan
-- **Persiapan data:** pengajuan A `ditawarkan`. Untuk langkah 4, siapkan pengajuan `ditawarkan` yang hanya punya pesan admin **tanpa** `harga_usulan` (INSERT pesan `pengirim='admin'`, `harga_usulan=NULL`).
+- **Persiapan data:** pengajuan A `ditawarkan` dengan satu pesan admin berisi `harga_usulan`.
 - **Langkah:**
-  1. Buka `/langganan` di dua tab sebagai A.
-  2. Klik **Setujui harga** di tab pertama sampai status **Disetujui pelanggan**.
-  3. Tanpa memuat ulang, klik **Setujui harga** di tab kedua.
-  4. Buka pengajuan `ditawarkan` yang hanya punya pesan admin tanpa `harga_usulan`, lalu klik **Setujui harga**.
-- **Hasil yang diharapkan:** langkah 3 menampilkan "Status pengajuan sudah berubah. Muat ulang halaman." (pesan gagal, bukan error 500), status tetap `disetujui_pelanggan` dan `harga_final` tidak berubah. Langkah 4 menampilkan pesan yang sama karena `WHERE EXISTS` tidak menemukan usulan admin berisi harga, sehingga status tetap `ditawarkan` dan `harga_final` tetap NULL (bukan jatuh ke error LGN-14).
-- **Keadaan gagal yang dicek:** dua tab menyetujui penawaran yang sama; setujui tanpa usulan admin berisi harga.
+  1. Buka `/langganan` sebagai A di dua tab.
+  2. Klik **Setujui harga** di tab pertama.
+  3. Tanpa memuat ulang tab kedua, klik **Setujui harga** di tab kedua.
+  4. Siapkan lagi pengajuan `ditawarkan` dengan pesan admin berisi harga. Buka `/langganan` sampai tombol **Setujui harga** tampil, lalu di SQL Editor jalankan `UPDATE pesan_negosiasi SET harga_usulan = NULL WHERE pengajuan_id = <id pengajuan> AND pengirim = 'admin';` dan klik **Setujui harga** tanpa memuat ulang halaman.
+  5. Muat ulang halaman.
+- **Hasil yang diharapkan:**
+  - Langkah 3: "Status pengajuan sudah berubah. Muat ulang halaman." (pesan gagal, bukan error 500). Status tetap `disetujui_pelanggan` dan `harga_final` tidak berubah.
+  - Langkah 4: pesan yang sama. `WHERE EXISTS` di server tidak menemukan usulan admin berisi harga, sehingga status tetap `ditawarkan` dan `harga_final` tetap NULL.
+  - Langkah 5: tidak ada tombol **Setujui harga**, dan yang tampil adalah "Penawaran harga tidak ditemukan. Silakan muat ulang halaman."
+- **Keadaan gagal yang dicek:** dua tab menyetujui penawaran yang sama; setujui saat usulan admin berisi harga tidak ada, dicek di server dan di tampilan.
 - **Hasil uji terakhir:** belum diuji
 
 ## LGN-19: Aksi ke pengajuan milik akun lain ditolak
