@@ -27,9 +27,6 @@ export function PemilihTanggal({ tanggal }: { tanggal: string }) {
         />
       </div>
       <Button type="submit">Tampilkan</Button>
-      <p className="text-xs text-gray-500">
-        Bawaan halaman ini adalah hari ini (WIB).
-      </p>
     </form>
   );
 }
