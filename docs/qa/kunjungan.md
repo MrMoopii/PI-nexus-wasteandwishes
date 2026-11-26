@@ -274,6 +274,100 @@ $uji$;
   - Tanggal ganda, akhir pekan, tanggal lewat, isian kosong, ID salah, dan data yang sudah dihapus di tab lain.
 - **Hasil uji terakhir:** belum diuji
 
+## KJG-13: Admin mencatat ember, foto, lalu berat
+
+- **Kode tugas:** 2.3
+- **Peran:** admin
+- **Persiapan data:** akun admin dan akun `user` biasa (`CONTRIBUTING.md` bagian 6.4). Jalankan skrip ini sekali di SQL Editor Neon branch pribadimu; tanggal memakai Senin minggu depan supaya tetap bermakna.
+
+  ```sql
+  -- KJG-13: dua pelanggan uji dengan kunjungan dijadwalkan (kode tugas 2.3).
+  DO $uji$
+  DECLARE
+    a integer; b integer; pa integer; pb integer;
+    senin date := (date_trunc('week', (now() AT TIME ZONE 'Asia/Jakarta')::date) + interval '7 days')::date;
+  BEGIN
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-3-a@contoh.invalid', 'Uji 2.3 A') RETURNING id_user INTO a;
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-3-b@contoh.invalid', 'Uji 2.3 B') RETURNING id_user INTO b;
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic, estimasi_ember, status)
+      VALUES (a, 'Instansi Uji A', 'hotel', 'Alamat A', 'PIC A', '0800000001', 2, 'siap_bayar') RETURNING id_pengajuan INTO pa;
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic, estimasi_ember, status)
+      VALUES (b, 'Instansi Uji B', 'restoran', 'Alamat B', 'PIC B', '0800000002', 3, 'siap_bayar') RETURNING id_pengajuan INTO pb;
+    INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai)
+      VALUES (a, pa, senin, '08:00', '10:00'), (b, pb, senin, '13:00', '15:00');
+  END
+  $uji$;
+  ```
+
+- **Langkah:**
+  1. Login sebagai admin, buka `/admin/kunjungan?tanggal=<Senin minggu depan>`. Pastikan kedua instansi tampil dengan rentang jam dan status Dijadwalkan.
+  2. Di baris Instansi Uji A, buka **Catat ember & foto**. Sebelum mengisi apa pun, pastikan tombol **Simpan ember & foto** nonaktif dan isian jumlah ember kosong (bukan `0`). Isi jumlah ember `3` saja (tanpa foto): tombol tetap nonaktif. Unggah satu foto JPG/PNG, lalu simpan.
+  3. Di baris yang sama, buka **Catat berat**, isi `4.25`, lalu simpan.
+  4. Buka **Edit** di baris A. Pastikan jumlah ember terisi `3`, berat terisi `4.25`, dan keterangan foto lama tampil. Ubah jumlah ember menjadi `5`, unggah foto baru, lalu simpan.
+  5. Buka lagi **Edit** di baris A, ubah berat menjadi `4.5`, lalu simpan.
+  6. Jalankan query ini di SQL Editor:
+
+     ```sql
+     SELECT u.email, k.status, k.jumlah_ember, k.berat_kg, k.foto_bukti IS NOT NULL AS ada_foto,
+            k.dicatat_oleh, k.ditimbang_pada IS NOT NULL AS ada_waktu_timbang
+     FROM kunjungan_pengambilan k JOIN users u ON u.id_user = k.id_user
+     WHERE u.email LIKE 'uji-2-3-%@contoh.invalid' ORDER BY u.email;
+     ```
+
+  7. Di baris Instansi Uji B, isi jumlah ember `-1`, lalu simpan.
+  8. Isi berat `-1`, lalu `4.256`, lalu kosongkan, masing-masing kirim.
+  9. Buka halaman di dua tab. Di tab pertama catat ember Instansi Uji B, lalu di tab kedua catat ember untuk kunjungan yang sama.
+  10. Di DevTools, ubah hidden input `fotoBukti` menjadi `javascript:alert(1)`, lalu kirim form catat ember.
+  11. Ubah `?tanggal=` menjadi `2026-02-30` dan `abc`.
+
+- **Hasil yang diharapkan:**
+  - Langkah 2: tombol simpan nonaktif sampai jumlah ember terisi **dan** foto diunggah. Setelah simpan, pesan "Jumlah ember dan foto bukti disimpan.", status menjadi Diambil, kolom Ember `3`, dan tautan "Lihat foto bukti" muncul.
+  - Langkah 3: pesan "Berat 4.25 kg disimpan.", status Ditimbang, kolom Berat `4.25 kg`.
+  - Langkah 4: pesan "Perubahan pencatatan disimpan.", kolom Ember menjadi `5`, foto baru tampil, dan foto lama terhapus dari ImageKit.
+  - Langkah 5: pesan "Perubahan pencatatan disimpan.", kolom Berat menjadi `4.5 kg`.
+  - Langkah 6: A berstatus `ditimbang`, `jumlah_ember` 5, `berat_kg` 4.5, ada foto, `dicatat_oleh` = id admin, `ada_waktu_timbang` = true.
+  - Langkah 7: "Jumlah ember tidak boleh negatif." dan tidak ada perubahan status.
+  - Langkah 8: "Berat tidak boleh negatif.", "Berat berupa angka, maksimal dua angka desimal.", dan "Berat wajib diisi."
+  - Langkah 9: tab kedua menampilkan "Status kunjungan sudah berubah. Muat ulang halaman lalu coba lagi." dan data tab pertama tidak tertimpa.
+  - Langkah 10: "Foto bukti wajib diunggah." karena skema hanya menerima URL `https`.
+  - Langkah 11: halaman 404.
+- **Keadaan gagal yang dicek:**
+  - Belum login: membuka `/admin/kunjungan` dialihkan ke halaman login.
+  - Akun `user` biasa: dialihkan ke beranda. Mengirim form dari tab admin yang sesinya sudah diganti `user` menampilkan "Akses khusus admin."
+  - Sesi idle: pesan "Sesi Anda telah berakhir. Silakan untuk login ulang."
+  - Tanggal tanpa kunjungan menampilkan "Belum ada kunjungan pada tanggal ini."
+  - Isian kosong pada jumlah ember dan foto tidak boleh lolos sebagai `0`.
+  - Edit berat saat status masih `diambil` (misalnya form Edit lama dikirim dari tab lain) ditolak dengan pesan bahwa berat hanya bisa diubah setelah ditimbang.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-14: Admin menandai kunjungan tertunda, satu atau banyak
+
+- **Kode tugas:** 2.3
+- **Peran:** admin
+- **Persiapan data:** data uji KJG-13 (tiga kunjungan `dijadwalkan`, minimal dua pada tanggal yang sama). Jika KJG-13 sudah dijalankan dan statusnya berubah, buat ulang datanya dengan skrip di sana.
+- **Langkah:**
+  1. Buka `/admin/kunjungan?tanggal=<Senin minggu depan>`. Centang dua kunjungan berstatus Dijadwalkan, isi alasan "Truk pengangkut rusak", isi tanggal paling lambat satu hari setelah tanggal kunjungan, lalu klik **Tandai tertunda**.
+  2. Jalankan query dari KJG-13 langkah 6.
+  3. Di halaman yang sama, centang satu kunjungan yang baru ditandai tertunda, lalu klik **Tandai tertunda**.
+  4. Pilih tanggal paling lambat sebelum tanggal kunjungan (ketik manual di DevTools jika pemilih tanggal menolaknya), lalu kirim.
+  5. Isi alasan hanya spasi, lalu kirim.
+  6. Kosongkan semua centang, lalu periksa tombol **Tandai tertunda**.
+  7. Buka halaman di dua tab: tandai tertunda satu kunjungan di tab pertama, lalu kirim form yang sama dari tab kedua.
+  8. Di DevTools, ubah hidden input `idKunjungan` menjadi `abc`, lalu menjadi `999999`, dan kirim.
+
+- **Hasil yang diharapkan:**
+  - Langkah 1: pesan "2 kunjungan ditandai tertunda.", kedua baris berstatus Tertunda, dan di bawah nama instansi tampil alasan beserta "paling lambat <tanggal>".
+  - Langkah 2: kedua baris berstatus `tertunda` dengan `alasan_kendala` dan `tanggal_paling_lambat` terisi.
+  - Langkah 3: kunjungan `tertunda` tidak bisa dicentang lagi (checkbox nonaktif), jadi tidak ada baris yang berubah.
+  - Langkah 4: "Tidak ada kunjungan yang bisa ditandai tertunda…" dan tidak ada data yang berubah.
+  - Langkah 5: "Alasan tertunda wajib diisi."
+  - Langkah 6: tombol nonaktif, dengan teks "Belum ada kunjungan yang dicentang."
+  - Langkah 7: tab kedua menampilkan "Tidak ada kunjungan yang bisa ditandai tertunda…" karena statusnya sudah berubah.
+  - Langkah 8: `abc` menampilkan "Kunjungan tidak valid."; `999999` menampilkan pesan bahwa tidak ada kunjungan yang bisa ditandai tertunda.
+- **Keadaan gagal yang dicek:**
+  - Belum login, akun bukan admin, dan sesi idle (sama seperti KJG-13).
+  - Tanggal paling lambat sebelum tanggal kunjungan, alasan kosong, dan ID yang tidak valid.
+  - Sebagian baris sudah berubah status: pesan menyebut jumlah yang berhasil dan yang dilewati.
 ## Data uji tracker (KJG-20 sampai KJG-25)
 
 Skenario tracker (kode tugas 2.4) memakai **akun user uji khusus** yang dibuat lewat halaman Daftar, belum pernah membayar, dan tidak punya pengajuan berjalan. Pelanggan uji harus login, jadi akunnya dibuat lewat aplikasi, bukan lewat SQL. Siapkan juga satu akun admin (`CONTRIBUTING.md` bagian 6.4).

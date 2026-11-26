@@ -14,8 +14,8 @@ const adminNavigation = [
   },
   { name: "Hari Libur", href: "/admin/hari-libur", category: "NAVIGATION" },
   {
-    name: "Jadwal Pengambilan",
-    href: "/admin/jadwal-pengambilan",
+    name: "Pencatatan Kunjungan",
+    href: "/admin/kunjungan",
     category: "NAVIGATION",
   },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },

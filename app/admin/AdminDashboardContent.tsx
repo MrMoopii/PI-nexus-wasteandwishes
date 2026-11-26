@@ -256,11 +256,11 @@ export default function AdminDashboardContent() {
           </h2>
           <div className="space-y-3">
             <Link
-              href="/admin/jadwal-pengambilan"
+              href="/admin/kunjungan"
               className="block rounded-lg border border-slate-100 p-3 hover:border-blue-200 hover:bg-blue-50/50 transition-all"
             >
               <p className="font-medium text-slate-800 text-sm">
-                Kelola Jadwal Pengambilan
+                Pencatatan Kunjungan
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
                 Atur rute dan jadwal kurir
