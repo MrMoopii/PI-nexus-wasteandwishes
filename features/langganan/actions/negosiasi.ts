@@ -3,43 +3,31 @@
 import { revalidatePath } from "next/cache";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { pengajuanLangganan, pesanNegosiasi } from "@/lib/db/schema";
+import { pengajuanLangganan } from "@/lib/db/schema";
 import { requireLogin } from "@/lib/require-login";
 import { AKSI_PENGAJUAN, statusAsal } from "../aturan";
-import { getRiwayatPesanNegosiasi } from "../queries/negosiasi";
-import type { PesanNegosiasiTampilan } from "../types";
 import {
   skemaIdPengajuan,
   skemaKirimPesan,
   skemaTawarHarga,
-} from "../validasi/pelanggan";
+} from "../validasi/negosiasi";
 
-/**
- * Hasil Server Action negosiasi untuk useActionState di komponen klien.
- * daftarPesan dipakai form untuk menampilkan riwayat tanpa memuat ulang halaman.
- */
-export type HasilNegosiasi =
-  | { ok: true; daftarPesan: PesanNegosiasiTampilan[] }
-  | { ok: false; pesan: string };
+/** Hasil Server Action negosiasi untuk useActionState di komponen klien. */
+export type HasilNegosiasi = { ok: true } | { ok: false; pesan: string };
 
 /** Pesan penolakan status sudah berubah; disamakan agar tidak membocorkan
     pengajuan akun lain (pola batalkanPengajuan). */
 const PESAN_STATUS_BERUBAH =
   "Status pengajuan sudah berubah. Muat ulang halaman.";
 
-/** Riwayat pesan terbaru untuk pengajuan ini; kosong jika belum ada pesan. */
-async function daftarTerbaru(
-  idPengajuan: number,
-): Promise<PesanNegosiasiTampilan[]> {
-  return (await getRiwayatPesanNegosiasi(idPengajuan)) ?? [];
-}
-
 // ── Setujui penawaran (1.3) ─────────────────────────────────────
 
 /**
  * Pelanggan menyetujui penawaran terakhir: status ditawarkan → disetujui_pelanggan
- * dan harga_final diambil dari harga usulan admin terakhir dalam satu perintah SQL
- * (CONTRIBUTING 6.2, 9.7). Gagal jika status sudah berubah atau bukan milik akun ini.
+ * dan harga_final diambil dari harga usulan admin terakhir yang berisi harga
+ * (harga_usulan IS NOT NULL), dalam satu perintah SQL (CONTRIBUTING 6.2, 9.7).
+ * Gagal jika status sudah berubah, bukan milik akun ini, atau belum ada usulan
+ * admin berisi harga.
  */
 export async function setujuiPenawaran(
   _sebelumnya: HasilNegosiasi | null,
@@ -61,19 +49,21 @@ export async function setujuiPenawaran(
   }
 
   // 3. UPDATE bersyarat dalam satu perintah SQL: hanya pengajuan milik akun ini
-  //    yang masih berstatus ditawarkan. Harga final diambil dari usulan admin
-  //    terakhir (bagian 9.7). Jika ada lebih dari satu tawaran, yang terakhir dipakai.
+  //    yang masih berstatus ditawarkan DAN punya usulan admin berisi harga
+  //    (WHERE EXISTS). Harga final diambil dari usulan admin terakhir yang
+  //    harganya tidak null (bagian 9.7). Karena WHERE menjamin usulan itu ada,
+  //    subquery pasti mengembalikan nilai, tanpa nilai cadangan (11.3 no. 6).
   const [hasilUpdate] = await getDb()
     .update(pengajuanLangganan)
     .set({
       status: AKSI_PENGAJUAN.setujuiHarga.ke,
-      hargaFinal: sql`COALESCE(
-        (SELECT harga_usulan FROM pesan_negosiasi
-         WHERE pengajuan_id = ${hasil.data.idPengajuan}
-           AND pengirim = 'admin'
-         ORDER BY id_pesan DESC
-         LIMIT 1),
-        harga_final
+      hargaFinal: sql`(
+        SELECT harga_usulan FROM pesan_negosiasi
+        WHERE pengajuan_id = ${hasil.data.idPengajuan}
+          AND pengirim = 'admin'
+          AND harga_usulan IS NOT NULL
+        ORDER BY id_pesan DESC
+        LIMIT 1
       )`,
       diperbaruiPada: sql`now()`,
     })
@@ -82,19 +72,25 @@ export async function setujuiPenawaran(
         eq(pengajuanLangganan.idPengajuan, hasil.data.idPengajuan),
         eq(pengajuanLangganan.idUser, cek.idUser),
         inArray(pengajuanLangganan.status, statusAsal("setujuiHarga")),
+        sql`EXISTS (
+          SELECT 1 FROM pesan_negosiasi
+          WHERE pengajuan_id = ${pengajuanLangganan.idPengajuan}
+            AND pengirim = 'admin'
+            AND harga_usulan IS NOT NULL
+        )`,
       ),
     )
     .returning({ idPengajuan: pengajuanLangganan.idPengajuan });
 
-  // 4. RETURNING kosong: status sudah berubah atau bukan milik akun ini.
+  // 4. RETURNING kosong: status sudah berubah, bukan milik akun ini, atau
+  //    belum ada usulan admin berisi harga.
   if (!hasilUpdate) {
     return { ok: false, pesan: PESAN_STATUS_BERUBAH };
   }
 
-  // 5. Kembalikan daftar pesan terbaru dan segarkan halaman.
-  const daftarPesan = await daftarTerbaru(hasil.data.idPengajuan);
+  // 5. Segarkan halaman; riwayat diperbarui lewat re-render server component.
   revalidatePath("/langganan");
-  return { ok: true, daftarPesan };
+  return { ok: true };
 }
 
 // ── Tawar harga (1.3) ─────────────────────────────────────────────
@@ -102,7 +98,7 @@ export async function setujuiPenawaran(
 /**
  * Pelanggan mengusulkan harga lain: status ditawarkan → negosiasi, dan pesan
  * negosiasi berisi harga_usulan disimpan dalam satu perintah SQL
- * (CONTRIBUTING 6.2: WITH … UPDATE … RETURNING lalu INSERT … SELECT).
+ * (CONTRIBUTING 6.2: WITH … UPDATE … RETURNING lalu INSERT … SELECT … RETURNING).
  * Gagal jika status sudah berubah, harga tidak valid, atau bukan milik akun ini.
  */
 export async function tawarHarga(
@@ -128,8 +124,9 @@ export async function tawarHarga(
 
   // 3. UPDATE status + INSERT pesan dalam satu perintah SQL (bagian 6.2).
   //    Harga tawaran disimpan di pesan_negosiasi, bukan di harga_final (bagian 9.7).
-  //    Jika UPDATE tidak mengubah apa pun (status sudah berubah atau bukan milik
-  //    akun ini), CTE-nya kosong sehingga INSERT juga kosong dan baris hasilnya nol.
+  //    INSERT … SELECT … RETURNING id_pesan: jika UPDATE tidak mengubah apa pun
+  //    (status sudah berubah atau bukan milik akun ini), CTE ubah_status kosong,
+  //    INSERT juga kosong, dan RETURNING tidak menghasilkan baris apa pun.
   const hasilSql = await getDb().execute(
     sql`
       WITH ubah_status AS (
@@ -140,38 +137,28 @@ export async function tawarHarga(
           AND id_user = ${cek.idUser}
           AND status = 'ditawarkan'
         RETURNING id_pengajuan
-      ),
-      simpan_pesan AS (
-        INSERT INTO pesan_negosiasi
-          (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
-        SELECT
-          ubah.id_pengajuan,
-          'pelanggan',
-          ${cek.idUser},
-          ${hasil.data.hargaUsulan},
-          ${hasil.data.catatan}
-        FROM ubah_status ubah
-        RETURNING 1
       )
-      SELECT COUNT(*) FROM (
-        SELECT 1 FROM ubah_status
-        UNION ALL
-        SELECT 1 FROM simpan_pesan
-      ) hasil
+      INSERT INTO pesan_negosiasi
+        (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+      SELECT
+        ubah.id_pengajuan,
+        'pelanggan',
+        ${cek.idUser},
+        ${hasil.data.hargaUsulan},
+        ${hasil.data.catatan}
+      FROM ubah_status ubah
+      RETURNING id_pesan
     `,
   );
 
-  // 4. Cek apakah UPDATE mengubah setidaknya satu baris.
-  const [jumlah] = hasilSql.rows as unknown as [{ count: number }];
-  const total = Number(jumlah?.count ?? 0);
-  if (total === 0) {
+  // 4. Jika INSERT tidak menghasilkan baris, berarti UPDATE tidak mengubah apa pun.
+  if (hasilSql.rows.length === 0) {
     return { ok: false, pesan: PESAN_STATUS_BERUBAH };
   }
 
-  // 5. Kembalikan daftar pesan terbaru dan segarkan halaman.
-  const daftarPesan = await daftarTerbaru(hasil.data.idPengajuan);
+  // 5. Segarkan halaman.
   revalidatePath("/langganan");
-  return { ok: true, daftarPesan };
+  return { ok: true };
 }
 
 // ── Kirim pesan tanpa harga (1.3) ─────────────────────────────────
@@ -201,35 +188,35 @@ export async function kirimPesan(
     };
   }
 
-  // 3. Pastikan pengajuan milik akun ini dan status masih mengizinkan (bagian 7.2 no. 9).
-  const [ada] = await getDb()
-    .select({ idPengajuan: pengajuanLangganan.idPengajuan })
-    .from(pengajuanLangganan)
-    .where(
-      and(
-        eq(pengajuanLangganan.idPengajuan, hasil.data.idPengajuan),
-        eq(pengajuanLangganan.idUser, cek.idUser),
-        inArray(pengajuanLangganan.status, statusAsal("kirimPesan")),
-      ),
-    )
-    .limit(1);
+  // 3. INSERT … SELECT … RETURNING dalam satu perintah SQL (bagian 6.2).
+  //    Kepemilikan dan status dicek di dalam SELECT, jadi jika pengajuan sudah
+  //    ditolak/dibatalkan di antara waktu halaman dimuat dan form dikirim,
+  //    INSERT tidak akan menghasilkan baris apa pun.
+  const hasilSql = await getDb().execute(
+    sql`
+      INSERT INTO pesan_negosiasi
+        (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+      SELECT
+        pengajuan_langganan.id_pengajuan,
+        'pelanggan',
+        ${cek.idUser},
+        NULL,
+        ${hasil.data.pesan}
+      FROM pengajuan_langganan
+      WHERE pengajuan_langganan.id_pengajuan = ${hasil.data.idPengajuan}
+        AND pengajuan_langganan.id_user = ${cek.idUser}
+        AND pengajuan_langganan.status IN ('menunggu_review', 'ditawarkan', 'negosiasi')
+      RETURNING id_pesan
+    `,
+  );
 
-  if (!ada) {
+  // 4. Jika INSERT tidak menghasilkan baris, berarti status sudah berubah
+  //    atau pengajuan bukan milik akun ini.
+  if (hasilSql.rows.length === 0) {
     return { ok: false, pesan: PESAN_STATUS_BERUBAH };
   }
 
-  // 4. Simpan pesan tanpa harga (bagian 9.7).
-  await getDb()
-    .insert(pesanNegosiasi)
-    .values({
-      pengajuanId: hasil.data.idPengajuan,
-      pengirim: "pelanggan",
-      idPengirim: cek.idUser,
-      hargaUsulan: null,
-      pesan: hasil.data.pesan,
-    });
-
-  const daftarPesan = await daftarTerbaru(hasil.data.idPengajuan);
+  // 5. Segarkan halaman.
   revalidatePath("/langganan");
-  return { ok: true, daftarPesan };
+  return { ok: true };
 }

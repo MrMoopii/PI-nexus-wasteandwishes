@@ -242,17 +242,18 @@ VALUES
 - **Keadaan gagal yang dicek:** harga 0, negatif, bukan angka, desimal berlebih.
 - **Hasil uji terakhir:** belum diuji
 
-## LGN-18: Setuju di dua tab sekaligus
+## LGN-18: Setuju di dua tab sekaligus / setujui tanpa usulan harga
 
 - **Kode tugas:** 1.3
 - **Peran:** pelanggan
-- **Persiapan data:** pengajuan A `ditawarkan`.
+- **Persiapan data:** pengajuan A `ditawarkan`. Untuk langkah 4, siapkan pengajuan `ditawarkan` yang hanya punya pesan admin **tanpa** `harga_usulan` (INSERT pesan `pengirim='admin'`, `harga_usulan=NULL`).
 - **Langkah:**
   1. Buka `/langganan` di dua tab sebagai A.
   2. Klik **Setujui harga** di tab pertama sampai status **Disetujui pelanggan**.
   3. Tanpa memuat ulang, klik **Setujui harga** di tab kedua.
-- **Hasil yang diharapkan:** tab kedua menampilkan "Status pengajuan sudah berubah. Muat ulang halaman." (pesan gagal, bukan error 500). Status tetap `disetujui_pelanggan` dan `harga_final` tidak berubah.
-- **Keadaan gagal yang dicek:** dua tab menyetujui penawaran yang sama.
+  4. Buka pengajuan `ditawarkan` yang hanya punya pesan admin tanpa `harga_usulan`, lalu klik **Setujui harga**.
+- **Hasil yang diharapkan:** langkah 3 menampilkan "Status pengajuan sudah berubah. Muat ulang halaman." (pesan gagal, bukan error 500), status tetap `disetujui_pelanggan` dan `harga_final` tidak berubah. Langkah 4 menampilkan pesan yang sama karena `WHERE EXISTS` tidak menemukan usulan admin berisi harga, sehingga status tetap `ditawarkan` dan `harga_final` tetap NULL (bukan jatuh ke error LGN-14).
+- **Keadaan gagal yang dicek:** dua tab menyetujui penawaran yang sama; setujui tanpa usulan admin berisi harga.
 - **Hasil uji terakhir:** belum diuji
 
 ## LGN-19: Aksi ke pengajuan milik akun lain ditolak
