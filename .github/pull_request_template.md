@@ -34,4 +34,5 @@ Closes #
 - [ ] Jika mengubah skema database: file migrasi ikut di-commit, kolom yang berubah disebut di ringkasan, dan tim diingatkan menjalankan `pnpm db:migrate`
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari
 - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (CONTRIBUTING.md bagian 9.5)
+- [ ] Jika butuh atau menyiapkan bagian untuk tugas lain yang belum di-merge: penanda `TUGAS <kode> (#<issue>)`, entri README, dan komentar di issue tujuan sudah dibuat. Catatan untuk tugas ini yang sudah dikerjakan sudah dihapus, dan README fitur tidak lagi menyebut tugas ini sebagai "menyusul" atau "belum ada" (CONTRIBUTING.md bagian 4.7)
 - [ ] Untuk perubahan tampilan: sertakan tangkapan layar
