@@ -492,3 +492,34 @@ FROM pengajuan_langganan WHERE id_pengajuan = <id pengajuan>;
 - **Hasil yang diharapkan:** langkah 1 menampilkan "Akses khusus admin." di setiap aksi (peran dicek ulang di database). Langkah 2 menampilkan "Sesi Anda telah berakhir. Silakan untuk login ulang." Langkah 3: `abc` dan `0` menampilkan "Pengajuan tidak valid."; ID yang tidak ada menampilkan "Status pengajuan sudah berubah. Muat ulang halaman.". Langkah 4 menampilkan halaman 404. Database tidak berubah di semua langkah.
 - **Keadaan gagal yang dicek:** bukan admin, sesi idle, ID salah.
 - **Hasil uji terakhir:** belum diuji
+
+## LGN-48: Riwayat negosiasi di detail admin
+
+- **Kode tugas:** 1.5 (komponen `RiwayatNegosiasi` dari 1.2)
+- **Peran:** admin
+- **Persiapan data:** pengajuan A berstatus `menunggu_review`, belum ada pesan. Untuk langkah 2, jalankan SQL ini dengan `<id admin>` diganti `id_user` akun admin:
+  ```sql
+  -- Tiga pesan dalam satu perintah, jadi dibuat_pada ketiganya sama dan urutannya ditentukan id_pesan.
+  INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+  VALUES
+    (<id pengajuan>, 'admin', <id admin>, 175000, 'Harga termasuk ember.'),
+    (<id pengajuan>, 'pelanggan', <id A>, 150000, NULL),
+    (<id pengajuan>, 'pelanggan', <id A>, NULL, E'Baris pertama\nBaris kedua');
+  UPDATE pengajuan_langganan SET status = 'negosiasi', diperbarui_pada = now()
+  WHERE id_pengajuan = <id pengajuan>;
+  ```
+- **Langkah:**
+  1. Buka detail pengajuan sebelum SQL dijalankan.
+  2. Jalankan SQL di atas, lalu muat ulang halaman.
+  3. Kirim penawaran baru `160000` dari form penawaran.
+- **Hasil yang diharapkan:**
+  - Langkah 1: bagian "Riwayat negosiasi" menampilkan "Belum ada pesan negosiasi."
+  - Langkah 2: tiga pesan tampil urut dari yang terlama, sesuai urutan di SQL:
+    - pesan pertama dari "Admin WW", dengan "Usulan harga: Rp 175.000 / 30 hari" dan catatannya;
+    - pesan kedua atas nama instansi, dengan harga saja tanpa teks pesan;
+    - pesan ketiga atas nama instansi, berisi teks dua baris tanpa baris harga.
+  - Ketiga pesan menampilkan waktu yang sama, dalam WIB.
+  - Di panel tindakan, "Penawaran terakhir admin" Rp 175.000 dan "Tawaran terakhir pelanggan" Rp 150.000. Pesan tanpa harga tidak menggeser ringkasan ini.
+  - Langkah 3: pesan admin Rp 160.000 muncul paling bawah setelah aksi selesai, dan "Penawaran terakhir admin" menjadi Rp 160.000.
+- **Keadaan gagal yang dicek:** belum ada pesan, waktu simpan yang sama persis, pesan tanpa harga, pesan tanpa teks, teks bergaris baru.
+- **Hasil uji terakhir:** belum diuji

@@ -6,8 +6,9 @@ import {
 import type { DetailPengajuanAdmin } from "@/features/langganan/queries/admin";
 import { formatRupiah } from "@/lib/format-angka";
 import { formatWaktu } from "@/lib/format-tanggal";
-import { StatusPengajuanBadge } from "../../_components/status-pengajuan";
+import { StatusPengajuanBadge } from "@/app/admin/langganan/_components/status-pengajuan";
 import { PanelAksi } from "./panel-aksi";
+import { RiwayatNegosiasi } from "@/features/langganan/components/riwayat-negosiasi";
 
 const FORMAT_WAKTU = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "long",
@@ -121,9 +122,7 @@ export function DetailPengajuan({
           </h2>
           <dl>
             <Fakta label="Nama instansi">{pengajuan.namaInstansi}</Fakta>
-            <Fakta label="Jenis instansi">
-              {teksJenisInstansi(pengajuan)}
-            </Fakta>
+            <Fakta label="Jenis instansi">{teksJenisInstansi(pengajuan)}</Fakta>
             <Fakta label="Alamat pengambilan">
               {pengajuan.alamatPengambilan}
             </Fakta>
@@ -185,6 +184,19 @@ export function DetailPengajuan({
           </dl>
         </section>
       </div>
+
+      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-400">
+          Riwayat negosiasi
+        </h2>
+        <RiwayatNegosiasi
+          daftarPesan={pesan}
+          namaPengirim={{
+            pelanggan: pengajuan.namaInstansi,
+            admin: "Admin WW",
+          }}
+        />
+      </section>
 
       <PanelAksi pengajuan={pengajuan} pesan={pesan} />
     </div>
