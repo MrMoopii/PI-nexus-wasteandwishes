@@ -9,10 +9,12 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | File                           | Isi                                                                                    | Kode tugas |
 | ------------------------------ | -------------------------------------------------------------------------------------- | ---------- |
 | `types.ts`                     | Daftar status, jenis, dan aturan (label dan `is…()`), tipe tampilan per tabel          | 2.1        |
-| `jadwal.ts`                    | Fungsi murni: tanggal kunjungan dari pola hari, aturan hari libur (`geser` / `lewati`) | 2.2        |
-| `queries/hari-libur.ts`        | Daftar hari libur                                                                      | 2.2        |
-| `actions/jadwal.ts`            | Buat kunjungan untuk rentang tanggal, kelola hari libur                                | 2.2        |
-| `validasi/jadwal.ts`           | Skema Zod rentang tanggal dan isian hari libur                                         | 2.2        |
+| `jadwal.ts`                    | Fungsi murni: tanggal kunjungan, aturan hari libur, batas minta lewati (lihat bawah)   | 2.2        |
+| `queries/hari-libur.ts`        | `getDaftarHariLibur()`: hari libur mulai hari ini, urut naik. Hanya admin              | 2.2        |
+| `actions/jadwal.ts`            | `buatKunjungan()`: kunjungan satu rentang dari pola pelanggan aktif dan hari libur     | 2.2        |
+| `validasi/jadwal.ts`           | `skemaRentangKunjungan`, `tanggalWajib()`, `teksIsian()`, `NilaiIsian`, `GalatIsian`   | 2.2        |
+| `actions/hari-libur.ts`        | `tambahHariLibur()`, `ubahHariLibur()`, `hapusHariLibur()`                             | 2.2        |
+| `validasi/hari-libur.ts`       | `skemaHariLibur` (tanggal, keterangan, aturan) dan `skemaIdHariLibur`                  | 2.2        |
 | `queries/admin.ts`             | Daftar kunjungan per tanggal untuk pencatatan                                          | 2.3        |
 | `actions/pencatatan.ts`        | Catat ember dan foto, catat berat (kg), tandai tertunda dengan tanggal paling lambat   | 2.3        |
 | `validasi/pencatatan.ts`       | Skema Zod jumlah ember, berat (kg), dan tanggal paling lambat                          | 2.3        |
@@ -23,12 +25,46 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `queries/kendala.ts`           | Daftar laporan kendala yang masih terbuka                                              | 2.6        |
 | `actions/tanggapi-kendala.ts`  | Admin menanggapi laporan kendala                                                       | 2.6        |
 | `validasi/tanggapi-kendala.ts` | Skema Zod tanggapan admin                                                              | 2.6        |
-| `app/admin/hari-libur/`        | Halaman admin hari libur                                                               | 2.2        |
+| `app/admin/hari-libur/`        | Halaman admin hari libur: tambah, daftar mendatang, ubah, hapus                        | 2.2        |
+| `app/admin/buat-kunjungan/`    | Halaman admin buat kunjungan: form rentang, ringkasan hasil, hari libur dihitung       | 2.2        |
 | `app/admin/kunjungan/`         | Halaman admin pencatatan harian                                                        | 2.3        |
 | `app/tracker/`                 | Halaman tracker pelanggan                                                              | 2.4        |
 | `app/admin/kendala/`           | Halaman admin laporan kendala                                                          | 2.6        |
 
 `types.ts` berisi `STATUS_KUNJUNGAN`, `JENIS_LAPORAN`, `STATUS_LAPORAN`, dan `ATURAN_HARI_LIBUR`, masing-masing dengan tipe, `LABEL_…`, dan pemeriksa `is…()` tanpa `as`. Tipe tampilannya `KunjunganTampilan`, `LaporanKendalaTampilan`, `HariLiburTampilan`, dan `PerubahanJadwalTampilan`, diturunkan dari skema (kolom `numeric` menjadi `number`, `id_user` tidak ikut).
+
+## Jadwal dan hari libur (2.2)
+
+### Fungsi di `jadwal.ts`
+
+Fungsi murni tanpa database dan sesi, jadi bisa dipakai di server maupun klien. Semua tanggal berupa teks `"YYYY-MM-DD"` (nilai kolom `date` dari Drizzle) dan dihitung di UTC, sehingga tidak bergeser antara laptop (WIB) dan Vercel (UTC).
+
+- `type PetaHariLibur = ReadonlyMap<string, AturanHariLibur>`: tanggal libur beserta aturannya, dibaca dari tabel `hari_libur`.
+- `tanggalKunjungan({ hariPengambilan, mulai, selesai, hariLibur }): string[]`: tanggal kunjungan satu pelanggan dari pola hari (`readonly number[]`, 1 = Senin sampai 5 = Jumat) untuk rentang `mulai`–`selesai` (keduanya ikut).
+  - Libur `geser` pindah ke `hariKerjaBerikutnya()`, boleh jatuh setelah `selesai`.
+  - Libur `lewati` tidak menghasilkan kunjungan.
+  - Hasil geser yang jatuh di hari jadwal pelanggan menjadi satu kunjungan saja.
+  - Hasilnya urut dan tanpa tanggal ganda. Dipakai `buatKunjungan()`, dan oleh 2.7 untuk membuat ulang kunjungan dari pola baru mulai `berlaku_mulai`.
+- `hariKerjaBerikutnya(tanggal, hariLibur): string`: hari kerja pertama setelah `tanggal` yang bukan hari libur, apa pun aturan liburnya.
+- `isHariKerja(tanggal): boolean`: Senin sampai Jumat. Bisa dipakai 2.4 dan 2.6 untuk memeriksa tanggal pengganti.
+- `tambahHari(tanggal, jumlah): string`: tanggal ditambah sejumlah hari kalender, boleh negatif.
+- `batasMintaLewati(tanggalKunjungan): Date`: batas meminta lewati, yaitu `<H-1>T17:00:00+07:00`, untuk ditampilkan tracker (2.4).
+- `bolehMintaLewati(tanggalKunjungan, sekarang: Date): boolean`: `true` jika `sekarang` masih sebelum batas. Kunjungan Senin: Minggu 16.59 WIB boleh, Minggu 17.00 WIB tidak. Status kunjungan (misalnya hanya `dijadwalkan`) dicek pemanggil (2.4).
+
+### Buat kunjungan
+
+`buatKunjungan()` di `actions/jadwal.ts` dipanggil dari `/admin/buat-kunjungan`:
+
+1. Rentang divalidasi `skemaRentangKunjungan`: mulai tidak sebelum hari ini (WIB), selesai tidak sebelum mulai, paling panjang `PANJANG_RENTANG_MAKS` (31) hari.
+2. Pelanggan diambil dari `data_langganan` yang aktif (`kondisiLanggananAktif()`), digabung dengan pengajuan `siap_bayar` miliknya. Pelanggan aktif tanpa pengajuan `siap_bayar` atau tanpa pola hari dilewati, lalu jumlahnya dilaporkan di hasil (`tanpaPola`).
+3. Tanggal dihitung dengan `tanggalKunjungan()`. Jam diambil dari pengajuan, jadi rentang jam MOU ikut berlaku di hari pengganti. Tanggal setelah `tanggal_akhir_langganan` tidak dibuat; setelah langganan diperpanjang, admin menjalankan aksi ini lagi.
+4. Baris disisipkan per 500 dengan `ON CONFLICT (id_user, tanggal) DO NOTHING`, jadi aksi aman dijalankan ulang.
+
+Keputusan 2.2: kunjungan yang sudah ada tidak diubah, apa pun statusnya, termasuk saat hari libur ditambah, diubah, atau dihapus setelah kunjungan dibuat. Karena itu kedua halaman admin meminta hari libur diisi sebelum membuat kunjungan, dan `/admin/buat-kunjungan` menampilkan hari libur yang akan dihitung.
+
+### Hari libur
+
+`/admin/hari-libur` memakai `tambahHariLibur()`, `ubahHariLibur()`, dan `hapusHariLibur()` di `actions/hari-libur.ts`. Tanggal libur harus hari kerja dan tidak sebelum hari ini. Aturan bawaan `geser` masih usulan dan belum dikonfirmasi WW. Daftar di kedua halaman hanya memuat libur mulai hari ini (`getDaftarHariLibur()`), karena libur yang sudah lewat tidak memengaruhi pembuatan kunjungan.
 
 ## Tabel
 
@@ -52,7 +88,7 @@ Cara memakainya:
 
 - `pengajuan_id` menunjuk kesepakatan yang berlaku, yaitu pengajuan `siap_bayar` milik pelanggan: pola hari, jam, jumlah ember, instansi, dan harga. Keadaan aktif tidak disimpan di kunjungan, tetapi dibaca dari `data_langganan` lewat `kondisiLanggananAktif()` dan digabung lewat `id_user` (satu baris `data_langganan` per pelanggan).
 - Daftar status, jenis, dan aturan di `types.ts` harus sama dengan CHECK di skema. Mengubahnya berarti migrasi baru lewat pemilik skema.
-- Unique (`id_user`, `tanggal`) berlaku untuk semua status. Membuat ulang kunjungan dari pola atau hari libur memperbarui baris yang sudah ada, misalnya `INSERT … ON CONFLICT (id_user, tanggal) DO UPDATE … WHERE kunjungan_pengambilan.status IN (…)`, bukan menyisipkan baris kedua.
+- Unique (`id_user`, `tanggal`) berlaku untuk semua status, jadi kunjungan tidak pernah disisipkan dua kali. "Buat kunjungan" (2.2) memakai `ON CONFLICT (id_user, tanggal) DO NOTHING` dan tidak mengubah baris yang sudah ada. Membuat ulang kunjungan dari pola baru (2.7), yang perlu memperbarui baris yang belum diambil, memakai `INSERT … ON CONFLICT (id_user, tanggal) DO UPDATE … WHERE kunjungan_pengambilan.status IN (…)`, bukan menyisipkan baris kedua.
 - Lewati dengan tanggal pengganti: kunjungan asal menjadi `dilewati`, dan usulan pelanggan disimpan di `laporan_kendala.tanggal_pengganti`. Tanggal yang disetujui admin, yang boleh berbeda dari usulan, menjadi kunjungan baru dengan `pengganti_dari` berisi id kunjungan asal. Kunjungan asal harus milik pelanggan yang sama (`kunjungan_pengambilan_pengganti_dari_fkey`).
 - `foto_bukti_file_id` disimpan bersama `foto_bukti`, karena `deleteImageKitFile()` di `lib/imagekit.ts` butuh fileId saat foto diganti atau dihapus. Mengganti foto berarti menulis keduanya di `UPDATE` yang sama, dan menghapus foto berarti mengosongkan keduanya.
 - `berat_kg` adalah kolom `numeric`, jadi Drizzle mengembalikannya sebagai string. Ubah dengan `Number(...)` (`CONTRIBUTING.md` bagian 9.2).
@@ -61,7 +97,7 @@ Cara memakainya:
 
 ## Yang dipakai dari luar fitur ini
 
-- `kondisiLanggananAktif()` dari `lib/langganan.ts`: tracker hanya untuk pelanggan yang langganannya aktif.
+- `kondisiLanggananAktif()` dari `lib/langganan.ts`: tracker hanya untuk pelanggan yang langganannya aktif, dan "Buat kunjungan" hanya membuat kunjungan untuk pelanggan aktif.
 - `tanggalHariIniJakarta()` dan fungsi format dari `lib/format-tanggal.ts`.
 - Data pola hari dan rentang jam pelanggan dibaca langsung dari tabelnya lewat `lib/db/schema.ts`, bukan dengan mengimpor dari `features/langganan/`.
 

@@ -46,7 +46,10 @@
 /features/kunjungan/queries/hari-libur.ts        @jodi240506 @MrMoopii
 /features/kunjungan/actions/jadwal.ts            @jodi240506 @MrMoopii
 /features/kunjungan/validasi/jadwal.ts           @jodi240506 @MrMoopii
+/features/kunjungan/actions/hari-libur.ts        @jodi240506 @MrMoopii
+/features/kunjungan/validasi/hari-libur.ts       @jodi240506 @MrMoopii
 /app/admin/hari-libur/                           @jodi240506 @MrMoopii
+/app/admin/buat-kunjungan/                       @jodi240506 @MrMoopii
 /features/kunjungan/queries/kendala.ts           @jodi240506 @MrMoopii
 /features/kunjungan/actions/tanggapi-kendala.ts  @jodi240506 @MrMoopii
 /features/kunjungan/validasi/tanggapi-kendala.ts @jodi240506 @MrMoopii

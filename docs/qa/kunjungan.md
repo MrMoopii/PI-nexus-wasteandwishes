@@ -151,3 +151,125 @@ BEGIN
 END
 $uji$;
 ```
+
+## KJG-10: Fungsi jadwal tanpa database
+
+- **Kode tugas:** 2.2
+- **Peran:** pengembang (terminal di root repo)
+- **Persiapan data:** tidak ada. Fungsi di `features/kunjungan/jadwal.ts` tidak membaca database.
+- **Langkah:**
+  1. Jalankan perintah di bawah. Bisa di Git Bash maupun PowerShell, karena isinya tidak memakai tanda kutip ganda atau `$`.
+  2. Bandingkan dua baris keluarannya.
+
+  ```bash
+  pnpm exec tsx -e "import('./features/kunjungan/jadwal.ts').then((j) => { const libur = new Map([['2026-12-25', 'geser']]); console.log(j.tanggalKunjungan({ hariPengambilan: [1, 3, 5], mulai: '2026-12-21', selesai: '2026-12-31', hariLibur: libur })); console.log(j.bolehMintaLewati('2026-12-28', new Date('2026-12-27T16:59:00+07:00')), j.bolehMintaLewati('2026-12-28', new Date('2026-12-27T17:00:00+07:00'))); })"
+  ```
+
+- **Hasil yang diharapkan:**
+  - Baris 1: `[ '2026-12-21', '2026-12-23', '2026-12-28', '2026-12-30' ]`. Jumat 25 Des libur `geser` menjadi Senin 28 Des, dan 28 Des hanya muncul sekali.
+  - Baris 2: `true false`. Untuk kunjungan Senin 28 Des, Minggu 16.59 WIB masih boleh meminta lewati, Minggu 17.00 WIB sudah tidak.
+- **Keadaan gagal yang dicek:** tanggal ganda dari hasil geser, dan batas tepat pukul 17.00.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-11: Admin membuat kunjungan dari pola dan hari libur
+
+- **Kode tugas:** 2.2
+- **Peran:** admin
+- **Persiapan data:** satu akun admin dan satu akun `user` biasa (`CONTRIBUTING.md` bagian 6.4). Skenario ini memakai Natal 25 Des 2026, jadi jalankan sebelum 21 Des 2026, atau geser semua tanggal ke minggu yang masih akan datang. Jalankan skrip ini sekali di SQL Editor Neon branch pribadimu:
+
+  ```sql
+  -- KJG-11: tiga pelanggan uji (kode tugas 2.2). Hapus lagi dengan skrip di langkah 7.
+  DO $uji$
+  DECLARE a integer; b integer; c integer;
+  BEGIN
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-2-a@contoh.invalid', 'Uji 2.2 A') RETURNING id_user INTO a;
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-2-b@contoh.invalid', 'Uji 2.2 B') RETURNING id_user INTO b;
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-2-c@contoh.invalid', 'Uji 2.2 C') RETURNING id_user INTO c;
+    -- A: MOU Senin-Rabu-Jumat 08.00-10.00, aktif sampai 31 Des 2026.
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic, estimasi_ember,
+      jenis_pelanggan, hari_pengambilan, jam_mulai, jam_selesai, jumlah_ember, harga_final, status)
+      VALUES (a, 'Uji 2.2 A', 'hotel', 'Alamat A', 'PIC A', '0800000001', 2, 'mou', '{1,3,5}', '08:00', '10:00', 2, 500000, 'siap_bayar');
+    INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+      VALUES (a, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, '2026-12-31');
+    -- B: reguler Senin-Rabu-Jumat tanpa jam, aktif hanya sampai 23 Des 2026.
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic, estimasi_ember,
+      jenis_pelanggan, hari_pengambilan, jumlah_ember, harga_final, status)
+      VALUES (b, 'Uji 2.2 B', 'restoran', 'Alamat B', 'PIC B', '0800000002', 3, 'reguler', '{1,3,5}', 3, 400000, 'siap_bayar');
+    INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+      VALUES (b, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, '2026-12-23');
+    -- C: langganan aktif tanpa pengajuan siap_bayar, seperti pelanggan dari alur lama.
+    INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+      VALUES (c, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, '2026-12-31');
+  END
+  $uji$;
+  ```
+
+- **Langkah:**
+  1. Login sebagai admin, buka menu **Hari Libur**, lalu tambah 25 Des 2026, keterangan "Hari Raya Natal", aturan **Geser ke hari kerja berikutnya**.
+  2. Buka menu **Buat Kunjungan**. Pastikan "Jumat, 25 Desember 2026" tampil di kartu "Hari libur yang dihitung".
+  3. Isi tanggal mulai 21 Des 2026 dan tanggal selesai 31 Des 2026, lalu klik **Buat kunjungan**.
+  4. Jalankan query ini di SQL Editor:
+
+     ```sql
+     SELECT u.email, k.tanggal, to_char(k.tanggal, 'TMDay') AS hari, k.jam_mulai, k.jam_selesai, k.status
+     FROM kunjungan_pengambilan k JOIN users u ON u.id_user = k.id_user
+     WHERE u.email LIKE 'uji-2-2-%@contoh.invalid'
+     ORDER BY u.email, k.tanggal;
+     ```
+
+  5. Klik **Buat kunjungan** lagi dengan rentang yang sama, lalu jalankan ulang query langkah 4.
+  6. Coba isian salah satu per satu: tanggal mulai kemarin, tanggal selesai sebelum tanggal mulai, rentang 1 Des 2026 – 1 Jan 2027 (32 hari), dan kedua tanggal dikosongkan.
+  7. Hapus data uji. Hari libur Natal dihapus lewat halaman (KJG-12 langkah 6) atau ikut skrip ini:
+
+     ```sql
+     DELETE FROM kunjungan_pengambilan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-2-%@contoh.invalid');
+     DELETE FROM data_langganan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-2-%@contoh.invalid');
+     DELETE FROM pengajuan_langganan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-2-%@contoh.invalid');
+     DELETE FROM users WHERE email LIKE 'uji-2-2-%@contoh.invalid';
+     DELETE FROM hari_libur WHERE tanggal = '2026-12-25' AND keterangan = 'Hari Raya Natal';
+     ```
+
+- **Hasil yang diharapkan:**
+  - Langkah 3: pesan hijau "Rentang 21 Desember 2026 – 31 Desember 2026: … kunjungan baru dibuat …", ditambah kalimat bahwa minimal satu pelanggan aktif dilewati karena belum punya pengajuan siap bayar (pelanggan C). Angkanya bisa lebih besar jika branch Neon-mu punya pelanggan aktif lain, jadi yang dicocokkan adalah hasil query langkah 4 (`CONTRIBUTING.md` bagian 6.5).
+  - Langkah 4: tepat 6 baris, semuanya `dijadwalkan`:
+    - A: 21, 23, 28, 30 Des, jam 08.00–10.00. Tidak ada 25 Des, dan 28 Des hanya satu baris.
+    - B: 21 dan 23 Des, jam kosong. Tidak ada 28 dan 30 Des karena langganannya berakhir 23 Des.
+    - C: tidak ada baris.
+  - Langkah 5: pesan "0 kunjungan baru dibuat …" beserta jumlah tanggal yang sudah punya kunjungan. Query langkah 4 tetap 6 baris yang sama.
+  - Langkah 6: pesan di bawah isian, berturut-turut "Tanggal mulai tidak boleh sebelum hari ini.", "Tanggal selesai tidak boleh sebelum tanggal mulai.", "Rentang paling panjang 31 hari.", dan "… wajib diisi." di kedua isian. Tanggal yang diketik tetap ada di form.
+- **Keadaan gagal yang dicek:**
+  - Belum login: membuka `/admin/buat-kunjungan` dialihkan ke halaman login.
+  - Akun `user` biasa: membuka halaman dialihkan ke beranda. Buka halaman sebagai admin, logout di tab lain, login sebagai `user`, lalu kirim form di tab pertama: muncul "Akses khusus admin." dan tidak ada baris baru.
+  - Sesi idle: kirim form setelah sesi idle, muncul "Sesi Anda telah berakhir. Silakan untuk login ulang."
+  - Pelanggan tanpa pengajuan `siap_bayar` dan langganan yang berakhir di tengah rentang (langkah 4).
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-12: Admin mengelola hari libur
+
+- **Kode tugas:** 2.2
+- **Peran:** admin
+- **Persiapan data:** akun admin dan akun `user` biasa. Pilih satu Jumat yang masih akan datang dan belum terdaftar sebagai hari libur. Di bawah ini disebut Jumat-X, dan Sabtu sesudahnya Sabtu-X.
+- **Langkah:**
+  1. Buka menu **Hari Libur**. Tambah Jumat-X, keterangan "Libur uji", aturan bawaan (Geser).
+  2. Tambah Jumat-X sekali lagi dengan keterangan lain.
+  3. Tambah Sabtu-X, lalu tambah tanggal kemarin (ketik manual jika pemilih tanggal menolaknya), lalu tambah Jumat-X + 7 hari dengan keterangan hanya spasi.
+  4. Di baris Jumat-X, klik **Ubah**, ganti aturan ke **Lewati pengambilan**, lalu simpan.
+  5. Tambah Jumat-X + 7 hari dengan keterangan "Libur uji 2". Di baris itu klik **Ubah**, ganti tanggalnya ke Jumat-X, lalu simpan.
+  6. Klik **Hapus** di baris Jumat-X. Pilih Batal di dialog konfirmasi, lalu ulangi dan pilih OK.
+  7. Buka halaman di dua tab, hapus satu hari libur di tab pertama, lalu klik **Hapus** atau **Simpan perubahan** untuk baris yang sama di tab kedua.
+  8. Di DevTools, ubah nilai `<input type="hidden" name="idHariLibur">` di salah satu form menjadi `abc`, lalu menjadi `999999`, dan kirim form itu.
+- **Hasil yang diharapkan:**
+  - Langkah 1: pesan "Hari libur ditambahkan.", dan baris "Jumat, <tanggal>" dengan badge "Geser ke hari kerja berikutnya" muncul urut menurut tanggal. Hari libur yang sama juga tampil di halaman **Buat Kunjungan**.
+  - Langkah 2: pesan di bawah tanggal "Tanggal ini sudah terdaftar sebagai hari libur.", dan tidak ada baris baru.
+  - Langkah 3: berturut-turut "Sabtu dan Minggu memang tidak ada pengambilan.", "Tanggal libur tidak boleh sebelum hari ini.", dan "Keterangan wajib diisi."
+  - Langkah 4: pesan "Perubahan hari libur disimpan.", dan badge berubah menjadi "Lewati pengambilan".
+  - Langkah 5: pesan "Tanggal ini sudah terdaftar sebagai hari libur.", dan kedua baris tetap seperti sebelumnya.
+  - Langkah 6: Batal tidak mengubah apa pun. OK menghapus baris itu.
+  - Langkah 7: tab kedua menampilkan "Hari libur ini sudah dihapus. Muat ulang halaman."
+  - Langkah 8: `abc` menampilkan "Hari libur tidak valid.", `999999` menampilkan "Hari libur ini sudah dihapus. Muat ulang halaman." Tidak ada data yang berubah.
+- **Keadaan gagal yang dicek:**
+  - Belum login: membuka `/admin/hari-libur` dialihkan ke halaman login.
+  - Akun `user` biasa: dialihkan ke beranda. Mengirim form dari tab admin yang sesinya sudah diganti `user` menampilkan "Akses khusus admin."
+  - Sesi idle: pesan "Sesi Anda telah berakhir. Silakan untuk login ulang."
+  - Tanggal ganda, akhir pekan, tanggal lewat, isian kosong, ID salah, dan data yang sudah dihapus di tab lain.
+- **Hasil uji terakhir:** belum diuji

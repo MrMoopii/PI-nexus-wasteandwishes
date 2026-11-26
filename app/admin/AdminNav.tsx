@@ -8,6 +8,12 @@ const adminNavigation = [
   { name: "Data Pengguna", href: "/admin/users", category: "NAVIGATION" },
   { name: "Langganan", href: "/admin/langganan", category: "NAVIGATION" },
   {
+    name: "Buat Kunjungan",
+    href: "/admin/buat-kunjungan",
+    category: "NAVIGATION",
+  },
+  { name: "Hari Libur", href: "/admin/hari-libur", category: "NAVIGATION" },
+  {
     name: "Jadwal Pengambilan",
     href: "/admin/jadwal-pengambilan",
     category: "NAVIGATION",
