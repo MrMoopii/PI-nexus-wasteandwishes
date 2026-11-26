@@ -257,3 +257,4 @@ export const riwayatPengambilan = pgTable("riwayat_pengambilan", {
 });
 
 export * from "./schema-langganan";
+export * from "./schema-kunjungan";

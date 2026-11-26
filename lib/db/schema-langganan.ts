@@ -8,6 +8,7 @@ import {
   text,
   time,
   timestamp,
+  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { users } from "./schema";
@@ -65,6 +66,12 @@ export const pengajuanLangganan = pgTable(
     uniqueIndex("pengajuan_langganan_satu_berjalan_per_user")
       .on(table.idUser)
       .where(sql`${table.status} NOT IN ('ditolak', 'dibatalkan')`),
+    // Target foreign key gabungan dari kunjungan_pengambilan (2.1): kunjungan harus
+    // memakai pengajuan milik pelanggan yang sama.
+    unique("pengajuan_langganan_pengajuan_user_unique").on(
+      table.idPengajuan,
+      table.idUser,
+    ),
     check(
       "pengajuan_langganan_status_valid",
       sql`${table.status} IN ('menunggu_review', 'ditawarkan', 'negosiasi', 'disetujui_pelanggan', 'siap_bayar', 'ditolak', 'dibatalkan')`,
@@ -114,6 +121,11 @@ export const pesanNegosiasi = pgTable(
   },
   (table) => [
     index("pesan_negosiasi_pengajuan_id_idx").on(table.pengajuanId),
+    // Harus sama dengan PENGIRIM_PESAN di features/langganan/types.ts (ditambahkan di 2.1).
+    check(
+      "pesan_negosiasi_pengirim_valid",
+      sql`${table.pengirim} IN ('pelanggan', 'admin')`,
+    ),
     check(
       "pesan_negosiasi_harga_usulan_positif",
       sql`${table.hargaUsulan} > 0`,
