@@ -372,6 +372,324 @@ $uji$;
   - Langkah 11: dropdown **Tandai tertunda** hilang saat centang dilepas, dan aksi pencatatan tampil lagi.
 - **Keadaan gagal yang dicek:**
   - Belum login, akun bukan admin, dan sesi idle (sama seperti KJG-13).
-  - Tanggal paling lambat sama dengan atau sebelum tanggal kunjungan, alasan kosong, dan ID yang tidak valid.
-  - Edit atau batalkan penundaan pada kunjungan yang statusnya sudah berubah (misalnya sudah diambil).
+  - Tanggal paling lambat sebelum tanggal kunjungan, alasan kosong, dan ID yang tidak valid.
+  - Sebagian baris sudah berubah status: pesan menyebut jumlah yang berhasil dan yang dilewati.
+## Data uji tracker (KJG-20 sampai KJG-25)
+
+Skenario tracker (kode tugas 2.4) memakai **akun user uji khusus** yang dibuat lewat halaman Daftar, belum pernah membayar, dan tidak punya pengajuan berjalan. Pelanggan uji harus login, jadi akunnya dibuat lewat aplikasi, bukan lewat SQL. Siapkan juga satu akun admin (`CONTRIBUTING.md` bagian 6.4).
+
+Skrip di bawah memberi akun itu pengajuan `siap_bayar` (pola Senin–Jumat, 08.00–10.00), langganan aktif sampai 30 hari lagi, dan data berikut:
+
+- **Riwayat**, 4 hari kerja terakhir:
+  - terbaru `ditimbang` (4 ember, 12,5 kg);
+  - lalu `diambil` (3 ember);
+  - lalu `tertunda` (alasan "Truk pengangkut diservis", paling lambat 2 hari lagi);
+  - terlama `dijadwalkan`, yaitu kunjungan yang belum dicatat admin.
+- **Hari ini:** kunjungan `dijadwalkan` jika hari ini hari kerja.
+- **Hari kerja ke-1 sampai ke-4** setelah hari ini: kunjungan `dijadwalkan`. Yang ke-3 tanpa jam.
+- **Hari kerja ke-5:** perubahan pola mulai berlaku (Senin, Rabu, Jumat, 07.00–09.00).
+- **Hari kerja ke-6:** hari libur "Libur uji 2.4" dengan aturan `geser`.
+
+Ganti `email-akun-uji@contoh.com` di semua skrip dengan email akun uji itu, lalu jalankan skrip ini sekali di SQL Editor Neon:
+
+```sql
+-- Data uji tracker (kode tugas 2.4). Hapus lagi dengan skrip di KJG-25 langkah 8.
+DO $uji$
+DECLARE
+  surel text := 'email-akun-uji@contoh.com';
+  u integer;
+  p integer;
+  adm integer;
+  hari_ini date := (now() AT TIME ZONE 'Asia/Jakarta')::date;
+  maju date[];   -- 8 hari kerja setelah hari ini
+  mundur date[]; -- 4 hari kerja terakhir sebelum hari ini, terbaru dulu
+BEGIN
+  SELECT id_user INTO u FROM users WHERE email = surel AND peran = 'user';
+  IF u IS NULL THEN
+    RAISE EXCEPTION 'Akun user % tidak ditemukan.', surel;
+  END IF;
+  SELECT min(id_user) INTO adm FROM users WHERE peran = 'admin';
+  IF adm IS NULL THEN
+    RAISE EXCEPTION 'Belum ada akun admin (CONTRIBUTING.md bagian 6.4).';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pengajuan_langganan
+             WHERE id_user = u AND status NOT IN ('ditolak', 'dibatalkan')) THEN
+    RAISE EXCEPTION 'Akun % masih punya pengajuan berjalan. Pakai akun uji lain.', surel;
+  END IF;
+  SELECT array_agg(d ORDER BY d) INTO maju FROM (
+    SELECT g::date AS d FROM generate_series(hari_ini + 1, hari_ini + 14, interval '1 day') AS g
+    WHERE extract(isodow FROM g) BETWEEN 1 AND 5 ORDER BY 1 LIMIT 8) AS x;
+  SELECT array_agg(d ORDER BY d DESC) INTO mundur FROM (
+    SELECT g::date AS d FROM generate_series(hari_ini - 10, hari_ini - 1, interval '1 day') AS g
+    WHERE extract(isodow FROM g) BETWEEN 1 AND 5 ORDER BY 1 DESC LIMIT 4) AS x;
+  INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic,
+    estimasi_ember, jenis_pelanggan, hari_pengambilan, jam_mulai, jam_selesai, jumlah_ember, harga_final, status)
+    VALUES (u, 'Uji 2.4', 'hotel', 'Alamat uji 2.4', 'PIC uji', '0800000024', 3, 'mou', '{1,2,3,4,5}',
+      '08:00', '10:00', 3, 500000, 'siap_bayar')
+    RETURNING id_pengajuan INTO p;
+  INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+    VALUES (u, 'aktif', hari_ini - 14, hari_ini + 30)
+    ON CONFLICT (id_user) DO UPDATE SET status_langganan = 'aktif',
+      tanggal_mulai_langganan = EXCLUDED.tanggal_mulai_langganan,
+      tanggal_akhir_langganan = EXCLUDED.tanggal_akhir_langganan;
+  INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai, status,
+    jumlah_ember, berat_kg, ditimbang_pada, alasan_kendala, tanggal_paling_lambat) VALUES
+    (u, p, mundur[1], '08:00', '10:00', 'ditimbang', 4, 12.5, now(), NULL, NULL),
+    (u, p, mundur[2], '08:00', '10:00', 'diambil', 3, NULL, NULL, NULL, NULL),
+    (u, p, mundur[3], '08:00', '10:00', 'tertunda', NULL, NULL, NULL, 'Truk pengangkut diservis', hari_ini + 2),
+    (u, p, mundur[4], '08:00', '10:00', 'dijadwalkan', NULL, NULL, NULL, NULL, NULL);
+  IF extract(isodow FROM hari_ini) BETWEEN 1 AND 5 THEN
+    INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai)
+      VALUES (u, p, hari_ini, '08:00', '10:00');
+  END IF;
+  INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai) VALUES
+    (u, p, maju[1], '08:00', '10:00'),
+    (u, p, maju[2], '08:00', '10:00'),
+    (u, p, maju[3], NULL, NULL),
+    (u, p, maju[4], '08:00', '10:00');
+  INSERT INTO hari_libur (tanggal, keterangan, aturan) VALUES (maju[6], 'Libur uji 2.4', 'geser')
+    ON CONFLICT (tanggal) DO NOTHING;
+  INSERT INTO perubahan_jadwal (pengajuan_id, hari_pengambilan, jam_mulai, jam_selesai, berlaku_mulai, alasan, diubah_oleh)
+    VALUES (p, '{1,3,5}', '07:00', '09:00', maju[5], 'Uji 2.4: rute kurir berubah', adm);
+END
+$uji$;
+```
+
+Tanggal yang sebenarnya dan id setiap kunjungan dilihat dengan query ini. Id dipakai di langkah DevTools.
+
+```sql
+SELECT k.id_kunjungan, k.tanggal, to_char(k.tanggal, 'TMDay') AS hari, k.status, k.jam_mulai, k.pengganti_dari
+FROM kunjungan_pengambilan k JOIN users u ON u.id_user = k.id_user
+WHERE u.email = 'email-akun-uji@contoh.com'
+ORDER BY k.tanggal;
+```
+
+Catatan hari libur:
+
+- Hari libur lain yang sudah ada di branch dan jatuh di hari kerja dalam 30 hari ke depan ikut tampil di pemberitahuan. Pola uji Senin–Jumat, jadi semuanya terhitung hari pola.
+- Jika hari kerja ke-6 sudah terdaftar sebagai libur lain, keterangan libur itu yang tampil, bukan "Libur uji 2.4".
+- Jika hari kerja ke-5 ternyata hari libur, pakai hari kerja ke-7 atau ke-8 di KJG-25 langkah 3.
+
+## KJG-20: Akses tracker pelanggan
+
+- **Kode tugas:** 2.4
+- **Peran:** publik, pelanggan, admin
+- **Persiapan data:** akun user uji dari "Data uji tracker", sebelum dan sesudah skrip persiapan dijalankan, dan satu akun admin.
+- **Langkah:**
+  1. Dalam keadaan logout, buka `/tracker`.
+  2. Login sebagai akun user uji sebelum skrip persiapan dijalankan. Lihat menu header, lalu klik **Tracker**.
+  3. Jalankan skrip persiapan, lalu muat ulang `/tracker`.
+  4. Jalankan `UPDATE data_langganan SET status_langganan = 'dihentikan' WHERE id_user = (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');`, lalu muat ulang. Ulangi dengan `status_langganan = 'aktif', tanggal_akhir_langganan = (now() AT TIME ZONE 'Asia/Jakarta')::date - 1`. Terakhir kembalikan ke `status_langganan = 'aktif', tanggal_akhir_langganan = (now() AT TIME ZONE 'Asia/Jakarta')::date + 30`.
+  5. Login sebagai admin, lalu buka `/tracker` lewat alamat.
+- **Hasil yang diharapkan:**
+  - Langkah 1: dialihkan ke halaman login (`/auth/login?callbackUrl=…`).
+  - Langkah 2: menu **Tracker** ada di antara Langganan dan Daftar Event. Halaman menampilkan "Tracker belum tersedia" dan tombol **Buka halaman langganan** menuju `/langganan`. Tidak ada data kunjungan apa pun.
+  - Langkah 3: isi tracker tampil (dicek di KJG-21).
+  - Langkah 4: `dihentikan` dan tanggal akhir kemarin sama-sama menampilkan "Tracker belum tersedia". Setelah dikembalikan, isi tracker tampil lagi.
+  - Langkah 5: "Tracker belum tersedia", karena admin tidak punya langganan.
+- **Keadaan gagal yang dicek:**
+  - Belum login.
+  - Sesi idle: buka `/tracker` setelah sesi idle, maka dialihkan ke `/auth/login?reason=idle`.
+  - Langganan dihentikan, berakhir kemarin, belum berlangganan, dan akun admin.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-21: Isi tracker
+
+- **Kode tugas:** 2.4
+- **Peran:** pelanggan
+- **Persiapan data:** skrip "Data uji tracker" sudah dijalankan. Belum ada aksi lapor atau lewati.
+- **Langkah:**
+  1. Login sebagai akun uji dan buka `/tracker`.
+  2. Cocokkan setiap bagian dengan hasil query tanggal di atas.
+  3. Muat ulang dengan DevTools → Network → Regular 4G (centang Disable Cache), lalu perhatikan kerangka sebelum isi muncul.
+  4. Ulangi di lebar layar HP (DevTools, 375 px).
+- **Hasil yang diharapkan:**
+  - **Kartu hari ini:**
+    - Hari kerja: "Dijadwalkan", "Sampah Anda dijadwalkan diambil hari ini.", dan "08.00 – 10.00 WIB".
+    - Sabtu atau Minggu: "Tidak ada pengambilan" dan "Sabtu dan Minggu tidak ada pengambilan."
+    - Selalu ada tombol **Lapor kendala atau minta lewati**, yang menggulir ke form.
+  - **Jadwal berikutnya:** hari kerja ke-1, "08.00 – 10.00 WIB".
+  - **Total:** "7 ember" (4 + 3, dari `diambil` dan `ditimbang`) dan "12,5 kg".
+  - **Baris di bawah kartu:** "Uji 2.4", lalu "Jadwal tetap Senin, Selasa, Rabu, Kamis, Jumat, 08.00 – 10.00 WIB (pola jadwal hanya bisa diubah admin)".
+  - **Pemberitahuan:**
+    - "Jadwal berubah mulai <hari kerja ke-5>", isi "Hari pengambilan menjadi Senin, Rabu, Jumat, 07.00 – 09.00 WIB." dan "Alasan: Uji 2.4: rute kurir berubah".
+    - "Pengambilan <hari kerja terakhir ke-3> tertunda", isi "Ditunda: Truk pengangkut diservis. Diambil paling lambat <2 hari lagi>."
+    - "Libur <hari kerja ke-6>", isi "Ditunda: Libur uji 2.4. Diambil paling lambat <hari kerja ke-7>." Hari kerja ke-7 berganti jika tanggal itu juga libur.
+  - **Jadwal mendatang:** hari kerja ke-1 sampai ke-4, semuanya "Dijadwalkan". Yang ke-3 menulis "Jam menyesuaikan Waste and Wishes".
+  - **Riwayat:** 4 baris, terbaru di atas:
+    - "Ditimbang" dengan "4 ember · 12,5 kg";
+    - "Diambil" dengan "3 ember sudah diambil. Berat menyusul setelah ditimbang.";
+    - "Tertunda" dengan pesan tertunda yang sama seperti di pemberitahuan;
+    - "Dijadwalkan".
+  - **Permintaan saya:** "Belum ada laporan."
+  - **Langkah 3:** kerangka abu-abu tampil dulu dengan tinggi yang mirip, dan isi di bawahnya tidak terdorong jauh saat data muncul.
+  - **Langkah 4:**
+    - Satu kolom: kartu hari ini, pemberitahuan, jadwal, riwayat, lalu form dan permintaan.
+    - Menu header terbagi beberapa baris tanpa saling menimpa.
+- **Keadaan gagal yang dicek:** data kosong.
+  1. Setelah KJG-25 langkah 8 (pembersihan), beri akun uji langganan aktif saja dengan `INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan) SELECT id_user, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, (now() AT TIME ZONE 'Asia/Jakarta')::date + 30 FROM users WHERE email = 'email-akun-uji@contoh.com';`.
+  2. Buka `/tracker`. Yang diharapkan:
+     - kartu hari ini "Tidak ada pengambilan";
+     - "Belum ada jadwal berikutnya. Jadwal dibuat oleh tim Waste and Wishes.";
+     - total 0;
+     - "Belum ada jadwal mendatang.", "Belum ada riwayat pengambilan.", dan "Belum ada laporan.";
+     - baris jadwal tetap dan kartu pemberitahuan tidak tampil;
+     - tab **Ada kendala** menulis "Belum ada kunjungan yang bisa dilaporkan.";
+     - tab **Minta lewati** menulis "Tidak ada kunjungan yang masih bisa dilewati. Permintaan lewati paling lambat H-1 pukul 17.00 WIB.".
+  3. Hapus lagi baris `data_langganan` itu.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-22: Pelanggan melaporkan kendala
+
+- **Kode tugas:** 2.4
+- **Peran:** pelanggan
+- **Persiapan data:** skrip "Data uji tracker" sudah dijalankan.
+- **Langkah:**
+  1. Di kartu **Laporan ke admin**, tab **Ada kendala**, klik **Kirim laporan** tanpa mengisi apa pun. Lalu pilih satu kunjungan, isi pesan hanya dengan spasi, dan kirim.
+  2. Pilih kunjungan riwayat yang "Ditimbang", tulis "Ember kemarin belum dikembalikan.", lalu kirim.
+  3. Di DevTools, ubah atribut `value` salah satu `<option>` di pilihan kunjungan menjadi `abc`, pilih opsi itu, lalu kirim. Ulangi dengan `999999`, lalu dengan id kunjungan milik akun lain dari query `SELECT id_kunjungan FROM kunjungan_pengambilan WHERE id_user <> (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com') LIMIT 1;`.
+  4. Biarkan halaman terbuka. Ubah langganan akun uji menjadi `dihentikan` (KJG-20 langkah 4), lalu kirim laporan yang valid dari halaman yang masih terbuka. Kembalikan ke `aktif` sesudahnya.
+  5. Jalankan `SELECT jenis, status, pesan, tanggal_pengganti FROM laporan_kendala WHERE id_user = (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');`.
+- **Hasil yang diharapkan:**
+  - Langkah 1: kotak merah "Periksa kembali isian yang ditandai.", ditambah pesan "Pilih kunjungan." dan "Pesan wajib diisi." di bawah isiannya. Isian yang sudah dipilih tetap ada.
+  - Langkah 2: "Laporan terkirim. Tanggapan admin akan tampil di Permintaan saya.", lalu form kosong lagi. Di **Permintaan saya** muncul "Kendala" dengan badge "Menunggu tanggapan", tanggal kunjungannya, tanggal kirim hari ini, dan isi pesannya.
+  - Langkah 3: `abc` menampilkan "Pilih kunjungan.". `999999` dan kunjungan akun lain sama-sama menampilkan "Kunjungan tidak ditemukan. Muat ulang halaman.".
+  - Langkah 4: "Laporan hanya untuk pelanggan dengan langganan aktif. Muat ulang halaman.".
+  - Langkah 5: tepat satu baris, yaitu `kendala`, `menunggu`, "Ember kemarin belum dikembalikan.", `tanggal_pengganti` kosong.
+- **Keadaan gagal yang dicek:**
+  - Isian kosong, ID salah, kunjungan akun lain, dan langganan berhenti saat halaman masih terbuka.
+  - Sesi idle: kirim laporan setelah sesi idle, maka muncul "Sesi Anda telah berakhir. Silakan untuk login ulang.".
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-23: Pelanggan meminta lewati tanpa tanggal pengganti
+
+- **Kode tugas:** 2.4
+- **Peran:** pelanggan
+- **Persiapan data:** skrip "Data uji tracker" sudah dijalankan.
+- **Langkah:**
+  1. Buka tab **Minta lewati**, lalu buka pilihan kunjungan.
+  2. Pilih hari kerja ke-3, kosongkan alasan, biarkan **Lewati saja**, lalu klik **Lewati pengambilan**. Pilih OK di dialog konfirmasi.
+  3. Isi alasan "Kantor tutup karena acara internal". Klik **Lewati pengambilan**, lalu pilih Batal di dialog.
+  4. Klik **Lewati pengambilan** lagi dan pilih OK.
+  5. Buka `/tracker` di dua tab. Di tab pertama, lewati hari kerja ke-4 dengan alasan apa saja. Di tab kedua, yang belum dimuat ulang, pilih hari kerja ke-4 lalu kirim.
+  6. Jalankan query tanggal di "Data uji tracker" dan query laporan di KJG-22 langkah 5.
+- **Hasil yang diharapkan:**
+  - Langkah 1: pilihan berisi hari kerja ke-1 sampai ke-4. Kunjungan hari ini dan kunjungan lampau tidak ada. Hari kerja ke-1 hanya muncul jika batasnya (H-1 pukul 17.00 WIB) belum lewat. Setelah satu kunjungan dipilih, di bawahnya tertulis "Batas permintaan: <hari>, <tanggal> pukul 17.00 WIB.".
+  - Langkah 2: "Alasan wajib diisi." di bawah isian alasan, dan tidak ada data yang berubah.
+  - Langkah 3: tidak terjadi apa-apa.
+  - Langkah 4: "Kunjungan dilewati. Alasan Anda sudah diteruskan ke admin.", lalu form kosong lagi.
+    - Di **Jadwal mendatang**, hari kerja ke-3 berbadge "Dilewati" dengan keterangan "Dilewati atas permintaan Anda.".
+    - Di **Permintaan saya** muncul "Lewati pengambilan", "Menunggu tanggapan", dan "Kunjungan sudah dilewati. Admin akan membaca alasan Anda.".
+    - Hari kerja ke-3 tidak ada lagi di pilihan lewati.
+  - Langkah 5: tab kedua menampilkan "Kunjungan ini sudah berstatus dilewati, jadi tidak bisa dilewati.".
+  - Langkah 6: hari kerja ke-3 dan ke-4 berstatus `dilewati`, dan ada dua baris laporan `lewati` dengan status `menunggu` dan `tanggal_pengganti` kosong.
+- **Keadaan gagal yang dicek:**
+  - Alasan kosong, batal di dialog konfirmasi, dan kunjungan yang sudah dilewati di tab lain.
+  - Admin tidak bisa memakai aksi ini: tidak ada langganan, jadi muncul "Laporan hanya untuk pelanggan dengan langganan aktif. Muat ulang halaman.".
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-24: Batas H-1 pukul 17.00 dicek di server
+
+- **Kode tugas:** 2.4
+- **Peran:** pelanggan
+- **Persiapan data:** skrip "Data uji tracker" sudah dijalankan. Catat id kunjungan riwayat yang berstatus `dijadwalkan` dan yang berstatus `diambil` dari query tanggal.
+- **Langkah:**
+  1. Di tab **Minta lewati**, pilih kunjungan apa saja dan isi alasan. Di DevTools, ubah `value` opsi yang terpilih menjadi id kunjungan riwayat `dijadwalkan`, lalu kirim dan pilih OK.
+  2. Ulangi dengan id kunjungan hari ini, jika hari ini hari kerja.
+  3. Ulangi dengan id kunjungan riwayat `diambil`.
+  4. (Jika hari kerja ke-1 adalah besok) buka tracker sebelum pukul 17.00 WIB dan sesudahnya.
+- **Hasil yang diharapkan:**
+  - Langkah 1 dan 2: "Batas meminta lewati untuk kunjungan ini sudah lewat (H-1 pukul 17.00 WIB)." Status kunjungannya tetap `dijadwalkan`.
+  - Langkah 3: "Kunjungan ini sudah berstatus diambil, jadi tidak bisa dilewati.".
+  - Langkah 4: sebelum pukul 17.00, hari kerja ke-1 ada di pilihan dengan "Batas permintaan: <hari ini> pukul 17.00 WIB.". Setelah pukul 17.00 dan halaman dimuat ulang, opsinya hilang. Batas tepatnya diuji di KJG-10.
+- **Keadaan gagal yang dicek:** permintaan setelah batas dan permintaan untuk kunjungan yang bukan `dijadwalkan` ditolak server, bukan hanya disembunyikan dari pilihan.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-25: Pelanggan meminta lewati dengan tanggal pengganti
+
+- **Kode tugas:** 2.4
+- **Peran:** pelanggan (langkah 7 meniru admin 2.6 lewat SQL)
+- **Persiapan data:** skrip "Data uji tracker" sudah dijalankan. Langkah di bawah memakai hari kerja ke-2 sebagai kunjungan yang dilewati.
+- **Langkah:**
+  1. Di tab **Minta lewati**, pilih hari kerja ke-2, isi alasan, lalu pilih **Minta tanggal pengganti**.
+  2. Kirim berturut-turut dengan tanggal pengganti berikut. Ketik tanggalnya jika pemilih tanggal menolak:
+     - kosong;
+     - Sabtu sesudah hari kerja ke-2;
+     - tanggal hari kerja ke-2 itu sendiri;
+     - hari kerja ke-6 (Libur uji 2.4);
+     - hari kerja ke-4.
+  3. Kirim dengan tanggal hari kerja ke-5.
+  4. Lihat kartu **Permintaan saya** dan **Jadwal mendatang**.
+  5. Jalankan query laporan di KJG-22 langkah 5.
+  6. Pilih **Lewati saja** lagi di form, lalu pastikan isian tanggal hilang.
+  7. Tiru persetujuan admin (tugas 2.6) dengan SQL ini, lalu muat ulang `/tracker`:
+
+     ```sql
+     -- Meniru 2.6: admin menyetujui tanggal pengganti dan menanggapi laporan lewati terakhir.
+     WITH lap AS (
+       SELECT l.id_laporan, l.kunjungan_id, l.tanggal_pengganti, k.id_user, k.pengajuan_id
+       FROM laporan_kendala l
+       JOIN kunjungan_pengambilan k ON k.id_kunjungan = l.kunjungan_id
+       JOIN users u ON u.id_user = l.id_user
+       WHERE u.email = 'email-akun-uji@contoh.com' AND l.jenis = 'lewati' AND l.tanggal_pengganti IS NOT NULL
+       ORDER BY l.id_laporan DESC
+       LIMIT 1
+     ), pengganti AS (
+       INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai, pengganti_dari)
+       SELECT id_user, pengajuan_id, tanggal_pengganti, '08:00', '10:00', kunjungan_id FROM lap
+       RETURNING id_kunjungan
+     )
+     UPDATE laporan_kendala
+     SET status = 'ditanggapi', tanggapan_admin = 'Disetujui. Kami ambil di tanggal pengganti.'
+     WHERE id_laporan = (SELECT id_laporan FROM lap);
+     ```
+
+  8. Hapus semua data uji tracker:
+
+     ```sql
+     DELETE FROM laporan_kendala WHERE id_user IN (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');
+     DELETE FROM kunjungan_pengambilan WHERE id_user IN (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');
+     DELETE FROM perubahan_jadwal WHERE alasan = 'Uji 2.4: rute kurir berubah';
+     DELETE FROM data_langganan WHERE id_user IN (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');
+     DELETE FROM pengajuan_langganan WHERE nama_instansi = 'Uji 2.4'
+       AND id_user IN (SELECT id_user FROM users WHERE email = 'email-akun-uji@contoh.com');
+     DELETE FROM hari_libur WHERE keterangan = 'Libur uji 2.4';
+     ```
+
+- **Hasil yang diharapkan:**
+  - Langkah 1: isian **Usulan tanggal pengganti** muncul, dengan keterangan "Hari kerja, bukan hari libur, setelah tanggal yang dilewati, dan belum ada kunjungan di tanggal itu.".
+  - Langkah 2: hari kerja ke-2 tetap `dijadwalkan`. Setiap kiriman menampilkan "Periksa kembali isian yang ditandai.", dengan pesan di bawah isian tanggal berturut-turut:
+    - "Tanggal pengganti wajib diisi.";
+    - "Tanggal pengganti harus hari kerja (Senin–Jumat).";
+    - "Tanggal pengganti harus setelah tanggal yang dilewati.";
+    - "Tanggal itu hari libur (Libur uji 2.4).";
+    - "Anda sudah punya kunjungan di tanggal itu.".
+  - Langkah 3: "Kunjungan dilewati. Tanggal pengganti menunggu persetujuan admin.".
+  - Langkah 4: di **Permintaan saya** muncul "Usulan tanggal pengganti: <hari kerja ke-5>" dan "Kunjungan sudah dilewati. Tanggal pengganti menunggu persetujuan admin.". Hari kerja ke-2 berbadge "Dilewati".
+  - Langkah 5: ada baris `lewati`, `menunggu`, dengan `tanggal_pengganti` = hari kerja ke-5.
+  - Langkah 7:
+    - Laporan itu berbadge "Sudah ditanggapi", dengan "Tanggal pengganti dari admin: <hari kerja ke-5>" dan kotak "Tanggapan admin" berisi teks dari SQL.
+    - Di **Jadwal mendatang** muncul hari kerja ke-5 dengan keterangan "Kunjungan pengganti".
+  - Langkah 8: query tanggal di "Data uji tracker" tidak menghasilkan baris, dan `/tracker` kembali menampilkan "Tracker belum tersedia".
+- **Keadaan gagal yang dicek:** tanggal pengganti kosong, akhir pekan, tidak setelah tanggal yang dilewati, hari libur, dan sudah ada kunjungan.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-26: Menu Tracker di header
+
+- **Kode tugas:** 2.4
+- **Peran:** publik dan pelanggan
+- **Persiapan data:** satu akun user (langganan aktif tidak wajib).
+- **Langkah:**
+  1. Dalam keadaan logout, lihat menu header.
+  2. Login, lalu buka `/tracker` dan halaman lain.
+  3. Di DevTools (mode responsif), ubah lebar layar menjadi 320, 375, 768, 1024, dan 1440 px.
+- **Hasil yang diharapkan:**
+  - Langkah 1: menu **Tracker** tidak tampil.
+  - Langkah 2: menu urut Beranda, Tentang Kami, Langganan, Tracker, Daftar Event, Toko, lalu avatar. Di `/tracker`, menu Tracker berwarna tema dengan garis bawah. Di halaman lain tidak.
+  - Langkah 3:
+    - 1024 dan 1440 px: logo dan semua menu dalam satu baris.
+    - 768 px: menu satu baris di bawah logo.
+    - 320 dan 375 px: menu terbagi beberapa baris.
+    - Tidak ada menu yang saling menimpa atau terpotong.
+- **Keadaan gagal yang dicek:** layar sempit.
 - **Hasil uji terakhir:** belum diuji

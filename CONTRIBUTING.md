@@ -464,7 +464,7 @@ Proyek ini memakai Auth.js `5.0.0-beta.32` dengan sesi JWT. Jangan mengubah vers
 
 | Lapis                     | Berkas                 | Menjaga                                                                            |
 | ------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
-| Middleware `authorized()` | `auth.config.ts`       | Navigasi **halaman** (`/admin`, `/event`, `/profil`, `/langganan`)                 |
+| Middleware `authorized()` | `auth.config.ts`       | Navigasi **halaman** (`/admin`, `/event`, `/profil`, `/langganan`, `/tracker`)     |
 | `requireLogin()`          | `lib/require-login.ts` | Server Action pengguna (dan route API pengguna jika nanti ada)                     |
 | `requireAdmin()`          | `lib/require-admin.ts` | Route `app/api/admin/*` dan Server Action admin. Dibangun di atas `requireLogin()` |
 

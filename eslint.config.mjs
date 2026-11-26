@@ -26,7 +26,6 @@ const eslintConfig = defineConfig([
   // Jangan menambah file baru ke daftar ini.
   {
     files: [
-      "lib/db/schema.ts",
       "components/admin/ImageKitUpload.tsx",
       "app/event/actions.ts",
       "components/admin/ImageKitEventUpload.tsx",

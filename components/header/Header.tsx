@@ -18,6 +18,7 @@ export default async function Header() {
       {loggedIn && (
         <>
           <NavLink href="/langganan">Langganan</NavLink>
+          <NavLink href="/tracker">Tracker</NavLink>
           <NavLink href="/event">Daftar Event</NavLink>
           <NavLink href="/toko">Toko</NavLink>
         </>
