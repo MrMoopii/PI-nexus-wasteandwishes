@@ -1,17 +1,19 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { count, desc, eq, inArray } from "drizzle-orm";
+import { asc, count, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { pengajuanLangganan, users } from "@/lib/db/schema";
+import { pengajuanLangganan, pesanNegosiasi, users } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/require-admin";
 import { STATUS_MENUNGGU_ADMIN } from "../aturan";
 import {
   isJenisInstansi,
   isJenisPelanggan,
+  isPengirimPesan,
   isStatusPengajuan,
   type DetailPengajuan,
   type JenisInstansi,
+  type PesanNegosiasiTampilan,
   type StatusPengajuan,
 } from "../types";
 
@@ -181,4 +183,43 @@ export async function getDetailPengajuan(
     // Kolom numeric dikembalikan sebagai string (CONTRIBUTING 9.2).
     hargaFinal: baris.hargaFinal === null ? null : Number(baris.hargaFinal),
   };
+}
+
+/**
+ * Riwayat pesan negosiasi satu pengajuan, urut dari yang terlama (kode tugas 1.5).
+ * Bentuknya PesanNegosiasiTampilan, sama dengan props komponen riwayat 1.2.
+ * Hanya admin; daftar kosong jika belum ada pesan. Gagal jika pengirim tidak dikenal.
+ */
+export async function getPesanNegosiasi(
+  idPengajuan: number,
+): Promise<PesanNegosiasiTampilan[]> {
+  // 1. Cek admin sebelum membaca pesan (CONTRIBUTING 7.2).
+  await pastikanAdmin();
+
+  // 2. Urutan waktu, lalu id untuk pesan yang dibuat di detik yang sama.
+  //    Aksi terimaTawaran() memakai urutan yang sama untuk "tawaran terakhir".
+  const daftar = await getDb()
+    .select({
+      idPesan: pesanNegosiasi.idPesan,
+      pengirim: pesanNegosiasi.pengirim,
+      hargaUsulan: pesanNegosiasi.hargaUsulan,
+      pesan: pesanNegosiasi.pesan,
+      dibuatPada: pesanNegosiasi.dibuatPada,
+    })
+    .from(pesanNegosiasi)
+    .where(eq(pesanNegosiasi.pengajuanId, idPengajuan))
+    .orderBy(asc(pesanNegosiasi.dibuatPada), asc(pesanNegosiasi.idPesan));
+
+  // 3. Pengirim ke tipe sempit, harga numeric ke number (CONTRIBUTING 9.2).
+  return daftar.map((baris) => {
+    if (!isPengirimPesan(baris.pengirim)) {
+      throw new Error(`Pengirim pesan tidak dikenal: ${baris.pengirim}`);
+    }
+    return {
+      ...baris,
+      pengirim: baris.pengirim,
+      hargaUsulan:
+        baris.hargaUsulan === null ? null : Number(baris.hargaUsulan),
+    };
+  });
 }

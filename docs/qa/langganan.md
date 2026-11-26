@@ -1,6 +1,6 @@
 # Skenario uji: langganan
 
-Nomor `LGN-01` sampai `LGN-19` disediakan untuk alur pengajuan dan negosiasi (kode tugas 1.1–1.5). Nomor `LGN-20` ke atas untuk pembayaran (kode tugas 1.6).
+Nomor `LGN-01` sampai `LGN-19` disediakan untuk alur pengajuan, negosiasi dari sisi pelanggan, dan daftar admin (kode tugas 1.1–1.4). Nomor `LGN-20` sampai `LGN-39` untuk pembayaran (kode tugas 1.6). Nomor `LGN-40` ke atas untuk aksi admin di halaman detail pengajuan (kode tugas 1.5).
 
 Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian 6.5). Siapkan:
 
@@ -362,4 +362,164 @@ Skenario yang menunggu notifikasi Midtrans memakai `pnpm build`, `pnpm start`, d
   2. Batalkan transaksi itu dari dashboard Midtrans sandbox (atau tunggu sampai kedaluwarsa).
 - **Hasil yang diharapkan:** `pembayaran_langganan` menjadi `dibatalkan` (atau `kedaluwarsa`). `data_langganan` tidak berubah. Tombol bayar tetap tampil karena pengajuan masih `siap_bayar`.
 - **Keadaan gagal yang dicek:** pembayaran tidak selesai.
+- **Hasil uji terakhir:** belum diuji
+
+## Data uji bersama untuk aksi admin
+
+Login dengan akun `admin`, lalu buka `/admin/langganan/<id pengajuan>`. Pengajuan dibuat dari akun `user` A lewat `/langganan` (LGN-01). Aksi pelanggan (setujui harga, tawar) belum ada di aplikasi (kode tugas 1.3), jadi tawaran pelanggan disiapkan lewat SQL:
+
+```sql
+-- Tawaran pelanggan Rp150.000 setelah admin mengirim penawaran.
+INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+VALUES (<id pengajuan>, 'pelanggan', <id A>, 150000, 'Bisa kurang sedikit?');
+UPDATE pengajuan_langganan SET status = 'negosiasi', diperbarui_pada = now()
+WHERE id_pengajuan = <id pengajuan>;
+
+-- Periksa pesan dan status.
+SELECT id_pesan, pengirim, id_pengirim, harga_usulan, pesan, dibuat_pada
+FROM pesan_negosiasi WHERE pengajuan_id = <id pengajuan> ORDER BY dibuat_pada, id_pesan;
+SELECT status, jenis_pelanggan, hari_pengambilan, jam_mulai, jam_selesai,
+       jumlah_ember, harga_final, alasan_ditolak, diperbarui_pada
+FROM pengajuan_langganan WHERE id_pengajuan = <id pengajuan>;
+```
+
+## LGN-40: Admin mengirim penawaran
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan A berstatus `menunggu_review`, belum ada pesan.
+- **Langkah:**
+  1. Buka detail pengajuan. Pastikan panel "Tindakan admin" menampilkan "Belum ada" di kedua harga terakhir, dan hari Senin, Rabu, Jumat sudah tercentang.
+  2. Isi harga `175000`, pilih Reguler, kosongkan jam, isi jumlah ember `3` dan catatan "Harga termasuk ember.", lalu klik **Kirim penawaran**.
+- **Hasil yang diharapkan:** badge berubah menjadi **Ditawarkan**, form penawaran hilang, "Penawaran terakhir admin" menampilkan Rp 175.000 / 30 hari beserta catatannya, dan "Rentang jam" menampilkan "Jam menyesuaikan WW". Di database: `status = 'ditawarkan'`, `jenis_pelanggan = 'reguler'`, `hari_pengambilan = {1,3,5}`, jam `NULL`, `jumlah_ember = 3`, **`harga_final` tetap `NULL`**, dan ada satu pesan baru `pengirim = 'admin'`, `id_pengirim` = id admin, `harga_usulan = 175000`. Halaman `/langganan` milik A menampilkan status **Ditawarkan**.
+- **Keadaan gagal yang dicek:** lihat LGN-41 dan LGN-42.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-41: Isian penawaran tidak valid
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan berstatus `menunggu_review`.
+- **Langkah:** kirim form penawaran dengan isian berikut satu per satu:
+  1. Pilih MOU, kosongkan kedua jam.
+  2. Isi jam mulai `08:00` saja.
+  3. Isi jam `22:00` sampai `02:00`, lalu `08:00` sampai `08:00`.
+  4. Harga `0`, `150000.5`, dan kosong.
+  5. Hilangkan semua centang hari.
+  6. Jumlah ember `0` dan `201`.
+  7. Pilih MOU dengan jam `08:00` sampai `23:00`, isian lain benar.
+- **Hasil yang diharapkan:** langkah 1–6 menampilkan "Periksa kembali isian yang ditandai." dan pesan di isian masing-masing: "Pelanggan MOU wajib punya rentang jam.", "Isi jam mulai dan jam selesai, atau kosongkan keduanya.", "Jam selesai harus setelah jam mulai.", "Harga harus lebih dari 0.", "Harga harus bilangan bulat rupiah.", "Pilih minimal satu hari pengambilan.", "Isi jumlah ember, minimal 1.", "Jumlah ember paling banyak 200.". Isian lain tetap terisi seperti yang diketik, dan database tidak berubah. Langkah 7 berhasil seperti LGN-40.
+- **Keadaan gagal yang dicek:** MOU tanpa jam, jam tidak berpasangan, rentang lewat tengah malam, harga nol/desimal/kosong, tanpa hari, ember di luar batas.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-42: Penawaran ulang dan status yang sudah berubah
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan berstatus `negosiasi` dengan tawaran pelanggan (data uji bersama).
+- **Langkah:**
+  1. Buka detail. Form penawaran terisi syarat sebelumnya dan harga penawaran admin terakhir. Ubah harga menjadi `160000`, kirim.
+  2. Buka detail pengajuan lain berstatus `menunggu_review` di dua tab. Kirim penawaran di tab pertama, lalu kirim lagi dari tab kedua tanpa memuat ulang.
+- **Hasil yang diharapkan:** langkah 1 mengubah status menjadi `ditawarkan` dan menambah satu pesan admin `harga_usulan = 160000`; `harga_final` tetap `NULL`. Langkah 2: tab kedua menampilkan "Status pengajuan sudah berubah. Muat ulang halaman.", dan **tidak ada pesan admin kedua** di database.
+- **Keadaan gagal yang dicek:** status berubah di tab lain; status dan pesan tidak boleh tersimpan sebagian.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-43: Admin menerima tawaran pelanggan
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan berstatus `negosiasi` dengan tawaran pelanggan Rp150.000 (data uji bersama).
+- **Langkah:**
+  1. Buka detail. "Tawaran terakhir pelanggan" menampilkan Rp 150.000 beserta pesannya, dan ada tombol **Terima tawaran Rp 150.000**.
+  2. Tanpa memuat ulang halaman, sisipkan tawaran baru lewat SQL: `INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan) VALUES (<id pengajuan>, 'pelanggan', <id A>, 140000);`
+  3. Klik **Terima tawaran Rp 150.000**, pilih **OK**.
+  4. Muat ulang halaman, lalu klik **Terima tawaran Rp 140.000**, pilih **OK**.
+  5. Ubah nilai input tersembunyi `idPesan` lewat DevTools menjadi `abc`, lalu klik tombol (ulangi di pengajuan `negosiasi` lain).
+- **Hasil yang diharapkan:** langkah 3 menampilkan "Tawaran tidak bisa diterima: ada tawaran baru dari pelanggan atau status pengajuan sudah berubah. Muat ulang halaman." dan status tetap `negosiasi`. Langkah 4 mengubah status menjadi **Disetujui pelanggan**, dan `harga_final = 140000` (sama dengan tawaran pelanggan terakhir). Langkah 5 menampilkan "Tawaran tidak valid.".
+- **Keadaan gagal yang dicek:** tawaran baru datang saat halaman terbuka, ID tawaran tidak valid.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-44: Admin mengaktifkan pembayaran
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan berstatus `disetujui_pelanggan` dengan `harga_final` terisi (hasil LGN-43).
+- **Langkah:**
+  1. Buka detail di dua tab. Klik **Aktifkan pembayaran** di tab pertama, pilih **OK**.
+  2. Klik **Aktifkan pembayaran** di tab kedua tanpa memuat ulang.
+  3. Siapkan pengajuan `disetujui_pelanggan` dengan `harga_final = NULL` lewat SQL, lalu klik **Aktifkan pembayaran**.
+- **Hasil yang diharapkan:** langkah 1 mengubah status menjadi **Siap bayar**, panel menampilkan "Tidak ada tindakan admin untuk status ini.", dan `/langganan` milik A menampilkan tombol **Bayar**. Langkah 2 dan 3 menampilkan "Pembayaran tidak bisa diaktifkan: status pengajuan sudah berubah atau harga final belum ada. Muat ulang halaman." dan status tidak berubah.
+- **Keadaan gagal yang dicek:** status bukan `disetujui_pelanggan`, harga final kosong.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-45: Admin menolak pengajuan
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** satu pengajuan berstatus `menunggu_review` (ulangi dengan `ditawarkan`, `negosiasi`, `disetujui_pelanggan`) dan satu berstatus `siap_bayar`.
+- **Langkah:**
+  1. Kosongkan alasan, klik **Tolak pengajuan**, pilih **OK**.
+  2. Isi alasan "Lokasi di luar jangkauan", klik **Tolak pengajuan**, pilih **Cancel**, lalu ulangi dan pilih **OK**.
+  3. Buka pengajuan `siap_bayar` dan pastikan form tolak tidak tampil.
+  4. Buka pengajuan lain berstatus `menunggu_review` sampai form tolak tampil. Tanpa memuat ulang, ubah statusnya menjadi `siap_bayar` lewat SQL (`UPDATE pengajuan_langganan SET status = 'siap_bayar', harga_final = 150000 WHERE id_pengajuan = <id pengajuan>;`), lalu isi alasan dan kirim form tolak.
+- **Hasil yang diharapkan:** langkah 1 menampilkan "Alasan penolakan wajib diisi.". Langkah 2: **Cancel** tidak mengubah apa pun; **OK** mengubah status menjadi **Ditolak**, `alasan_ditolak` terisi, dan `/langganan` milik A menampilkan alasan itu beserta form pengajuan baru. Langkah 3: form tolak tidak tampil. Langkah 4 menampilkan "Pengajuan tidak bisa ditolak karena statusnya sudah berubah. Muat ulang halaman.", alasan yang diketik tetap ada, dan status tetap `siap_bayar`.
+- **Keadaan gagal yang dicek:** alasan kosong, tolak setelah `siap_bayar`.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-46: Admin mengirim pesan tanpa harga
+
+- **Kode tugas:** 1.5
+- **Peran:** admin
+- **Persiapan data:** pengajuan berstatus `menunggu_review` (ulangi dengan `ditawarkan` dan `negosiasi`), dan satu berstatus `ditolak`.
+- **Langkah:**
+  1. Kirim pesan kosong.
+  2. Kirim pesan "Kami cek lokasi besok."
+  3. Buka pengajuan `ditolak`.
+- **Hasil yang diharapkan:** langkah 1 menampilkan "Pesan wajib diisi.". Langkah 2 menampilkan "Pesan terkirim.", status tidak berubah, dan ada pesan baru `pengirim = 'admin'` dengan `harga_usulan = NULL`. Di pengajuan `ditolak`, form pesan tidak tampil.
+- **Keadaan gagal yang dicek:** pesan kosong, status yang tidak lagi menerima pesan.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-47: Bukan admin, belum login, sesi idle, dan ID salah
+
+- **Kode tugas:** 1.5
+- **Peran:** pelanggan, publik
+- **Persiapan data:** pengajuan berstatus `menunggu_review`.
+- **Langkah:**
+  1. Login sebagai admin, buka detail pengajuan sampai semua form tampil. Di SQL Editor ubah `peran` akun admin itu menjadi `'user'` tanpa logout, lalu coba setiap aksi (kirim penawaran, kirim pesan, tolak). Kembalikan `peran` menjadi `'admin'`.
+  2. Buka detail sampai form tampil, biarkan sampai sesi idle, lalu coba setiap aksi.
+  3. Lewat DevTools ubah input tersembunyi `idPengajuan` menjadi `abc`, `0`, lalu ID yang tidak ada, dan kirim penawaran.
+  4. Buka `/admin/langganan/abc` dan `/admin/langganan/999999`.
+- **Hasil yang diharapkan:** langkah 1 menampilkan "Akses khusus admin." di setiap aksi (peran dicek ulang di database). Langkah 2 menampilkan "Sesi Anda telah berakhir. Silakan untuk login ulang." Langkah 3: `abc` dan `0` menampilkan "Pengajuan tidak valid."; ID yang tidak ada menampilkan "Status pengajuan sudah berubah. Muat ulang halaman.". Langkah 4 menampilkan halaman 404. Database tidak berubah di semua langkah.
+- **Keadaan gagal yang dicek:** bukan admin, sesi idle, ID salah.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-48: Riwayat negosiasi di detail admin
+
+- **Kode tugas:** 1.5 (komponen `RiwayatNegosiasi` dari 1.2)
+- **Peran:** admin
+- **Persiapan data:** pengajuan A berstatus `menunggu_review`, belum ada pesan. Untuk langkah 2, jalankan SQL ini dengan `<id admin>` diganti `id_user` akun admin:
+  ```sql
+  -- Tiga pesan dalam satu perintah, jadi dibuat_pada ketiganya sama dan urutannya ditentukan id_pesan.
+  INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+  VALUES
+    (<id pengajuan>, 'admin', <id admin>, 175000, 'Harga termasuk ember.'),
+    (<id pengajuan>, 'pelanggan', <id A>, 150000, NULL),
+    (<id pengajuan>, 'pelanggan', <id A>, NULL, E'Baris pertama\nBaris kedua');
+  UPDATE pengajuan_langganan SET status = 'negosiasi', diperbarui_pada = now()
+  WHERE id_pengajuan = <id pengajuan>;
+  ```
+- **Langkah:**
+  1. Buka detail pengajuan sebelum SQL dijalankan.
+  2. Jalankan SQL di atas, lalu muat ulang halaman.
+  3. Kirim penawaran baru `160000` dari form penawaran.
+- **Hasil yang diharapkan:**
+  - Langkah 1: bagian "Riwayat negosiasi" menampilkan "Belum ada pesan negosiasi."
+  - Langkah 2: tiga pesan tampil urut dari yang terlama, sesuai urutan di SQL:
+    - pesan pertama dari "Admin WW", dengan "Usulan harga: Rp 175.000 / 30 hari" dan catatannya;
+    - pesan kedua atas nama instansi, dengan harga saja tanpa teks pesan;
+    - pesan ketiga atas nama instansi, berisi teks dua baris tanpa baris harga.
+  - Ketiga pesan menampilkan waktu yang sama, dalam WIB.
+  - Di panel tindakan, "Penawaran terakhir admin" Rp 175.000 dan "Tawaran terakhir pelanggan" Rp 150.000. Pesan tanpa harga tidak menggeser ringkasan ini.
+  - Langkah 3: pesan admin Rp 160.000 muncul paling bawah setelah aksi selesai, dan "Penawaran terakhir admin" menjadi Rp 160.000.
+- **Keadaan gagal yang dicek:** belum ada pesan, waktu simpan yang sama persis, pesan tanpa harga, pesan tanpa teks, teks bergaris baru.
 - **Hasil uji terakhir:** belum diuji

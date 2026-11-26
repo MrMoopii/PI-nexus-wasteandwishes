@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { LABEL_JENIS_INSTANSI } from "@/features/langganan/types";
+import {
+  LABEL_JENIS_INSTANSI,
+  type PesanNegosiasiTampilan,
+} from "@/features/langganan/types";
 import type { DetailPengajuanAdmin } from "@/features/langganan/queries/admin";
 import { formatRupiah } from "@/lib/format-angka";
 import { formatWaktu } from "@/lib/format-tanggal";
-import { StatusPengajuanBadge } from "../../_components/status-pengajuan";
+import { StatusPengajuanBadge } from "@/app/admin/langganan/_components/status-pengajuan";
+import { PanelAksi } from "./panel-aksi";
+import { RiwayatNegosiasi } from "@/features/langganan/components/riwayat-negosiasi";
 
 const FORMAT_WAKTU = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "long",
@@ -44,6 +49,19 @@ function teksJenisInstansi(pengajuan: DetailPengajuanAdmin): string {
   return LABEL_JENIS_INSTANSI[pengajuan.jenisInstansi];
 }
 
+/**
+ * Teks rentang jam. Jam kosong setelah admin menetapkan syarat berarti
+ * jam menyesuaikan WW (keputusan mitra); sebelum itu berarti belum diatur.
+ */
+function teksJam(pengajuan: DetailPengajuanAdmin): string {
+  if (pengajuan.jamMulai === null && pengajuan.jamSelesai === null) {
+    return pengajuan.jenisPelanggan === null
+      ? "Belum diatur"
+      : "Jam menyesuaikan WW";
+  }
+  return formatWaktu(pengajuan.jamMulai, pengajuan.jamSelesai);
+}
+
 /** Teks hari pengambilan; hari kosong atau asing ditampilkan apa adanya. */
 function teksHari(hari: number[] | null): string {
   if (!hari || hari.length === 0) return "Belum diatur admin";
@@ -52,13 +70,16 @@ function teksHari(hari: number[] | null): string {
 
 /**
  * Detail satu pengajuan langganan untuk review admin: data pelanggan,
- * instansi, perkiraan ember, syarat pengambilan, dan catatan pelanggan.
- * Tombol aksi review ada di tugas 1.5.
+ * instansi, perkiraan ember, syarat pengambilan, catatan pelanggan, dan
+ * panel tindakan admin (kode tugas 1.5).
  */
 export function DetailPengajuan({
   pengajuan,
+  pesan,
 }: {
   pengajuan: DetailPengajuanAdmin;
+  /** Riwayat pesan negosiasi, urut dari yang terlama. */
+  pesan: PesanNegosiasiTampilan[];
 }) {
   return (
     <div className="mx-auto w-full max-w-5xl font-(family-name:--font-plus-jakarta-sans)">
@@ -101,9 +122,7 @@ export function DetailPengajuan({
           </h2>
           <dl>
             <Fakta label="Nama instansi">{pengajuan.namaInstansi}</Fakta>
-            <Fakta label="Jenis instansi">
-              {teksJenisInstansi(pengajuan)}
-            </Fakta>
+            <Fakta label="Jenis instansi">{teksJenisInstansi(pengajuan)}</Fakta>
             <Fakta label="Alamat pengambilan">
               {pengajuan.alamatPengambilan}
             </Fakta>
@@ -131,11 +150,7 @@ export function DetailPengajuan({
             <Fakta label="Hari pengambilan">
               {teksHari(pengajuan.hariPengambilan)}
             </Fakta>
-            <Fakta label="Rentang jam">
-              {pengajuan.jamMulai === null && pengajuan.jamSelesai === null
-                ? "Belum diatur"
-                : formatWaktu(pengajuan.jamMulai, pengajuan.jamSelesai)}
-            </Fakta>
+            <Fakta label="Rentang jam">{teksJam(pengajuan)}</Fakta>
             <Fakta label="Jumlah ember">
               {pengajuan.jumlahEmber === null
                 ? "Belum ditetapkan"
@@ -169,6 +184,21 @@ export function DetailPengajuan({
           </dl>
         </section>
       </div>
+
+      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-400">
+          Riwayat negosiasi
+        </h2>
+        <RiwayatNegosiasi
+          daftarPesan={pesan}
+          namaPengirim={{
+            pelanggan: pengajuan.namaInstansi,
+            admin: "Admin WW",
+          }}
+        />
+      </section>
+
+      <PanelAksi pengajuan={pengajuan} pesan={pesan} />
     </div>
   );
 }
