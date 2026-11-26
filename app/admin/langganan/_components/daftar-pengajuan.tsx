@@ -1,14 +1,12 @@
 import Link from "next/link";
 import {
   LABEL_JENIS_INSTANSI,
+  LABEL_STATUS_PENGAJUAN,
   STATUS_PENGAJUAN,
   type StatusPengajuan,
 } from "@/features/langganan/types";
 import type { RingkasanPengajuanAdmin } from "@/features/langganan/queries/admin";
-import {
-  LABEL_STATUS_PENGAJUAN,
-  StatusPengajuanBadge,
-} from "./status-pengajuan";
+import { StatusPengajuanBadge } from "./status-pengajuan";
 
 const FORMAT_WAKTU = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "medium",

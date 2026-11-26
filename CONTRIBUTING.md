@@ -293,6 +293,64 @@ Dokumentasi ditulis **di PR yang sama** dengan kodenya, bukan menyusul. PR yang 
 - Jika PR memang tidak butuh dokumen baru (misalnya hanya perbaikan tampilan kecil), tulis alasannya di deskripsi PR.
 - Reviewer memeriksa tabel ini di setiap PR, sama seperti memeriksa kodenya.
 
+### 4.7 Catatan antar-tugas
+
+Bagian ini dipakai saat tugasmu bersinggungan dengan tugas lain yang belum di-merge:
+
+- tugasmu butuh komponen, fungsi, query, atau tipe dari tugas lain yang belum ada di `development`; atau
+- tugasmu menyiapkan tempat yang nanti diisi tugas lain, misalnya data sudah dibaca di halaman dan tinggal dipasang komponennya.
+
+**Cek dulu apakah catatan memang perlu.** Perbarui branch dari `development` (bagian 3.2). Jika bagian yang dibutuhkan sudah ada, langsung pakai di PR-mu. Catatan hanya untuk bagian yang benar-benar belum ada.
+
+**Jika bagian yang dibutuhkan belum ada:**
+
+- Jangan membuat sendiri isi tugas orang lain, termasuk versi sementara, komponen tiruan, atau data contoh (bagian 11.3 no. 6). Jangan mengimpor file yang belum ada di `development`, karena build akan gagal.
+- Selesaikan tugasmu sampai batas yang bisa dikerjakan tanpa bagian itu, supaya PR-mu tetap bisa di-merge sendiri.
+- **Yang PR-nya di-merge belakangan yang memasang.** Jika PR-mu masuk lebih dulu, pemilik tugas lain memasangnya di PR mereka. Entri catatan menjadi izin untuk mengubah bagian yang ditandai itu saja di file milikmu (bagian 4.3), bukan bagian lainnya.
+- Jika nama fungsi, props, atau bentuk datanya belum tertulis di issue atau README fitur, sepakati dulu lewat komentar di issue tugas lain itu sebelum menulis kode.
+
+**Satu catatan ditulis di tiga tempat:**
+
+1. **Penanda di kode**, di file milikmu tempat bagian itu nanti dipasang. Awalannya selalu `TUGAS <kode> (#<issue>):` supaya bisa dicari. Isinya apa yang harus dipasang dan data mana yang sudah tersedia. Penanda bukan kode yang dikomentari.
+
+   ```tsx
+   {/* TUGAS 1.6 (#138): pasang tombol bayar di sini untuk status siap_bayar. idPengajuan dan
+       hargaFinal sudah ada di `pengajuan` dari getPengajuanSaya(). */}
+   ```
+
+2. **Entri di bagian `Catatan antar-tugas`** di README fitur yang peta filenya memuat file penanda tadi. Untuk `components/ui/` dan `hooks/`, pakai README folder itu. Jika bagiannya belum ada, tambahkan di akhir README. Satu entri untuk setiap tugas tujuan:
+
+   ```md
+   - **Untuk 1.6 (#138, @jodi240506), dari 1.1 (#136):** pasang tombol bayar di
+     `app/langganan/_components/status-pengajuan.tsx` pada penanda `TUGAS 1.6 (#138)`.
+     `getPengajuanSaya()` mengembalikan `DetailPengajuan` yang sudah berisi `idPengajuan`,
+     `status`, dan `hargaFinal` (number), jadi query tidak perlu ditambah.
+   ```
+
+3. **Komentar di issue tujuan**, dikirim oleh anggota tim (bukan agent), supaya pemiliknya mendapat notifikasi dari GitHub. Sebutkan juga catatan ini di deskripsi PR-mu.
+
+   ```text
+   Catatan dari 1.1 (#136): tempat tombol bayar sudah disiapkan di status-pengajuan.tsx.
+   Detailnya di features/langganan/README.md bagian "Catatan antar-tugas".
+   Di kode, cari penanda "TUGAS 1.6 (#138)".
+   ```
+
+**Sebelum mulai mengerjakan issue**, cari catatan untuk kode tugasmu:
+
+- bagian `Catatan antar-tugas` di README setiap fitur yang filenya akan kamu sentuh;
+- penanda di kode, misalnya untuk 1.6: `grep -rnF "TUGAS 1.6 (" app features components hooks lib`, atau cari `TUGAS 1.6 (` dengan Ctrl+Shift+F di VS Code;
+- komentar di issue-mu sendiri.
+
+**Saat catatan dikerjakan**, README diperbarui di PR yang sama supaya tidak ada lagi yang terbaca sebagai tugas yang belum dikerjakan:
+
+1. Hapus penanda `TUGAS <kode> (#<issue>):` di kode.
+2. Hapus entrinya dari bagian `Catatan antar-tugas`. Jika bagian itu menjadi kosong, tulis lagi "Belum ada."
+3. Perbarui baris peta file yang masih menyebut kode tugasmu dengan kata seperti "menyusul", "belum ada", "nanti", atau "setelah … masuk". Tulis yang sekarang sudah ada, misalnya "Setujui harga, tawar, kirim pesan menyusul (1.3)" menjadi "`setujuiPenawaran()`, `tawarHarga()`, `kirimPesan()` (1.3)".
+4. Bagian README lain yang berbentuk petunjuk pemasangan untuk tugasmu (misalnya "Memasang tombol bayar") diubah menjadi petunjuk pemakaian dari kode yang sudah ada, atau dihapus jika tidak dibutuhkan lagi.
+5. Tulis di deskripsi PR, misalnya "Menyelesaikan catatan dari 1.1 (#136)".
+
+Cara memeriksanya: `grep -rnF "TUGAS 1.6 (" app features components hooks lib` tidak menemukan apa pun, dan README fitur tidak lagi menyebut 1.6 sebagai sesuatu yang belum dikerjakan. Jika catatan ternyata keliru atau tidak berlaku lagi, balas di issue tujuan lalu hapus catatannya. Jangan dibiarkan menumpuk.
+
 ## 5. Variabel lingkungan, rahasia, dan Vercel
 
 - Nama semua variabel terdaftar di `.env.example`. Nilai asli hanya di `.env.local` (tidak ikut Git, jangan pernah di-commit).
@@ -680,6 +738,7 @@ export async function kirimPenawaran(formData: FormData): Promise<HasilAksi> {
 - [ ] Dokumen yang terkena perubahan sudah diperbarui di PR ini sesuai tabel bagian 4.6, atau alasannya ditulis di deskripsi PR.
 - [ ] Jika mengubah skema: file migrasi ikut di-commit, kolom yang berubah disebut di deskripsi PR, dan tim diingatkan menjalankan `pnpm db:migrate`.
 - [ ] Jika mengubah file milik anggota lain: pemiliknya sudah dikabari dan perubahannya disebut di deskripsi PR.
+- [ ] Jika tugas ini butuh atau menyiapkan bagian untuk tugas lain yang belum di-merge: penanda di kode, entri README, dan komentar di issue tujuan sudah dibuat. Catatan untuk tugas ini yang sudah dikerjakan sudah dihapus, dan README fitur tidak lagi menyebut tugas ini sebagai "menyusul" atau "belum ada" (bagian 4.7).
 - [ ] Jika mengubah kode status atau bentuk respons route API: semua pemanggilnya sudah dicari dan diuji (bagian 9.5).
 - [ ] Untuk perubahan tampilan yang memakai `<Suspense>`: tidak ada konten yang terdorong saat halaman pertama kali dimuat (bagian 8 no. 10).
 - [ ] Jika memakai AI agent: seluruh perubahannya sudah diperiksa dengan langkah di bagian 11.2.
@@ -701,7 +760,7 @@ AI agent boleh dipakai membantu, dengan syarat:
 - **Buka setiap tugas baru dengan prompt pembuka ini**, supaya agent benar-benar membaca aturannya:
 
   ```text
-  Sebelum mengerjakan apa pun, baca CONTRIBUTING.md dan AGENTS.md di root repo ini sampai habis. Lalu sebutkan nomor bagian aturan yang berlaku untuk tugas berikut, letak setiap file baru menurut peta folder di bagian 4, dan daftar file yang akan kamu ubah. Jangan menulis kode sampai saya membalas "lanjut". Tugasnya: [tulis tugasnya di sini]
+  Sebelum mengerjakan apa pun, baca CONTRIBUTING.md dan AGENTS.md di root repo ini sampai habis. Lalu sebutkan nomor bagian aturan yang berlaku untuk tugas berikut, catatan antar-tugas untuk kode tugas ini (bagian 4.7), letak setiap file baru menurut peta folder di bagian 4, dan daftar file yang akan kamu ubah. Jangan menulis kode sampai saya membalas "lanjut". Kode tugas dan issue: [misalnya 1.6, #138]. Tugasnya: [tulis tugasnya di sini]
   ```
 
   Jika jawabannya tidak menyebut aturan yang jelas relevan (misalnya untuk Server Action tidak menyebut cek sesi), atau menaruh file di luar peta folder, berarti agent belum membaca dengan benar. Ulangi sebelum lanjut.
@@ -758,6 +817,11 @@ Agent yang bekerja di repo ini wajib:
 14. Bertanya dulu jika maksud pengguna kurang jelas atau ada beberapa cara yang sama-sama masuk akal.
 15. **Memvalidasi setiap input dengan skema Zod** (bagian 9.8) **dan menulis komentar penjelasan singkat** (bagian 9.9) untuk setiap fungsi, komponen, dan alur yang dibuat atau diubah. Komentar menjelaskan tujuan dan alasan, bukan mengulang kode, dan ikut diperbarui saat kodenya berubah.
 16. **Memperbarui dokumentasi di perubahan yang sama** sesuai tabel bagian 4.6: peta file fitur, daftar komponen atau hook, tabel fungsi bantu, kontrak API, dan skenario uji. Jangan menunda dokumentasi ke tugas berikutnya.
+17. **Memeriksa dan menulis catatan antar-tugas** (bagian 4.7):
+    - Di awal, menanyakan kode tugas dan nomor issue jika pengguna belum menyebutnya. Lalu membaca bagian `Catatan antar-tugas` di README fitur yang akan disentuh dan mencari penanda `TUGAS <kode> (` di kode. Jika `gh` tersedia, membaca komentar issue dengan `gh issue view <nomor> --comments`. Jika tidak, meminta pengguna menempelkannya. Catatan yang ditemukan disebut di rencana.
+    - Jika tugas butuh komponen, fungsi, query, atau tipe dari tugas lain yang belum ada di `development`, tidak membuatnya sendiri, tidak membuat versi sementara, dan tidak mengimpor file yang belum ada. Sebagai gantinya, menulis penanda di kode dan entri README, lalu menuliskan teks komentar untuk issue tujuan di laporan akhir supaya dikirim pengguna.
+    - Tidak mengirim komentar, membuat issue, atau mengubah issue di GitHub sendiri.
+    - Setelah mengerjakan catatan atau tugas yang disebut di README, memperbarui README di perubahan yang sama sesuai langkah "Saat catatan dikerjakan" di bagian 4.7: menghapus penanda dan entri catatan, mengubah baris peta file yang masih berbunyi "menyusul" atau "belum ada" menjadi yang sudah ada, dan mengubah atau menghapus petunjuk pemasangan yang sudah selesai. Lalu mencari ulang kode tugasnya di README dan kode untuk memastikan tidak ada yang masih terbaca sebagai tugas yang belum dikerjakan.
 17. Setelah selesai, melaporkan:
     - daftar file yang diubah, dibuat, dipindah, atau dihapus, beserta alasan masing-masing;
     - jumlah baris setiap file kode yang diubah atau dibuat;

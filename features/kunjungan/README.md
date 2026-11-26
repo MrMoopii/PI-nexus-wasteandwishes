@@ -35,3 +35,9 @@ Tabel database (`lib/db/schema.ts` dan migrasinya) hanya diubah pemilik skema (k
 - `kondisiLanggananAktif()` dari `lib/langganan.ts`: tracker hanya untuk pelanggan yang langganannya aktif.
 - `tanggalHariIniJakarta()` dan fungsi format dari `lib/format-tanggal.ts`.
 - Data pola hari dan rentang jam pelanggan dibaca langsung dari tabelnya lewat `lib/db/schema.ts`, bukan dengan mengimpor dari `features/langganan/`.
+
+## Catatan antar-tugas
+
+Catatan untuk tugas lain yang belum di-merge. Format entri dan cara menulisnya ada di `CONTRIBUTING.md` bagian 4.7. Hapus entri di PR yang mengerjakannya.
+
+Belum ada.

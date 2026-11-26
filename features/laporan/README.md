@@ -17,3 +17,9 @@ Laporan bulanan untuk admin: pilih bulan dan satu instansi atau semua, tampilkan
 - Semua angka berasal dari database. Tidak ada angka tulisan tangan.
 - Data kunjungan dibaca langsung dari tabelnya lewat `lib/db/schema.ts`, bukan dengan mengimpor dari `features/kunjungan/`.
 - Emisi karbon belum dihitung sistem. Rumusnya menunggu dari WW.
+
+## Catatan antar-tugas
+
+Catatan untuk tugas lain yang belum di-merge. Format entri dan cara menulisnya ada di `CONTRIBUTING.md` bagian 4.7. Hapus entri di PR yang mengerjakannya.
+
+Belum ada.

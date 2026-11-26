@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import { getDetailPengajuan } from "@/features/langganan/queries/admin";
+import {
+  getDetailPengajuan,
+  getPesanNegosiasi,
+} from "@/features/langganan/queries/admin";
 import { skemaIdPengajuan } from "@/features/langganan/validasi/admin";
 import { DetailPengajuan } from "./_components/detail-pengajuan";
 import { KerangkaDetailPengajuan } from "./_components/kerangka-detail";
@@ -32,8 +35,11 @@ async function IsiDetail({ params }: { params: Promise<{ id: string }> }) {
   if (!hasil.success) notFound();
 
   // 2. Query admin memanggil requireAdmin() sendiri (CONTRIBUTING 7.2).
-  const pengajuan = await getDetailPengajuan(hasil.data.id);
+  const [pengajuan, pesan] = await Promise.all([
+    getDetailPengajuan(hasil.data.id),
+    getPesanNegosiasi(hasil.data.id),
+  ]);
   if (!pengajuan) notFound();
 
-  return <DetailPengajuan pengajuan={pengajuan} />;
+  return <DetailPengajuan pengajuan={pengajuan} pesan={pesan} />;
 }
