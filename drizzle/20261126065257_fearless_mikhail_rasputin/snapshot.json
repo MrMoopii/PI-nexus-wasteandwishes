@@ -1,0 +1,3649 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "1059f49d-ffe3-4ee1-a520-3196ce8e870e",
+  "prevIds": [
+    "69fff8b7-acea-4aca-adba-5c654bf55bc4"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "data_langganan",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "detail_keranjang",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "detail_transaksi",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "events",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "foto_produk",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "jadwal",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "jadwal_janjian",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "jadwal_rutin",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "keranjang",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pembayaran_event",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pembayaran_langganan",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pendaftaran_event",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "produk",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "riwayat_pengambilan",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "transaksi",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "users",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pengajuan_langganan",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pesan_negosiasi",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "hari_libur",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "kunjungan_pengambilan",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "laporan_kendala",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "perubahan_jadwal",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "data_langganan_id_langganan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_langganan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status_langganan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_mulai_langganan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_akhir_langganan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "keranjang_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "produk_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "1",
+      "generated": null,
+      "identity": null,
+      "name": "jumlah_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "detail_transaksi_id_detail_transaksi_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_detail_transaksi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "transaksi_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "produk_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jumlah_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "events_id_event_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nama_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deskripsi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "kuota_peserta",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_pelaksanaan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "waktu_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "waktu_selesai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lokasi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "gambar_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "gambar_file_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'draft'",
+      "generated": null,
+      "identity": null,
+      "name": "status_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "biaya_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "foto_produk_id_foto_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_foto",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "product_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "file_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "urutan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "is_primary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "jadwal_id_jadwal_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_jadwal",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "langganan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "hari_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_jadwal",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jadwal_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_janjian"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_janjian",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_janjian"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "keterangan_tujuan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_janjian"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status_konfirmasi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_janjian"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jadwal_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_rutin"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_rutin"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_selesai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "jadwal_rutin"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "keranjang_id_keranjang_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_keranjang",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "keranjang"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "keranjang"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pembayaran_event_id_pembayaran_event_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_pembayaran_event",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "event_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "order_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "midtrans_transaction_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "redirect_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jumlah",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status_pembayaran",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_dibuat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_dibayar",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_kedaluwarsa",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pembayaran_langganan_id_pembayaran_langganan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_pembayaran_langganan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "langganan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "order_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "midtrans_transaction_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jumlah",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status_pembayaran",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_dibuat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_dibayar",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pendaftaran_event_id_pendaftaran_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_pendaftaran",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "event_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_daftar",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "produk_id_produk_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nama_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "harga_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "jumlah_stok",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deskripsi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "gambar_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "berat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'aktif'",
+      "generated": null,
+      "identity": null,
+      "name": "status_produk",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "produk"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "riwayat_pengambilan_id_riwayat_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_riwayat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jadwal_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "foto_bukti_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "bobot_sampah",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "transaksi_id_transaksi_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_transaksi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "transaksi"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_transaksi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "transaksi"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "metode_pembayaran",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "transaksi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "users_id_user_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "username",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nama_pelanggan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'user'",
+      "generated": null,
+      "identity": null,
+      "name": "peran",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "password",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nomor_telp",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alamat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_lahir",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pengajuan_langganan_id_pengajuan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_pengajuan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nama_instansi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_instansi",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_instansi_lain",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alamat_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nama_pic",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "telp_pic",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_limbah",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "estimasi_ember",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "catatan_pelanggan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis_pelanggan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 1,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "hari_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_selesai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jumlah_ember",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "harga_final",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alasan_ditolak",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'menunggu_review'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "dibuat_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "diperbarui_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pesan_negosiasi_id_pesan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_pesan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pengajuan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pengirim",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_pengirim",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "harga_usulan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pesan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "dibuat_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "hari_libur_id_hari_libur_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_hari_libur",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "keterangan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'geser'",
+      "generated": null,
+      "identity": null,
+      "name": "aturan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "kunjungan_pengambilan_id_kunjungan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_kunjungan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pengajuan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_selesai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'dijadwalkan'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jumlah_ember",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "berat_kg",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "foto_bukti",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "foto_bukti_file_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "catatan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alasan_kendala",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_paling_lambat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pengganti_dari",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "dicatat_oleh",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ditimbang_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "dibuat_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "laporan_kendala_id_laporan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_laporan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id_user",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "kunjungan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jenis",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pesan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggal_pengganti",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'menunggu'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "tanggapan_admin",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "dibuat_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "perubahan_jadwal_id_perubahan_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id_perubahan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pengajuan_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "hari_pengambilan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jam_selesai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "berlaku_mulai",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alasan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "diubah_oleh",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "dibuat_pada",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "transaksi_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "produk_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "detail_transaksi_transaksi_produk_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "event_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "id_user",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "pendaftaran_event_event_user_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "username",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "users_username_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "email",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "users_email_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "id_user",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"status\" NOT IN ('ditolak', 'dibatalkan')",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "pengajuan_langganan_satu_berjalan_per_user",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "pengajuan_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "pesan_negosiasi_pengajuan_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "tanggal",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "hari_libur_tanggal_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "id_user",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "tanggal",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "kunjungan_pengambilan_user_tanggal_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "tanggal",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "kunjungan_pengambilan_tanggal_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "kunjungan_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "laporan_kendala_kunjungan_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "pengajuan_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "perubahan_jadwal_pengajuan_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "data_langganan_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "data_langganan"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "keranjang_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "keranjang",
+      "columnsTo": [
+        "id_keranjang"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "detail_keranjang_keranjang_id_keranjang_id_keranjang_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "produk_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "produk",
+      "columnsTo": [
+        "id_produk"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "detail_keranjang_produk_id_produk_id_produk_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "transaksi_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "transaksi",
+      "columnsTo": [
+        "id_transaksi"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "detail_transaksi_transaksi_id_transaksi_id_transaksi_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "produk_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "produk",
+      "columnsTo": [
+        "id_produk"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "detail_transaksi_produk_id_produk_id_produk_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "detail_transaksi"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "product_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "produk",
+      "columnsTo": [
+        "id_produk"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "foto_produk_product_id_produk_id_produk_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "foto_produk"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "langganan_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "data_langganan",
+      "columnsTo": [
+        "id_langganan"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "jadwal_langganan_id_data_langganan_id_langganan_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "jadwal"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "jadwal_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "jadwal",
+      "columnsTo": [
+        "id_jadwal"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "jadwal_janjian_jadwal_id_jadwal_id_jadwal_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "jadwal_janjian"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "jadwal_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "jadwal",
+      "columnsTo": [
+        "id_jadwal"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "jadwal_rutin_jadwal_id_jadwal_id_jadwal_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "jadwal_rutin"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "keranjang_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "keranjang"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "event_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "events",
+      "columnsTo": [
+        "id_event"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pembayaran_event_event_id_events_id_event_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pembayaran_event_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pembayaran_event"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "langganan_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "data_langganan",
+      "columnsTo": [
+        "id_langganan"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pembayaran_langganan_Myzn9HGb1tT9_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pembayaran_langganan"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "event_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "events",
+      "columnsTo": [
+        "id_event"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pendaftaran_event_event_id_events_id_event_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pendaftaran_event_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pendaftaran_event"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "jadwal_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "jadwal",
+      "columnsTo": [
+        "id_jadwal"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "riwayat_pengambilan_jadwal_id_jadwal_id_jadwal_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "riwayat_pengambilan"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "transaksi_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "transaksi"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pengajuan_langganan_id_user_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "pengajuan_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "pengajuan_langganan",
+      "columnsTo": [
+        "id_pengajuan"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pesan_negosiasi_ORORxLSRZATu_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_pengirim"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pesan_negosiasi_id_pengirim_users_id_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "pengajuan_id",
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "pengajuan_langganan",
+      "columnsTo": [
+        "id_pengajuan",
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "kunjungan_pengambilan_pengajuan_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "pengganti_dari",
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "kunjungan_pengambilan",
+      "columnsTo": [
+        "id_kunjungan",
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "kunjungan_pengambilan_pengganti_dari_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "dicatat_oleh"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "kunjungan_pengambilan_dicatat_oleh_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "kunjungan_id",
+        "id_user"
+      ],
+      "schemaTo": "public",
+      "tableTo": "kunjungan_pengambilan",
+      "columnsTo": [
+        "id_kunjungan",
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "laporan_kendala_kunjungan_user_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "pengajuan_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "pengajuan_langganan",
+      "columnsTo": [
+        "id_pengajuan"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "perubahan_jadwal_pengajuan_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "diubah_oleh"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id_user"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "perubahan_jadwal_diubah_oleh_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "columns": [
+        "keranjang_id",
+        "produk_id"
+      ],
+      "nameExplicit": false,
+      "name": "detail_keranjang_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "detail_keranjang"
+    },
+    {
+      "columns": [
+        "id_langganan"
+      ],
+      "nameExplicit": false,
+      "name": "data_langganan_pkey",
+      "schema": "public",
+      "table": "data_langganan",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_detail_transaksi"
+      ],
+      "nameExplicit": false,
+      "name": "detail_transaksi_pkey",
+      "schema": "public",
+      "table": "detail_transaksi",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_event"
+      ],
+      "nameExplicit": false,
+      "name": "events_pkey",
+      "schema": "public",
+      "table": "events",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_foto"
+      ],
+      "nameExplicit": false,
+      "name": "foto_produk_pkey",
+      "schema": "public",
+      "table": "foto_produk",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_jadwal"
+      ],
+      "nameExplicit": false,
+      "name": "jadwal_pkey",
+      "schema": "public",
+      "table": "jadwal",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "jadwal_id"
+      ],
+      "nameExplicit": false,
+      "name": "jadwal_janjian_pkey",
+      "schema": "public",
+      "table": "jadwal_janjian",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "jadwal_id"
+      ],
+      "nameExplicit": false,
+      "name": "jadwal_rutin_pkey",
+      "schema": "public",
+      "table": "jadwal_rutin",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_keranjang"
+      ],
+      "nameExplicit": false,
+      "name": "keranjang_pkey",
+      "schema": "public",
+      "table": "keranjang",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_pembayaran_event"
+      ],
+      "nameExplicit": false,
+      "name": "pembayaran_event_pkey",
+      "schema": "public",
+      "table": "pembayaran_event",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_pembayaran_langganan"
+      ],
+      "nameExplicit": false,
+      "name": "pembayaran_langganan_pkey",
+      "schema": "public",
+      "table": "pembayaran_langganan",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_pendaftaran"
+      ],
+      "nameExplicit": false,
+      "name": "pendaftaran_event_pkey",
+      "schema": "public",
+      "table": "pendaftaran_event",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_produk"
+      ],
+      "nameExplicit": false,
+      "name": "produk_pkey",
+      "schema": "public",
+      "table": "produk",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_riwayat"
+      ],
+      "nameExplicit": false,
+      "name": "riwayat_pengambilan_pkey",
+      "schema": "public",
+      "table": "riwayat_pengambilan",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_transaksi"
+      ],
+      "nameExplicit": false,
+      "name": "transaksi_pkey",
+      "schema": "public",
+      "table": "transaksi",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_user"
+      ],
+      "nameExplicit": false,
+      "name": "users_pkey",
+      "schema": "public",
+      "table": "users",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_pengajuan"
+      ],
+      "nameExplicit": false,
+      "name": "pengajuan_langganan_pkey",
+      "schema": "public",
+      "table": "pengajuan_langganan",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_pesan"
+      ],
+      "nameExplicit": false,
+      "name": "pesan_negosiasi_pkey",
+      "schema": "public",
+      "table": "pesan_negosiasi",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_hari_libur"
+      ],
+      "nameExplicit": false,
+      "name": "hari_libur_pkey",
+      "schema": "public",
+      "table": "hari_libur",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_kunjungan"
+      ],
+      "nameExplicit": false,
+      "name": "kunjungan_pengambilan_pkey",
+      "schema": "public",
+      "table": "kunjungan_pengambilan",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_laporan"
+      ],
+      "nameExplicit": false,
+      "name": "laporan_kendala_pkey",
+      "schema": "public",
+      "table": "laporan_kendala",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id_perubahan"
+      ],
+      "nameExplicit": false,
+      "name": "perubahan_jadwal_pkey",
+      "schema": "public",
+      "table": "perubahan_jadwal",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "id_pengajuan",
+        "id_user"
+      ],
+      "nullsNotDistinct": false,
+      "name": "pengajuan_langganan_pengajuan_user_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "id_kunjungan",
+        "id_user"
+      ],
+      "nullsNotDistinct": false,
+      "name": "kunjungan_pengambilan_kunjungan_user_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "nullsNotDistinct": false,
+      "name": "data_langganan_id_user_key",
+      "schema": "public",
+      "table": "data_langganan",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id_user"
+      ],
+      "nullsNotDistinct": false,
+      "name": "keranjang_id_user_key",
+      "schema": "public",
+      "table": "keranjang",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "order_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "pembayaran_event_order_id_key",
+      "schema": "public",
+      "table": "pembayaran_event",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "order_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "pembayaran_langganan_order_id_key",
+      "schema": "public",
+      "table": "pembayaran_langganan",
+      "entityType": "uniques"
+    },
+    {
+      "value": "\"status\" IN ('menunggu_review', 'ditawarkan', 'negosiasi', 'disetujui_pelanggan', 'siap_bayar', 'ditolak', 'dibatalkan')",
+      "name": "pengajuan_langganan_status_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "\"estimasi_ember\" > 0",
+      "name": "pengajuan_langganan_estimasi_ember_positif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "\"jumlah_ember\" > 0",
+      "name": "pengajuan_langganan_jumlah_ember_positif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "\"harga_final\" > 0",
+      "name": "pengajuan_langganan_harga_final_positif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "cardinality(\"hari_pengambilan\") > 0 AND \"hari_pengambilan\" <@ ARRAY[1, 2, 3, 4, 5]",
+      "name": "pengajuan_langganan_hari_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "(\"jam_mulai\" IS NULL AND \"jam_selesai\" IS NULL) OR (\"jam_mulai\" IS NOT NULL AND \"jam_selesai\" IS NOT NULL AND \"jam_mulai\" < \"jam_selesai\")",
+      "name": "pengajuan_langganan_rentang_jam_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pengajuan_langganan"
+    },
+    {
+      "value": "\"pengirim\" IN ('pelanggan', 'admin')",
+      "name": "pesan_negosiasi_pengirim_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "value": "\"harga_usulan\" > 0",
+      "name": "pesan_negosiasi_harga_usulan_positif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "pesan_negosiasi"
+    },
+    {
+      "value": "\"aturan\" IN ('geser', 'lewati')",
+      "name": "hari_libur_aturan_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "hari_libur"
+    },
+    {
+      "value": "\"status\" IN ('dijadwalkan', 'diambil', 'ditimbang', 'tertunda', 'batal', 'dilewati')",
+      "name": "kunjungan_pengambilan_status_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "(\"jam_mulai\" IS NULL AND \"jam_selesai\" IS NULL) OR (\"jam_mulai\" IS NOT NULL AND \"jam_selesai\" IS NOT NULL AND \"jam_mulai\" < \"jam_selesai\")",
+      "name": "kunjungan_pengambilan_rentang_jam_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"jumlah_ember\" >= 0",
+      "name": "kunjungan_pengambilan_jumlah_ember_tidak_negatif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"berat_kg\" >= 0",
+      "name": "kunjungan_pengambilan_berat_kg_tidak_negatif",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "EXTRACT(ISODOW FROM \"tanggal\") BETWEEN 1 AND 5",
+      "name": "kunjungan_pengambilan_tanggal_hari_kerja",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"status\" <> 'tertunda' OR (\"alasan_kendala\" IS NOT NULL AND \"tanggal_paling_lambat\" IS NOT NULL)",
+      "name": "kunjungan_pengambilan_tertunda_lengkap",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"tanggal_paling_lambat\" IS NULL OR \"tanggal_paling_lambat\" >= \"tanggal\"",
+      "name": "kunjungan_pengambilan_tanggal_paling_lambat_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"status\" NOT IN ('diambil', 'ditimbang') OR \"jumlah_ember\" IS NOT NULL",
+      "name": "kunjungan_pengambilan_ember_tercatat",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"status\" <> 'ditimbang' OR (\"berat_kg\" IS NOT NULL AND \"ditimbang_pada\" IS NOT NULL)",
+      "name": "kunjungan_pengambilan_timbang_lengkap",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "(\"foto_bukti\" IS NULL AND \"foto_bukti_file_id\" IS NULL) OR (\"foto_bukti\" IS NOT NULL AND \"foto_bukti_file_id\" IS NOT NULL)",
+      "name": "kunjungan_pengambilan_foto_berpasangan",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "kunjungan_pengambilan"
+    },
+    {
+      "value": "\"jenis\" IN ('kendala', 'lewati')",
+      "name": "laporan_kendala_jenis_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "value": "\"status\" IN ('menunggu', 'ditanggapi')",
+      "name": "laporan_kendala_status_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "value": "btrim(\"pesan\") <> ''",
+      "name": "laporan_kendala_pesan_tidak_kosong",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "value": "\"tanggal_pengganti\" IS NULL OR \"jenis\" = 'lewati'",
+      "name": "laporan_kendala_tanggal_pengganti_hanya_lewati",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "laporan_kendala"
+    },
+    {
+      "value": "cardinality(\"hari_pengambilan\") > 0 AND \"hari_pengambilan\" <@ ARRAY[1, 2, 3, 4, 5]",
+      "name": "perubahan_jadwal_hari_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    },
+    {
+      "value": "(\"jam_mulai\" IS NULL AND \"jam_selesai\" IS NULL) OR (\"jam_mulai\" IS NOT NULL AND \"jam_selesai\" IS NOT NULL AND \"jam_mulai\" < \"jam_selesai\")",
+      "name": "perubahan_jadwal_rentang_jam_valid",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "perubahan_jadwal"
+    }
+  ],
+  "renames": []
+}
