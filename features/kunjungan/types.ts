@@ -134,3 +134,103 @@ export type HariLiburTampilan = Omit<BarisHariLibur, "aturan"> & {
 
 /** Satu perubahan pola jadwal, untuk riwayat dan pemberitahuan di tracker. Tanpa id admin. */
 export type PerubahanJadwalTampilan = Omit<BarisPerubahanJadwal, "diubahOleh">;
+
+// ── Tracker pelanggan (kode tugas 2.4) ─────────────────────────────
+
+/** Nama hari pola: 1 = Senin sampai 5 = Jumat, sama dengan hari_pengambilan dan ISODOW. */
+export const LABEL_HARI: Record<number, string> = {
+  1: "Senin",
+  2: "Selasa",
+  3: "Rabu",
+  4: "Kamis",
+  5: "Jumat",
+};
+
+/** Nama hari dari angka 1–5. Angka lain ditampilkan apa adanya, tidak disembunyikan. */
+export function namaHari(hari: number): string {
+  return LABEL_HARI[hari] ?? `Hari ke-${hari}`;
+}
+
+/** Panjang pesan kendala dan alasan lewati paling banyak, dipakai skema dan form. */
+export const PANJANG_PESAN_LAPORAN_MAKS = 1000;
+
+/**
+ * Satu kunjungan di tracker. Hanya kolom yang ditampilkan ke pelanggan: tanpa foto,
+ * catatan admin, dan pencatat (CONTRIBUTING 7.2 no. 7). `hari` = nomor hari ISO tanggalnya.
+ */
+export type KunjunganTracker = Pick<
+  KunjunganTampilan,
+  | "idKunjungan"
+  | "tanggal"
+  | "jamMulai"
+  | "jamSelesai"
+  | "status"
+  | "jumlahEmber"
+  | "beratKg"
+  | "alasanKendala"
+  | "tanggalPalingLambat"
+  | "penggantiDari"
+> & { hari: number };
+
+/** Kunjungan yang bisa dipilih di form laporan. */
+export type PilihanKunjungan = Pick<
+  KunjunganTracker,
+  "idKunjungan" | "tanggal" | "hari" | "status"
+>;
+
+/** Kunjungan yang masih boleh diminta lewati; `batas` sudah diformat di server (WIB). */
+export type PilihanLewati = PilihanKunjungan & { batas: string };
+
+/** Pola tetap dari kesepakatan yang berlaku (pengajuan siap_bayar). Hanya admin yang mengubahnya. */
+export type JadwalTetap = {
+  namaInstansi: string;
+  hariPengambilan: number[];
+  jamMulai: string | null;
+  jamSelesai: string | null;
+};
+
+/** Hari libur di hari pola pelanggan. `diambilPalingLambat` hanya untuk aturan geser. */
+export type PemberitahuanLibur = Pick<
+  HariLiburTampilan,
+  "tanggal" | "keterangan" | "aturan"
+> & { hari: number; diambilPalingLambat: string | null };
+
+/** Perubahan pola dari admin (2.7) yang ditampilkan ke pelanggan. */
+export type PerubahanPolaTracker = Omit<
+  PerubahanJadwalTampilan,
+  "pengajuanId" | "dibuatPada"
+>;
+
+/** Laporan pelanggan beserta tanggapan admin dan tanggal pengganti yang disetujui (2.6). */
+export type LaporanTracker = Omit<
+  LaporanKendalaTampilan,
+  "kunjunganId"
+> & {
+  tanggalKunjungan: string;
+  hariKunjungan: number;
+  tanggalPenggantiDisetujui: string | null;
+};
+
+/** Isi halaman /tracker untuk pelanggan dengan langganan aktif. */
+export type IsiTracker = {
+  hariIni: string;
+  jadwalTetap: JadwalTetap | null;
+  kunjunganHariIni: KunjunganTracker | null;
+  mendatang: KunjunganTracker[];
+  riwayat: KunjunganTracker[];
+  /** Ember dari status diambil dan ditimbang, kg dari status ditimbang, seluruh riwayat. */
+  total: { ember: number; kg: number };
+  tertunda: KunjunganTracker[];
+  libur: PemberitahuanLibur[];
+  perubahanPola: PerubahanPolaTracker[];
+  permintaan: LaporanTracker[];
+  pilihanKendala: {
+    hariIni: PilihanKunjungan | null;
+    mendatang: PilihanKunjungan[];
+    riwayat: PilihanKunjungan[];
+  };
+  pilihanLewati: PilihanLewati[];
+};
+
+/** Hasil getTrackerSaya(): akun tanpa langganan aktif tidak menerima data apa pun. */
+export type DataTracker = { aktif: false } | ({ aktif: true } & IsiTracker);
