@@ -15,9 +15,10 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `validasi/jadwal.ts`           | `skemaRentangKunjungan`, `tanggalWajib()`, `teksIsian()`, `NilaiIsian`, `GalatIsian`   | 2.2        |
 | `actions/hari-libur.ts`        | `tambahHariLibur()`, `ubahHariLibur()`, `hapusHariLibur()`                             | 2.2        |
 | `validasi/hari-libur.ts`       | `skemaHariLibur` (tanggal, keterangan, aturan) dan `skemaIdHariLibur`                  | 2.2        |
-| `queries/admin.ts`             | Daftar kunjungan per tanggal untuk pencatatan                                          | 2.3        |
-| `actions/pencatatan.ts`        | Catat ember dan foto, catat berat (kg), tandai tertunda dengan tanggal paling lambat   | 2.3        |
-| `validasi/pencatatan.ts`       | Skema Zod jumlah ember, berat (kg), dan tanggal paling lambat                          | 2.3        |
+| `queries/admin.ts`             | `getKunjunganPerTanggal()`: daftar kunjungan satu tanggal beserta nama instansi      | 2.3        |
+| `actions/pencatatan.ts`        | `catatEmber()`, `catatBerat()`, `ubahPencatatan()`                                     | 2.3        |
+| `actions/tertunda.ts`          | `tandaiTertunda()`: satu atau banyak kunjungan sekaligus                               | 2.3        |
+| `validasi/pencatatan.ts`       | `skemaFilterTanggal`, `skemaCatatEmber`, `skemaCatatBerat`, `skemaUbahPencatatan`, `skemaTandaiTertunda` | 2.3 |
 | `queries/pelanggan.ts`         | Status hari ini, jadwal berikutnya, riwayat, total ember dan kg milik pelanggan        | 2.4        |
 | `actions/lapor-kendala.ts`     | Pelanggan melaporkan kendala                                                           | 2.4        |
 | `validasi/lapor-kendala.ts`    | Skema Zod isi laporan kendala                                                          | 2.4        |
@@ -27,7 +28,7 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `validasi/tanggapi-kendala.ts` | Skema Zod tanggapan admin                                                              | 2.6        |
 | `app/admin/hari-libur/`        | Halaman admin hari libur: tambah, daftar mendatang, ubah, hapus                        | 2.2        |
 | `app/admin/buat-kunjungan/`    | Halaman admin buat kunjungan: form rentang, ringkasan hasil, hari libur dihitung       | 2.2        |
-| `app/admin/kunjungan/`         | Halaman admin pencatatan harian                                                        | 2.3        |
+| `app/admin/kunjungan/`         | Halaman admin pencatatan harian: daftar per tanggal, catat ember/foto, catat berat, tandai tertunda | 2.3 |
 | `app/tracker/`                 | Halaman tracker pelanggan                                                              | 2.4        |
 | `app/admin/kendala/`           | Halaman admin laporan kendala                                                          | 2.6        |
 
@@ -94,6 +95,28 @@ Cara memakainya:
 - `berat_kg` adalah kolom `numeric`, jadi Drizzle mengembalikannya sebagai string. Ubah dengan `Number(...)` (`CONTRIBUTING.md` bagian 9.2).
 - Tabel ini tidak punya `diperbarui_pada`.
 - Data lama di `riwayat_pengambilan` tidak dipindahkan (keputusan 2.1, tabel lama kosong). Tracker dan laporan hanya membaca `kunjungan_pengambilan`.
+
+## Pencatatan harian (2.3)
+
+`/admin/kunjungan` dipakai admin untuk mencatat hasil pengambilan dari laporan kurir dan petugas pengolah sampah. Tidak ada status "dalam perjalanan". Tanggal dibaca dari `?tanggal=` (kosong berarti hari ini WIB; diisi tetapi bukan tanggal kalender berarti 404).
+
+### Alur status
+
+| Aksi | Status asal yang diterima | Status akhir | Isian wajib |
+| --- | --- | --- | --- |
+| `catatEmber()` | `dijadwalkan`, `tertunda` | `diambil` | jumlah ember, foto bukti (url + fileId) |
+| `catatBerat()` | `diambil` | `ditimbang` | berat kg (`ditimbang_pada` diisi `now()`) |
+| `ubahPencatatan()` | `diambil` | `diambil` | jumlah ember; foto opsional (kosong = foto lama) |
+| `ubahPencatatan()` | `ditimbang` | `ditimbang` | jumlah ember, berat kg; foto opsional (kosong = foto lama) |
+| `tandaiTertunda()` | `dijadwalkan` | `tertunda` | alasan, tanggal paling lambat |
+
+- Setiap aksi memakai satu `UPDATE … WHERE status IN (…) RETURNING …` (CONTRIBUTING 6.2). `RETURNING` kosong berarti status sudah berubah di tab lain; pesannya "Status kunjungan sudah berubah…" dan tidak ada data yang ditimpa.
+- `catatEmber()` dari status `tertunda` mengosongkan `alasan_kendala` dan `tanggal_paling_lambat`, karena kunjungan itu akhirnya diambil. Kedua status asal belum punya foto, jadi tidak ada file ImageKit lama yang perlu dihapus.
+- Tombol simpan `catatEmber()` dan `ubahPencatatan()` baru aktif jika jumlah ember terisi (dan foto untuk langkah 1). Isian jumlah ember sengaja kosong, bukan `0`: skema memvalidasi teks lalu mengubahnya ke angka, karena `z.coerce.number("")` menghasilkan `0` sehingga isian kosong lolos.
+- Tombol **Edit** muncul setelah kunjungan tersimpan. Status `diambil` menampilkan Edit jumlah ember + foto; status `ditimbang` menampilkan Edit jumlah ember + foto + berat. Foto baru yang menggantikan foto lama dihapus dari ImageKit lewat `deleteImageKitFile()`; foto kosong berarti foto lama dipertahankan. Berat hanya boleh diubah saat status `ditimbang` (dicek di `WHERE`), dan `ditimbang_pada` tidak ditulis ulang karena itu waktu penimbangan asli, bukan waktu koreksi.
+- `tandaiTertunda()` menerima banyak ID sekaligus. Syarat `tanggal <= tanggal_paling_lambat` ikut di `WHERE`, supaya satu baris yang tanggalnya sesudah tanggal paling lambat tidak membuat seluruh `UPDATE` gagal karena CHECK. Baris yang dilewati dilaporkan jumlahnya.
+- Kunjungan `batal` dan `dilewati` tetap tampil di daftar, tanpa aksi.
+- Foto diunggah lebih dulu lewat `ImageKitReportUpload` (memakai `/api/admin/imagekit-auth` dan `getImageKitAuthParams()`), lalu url dan fileId dikirim sebagai hidden input. Server hanya menerima URL `https`.
 
 ## Yang dipakai dari luar fitur ini
 
