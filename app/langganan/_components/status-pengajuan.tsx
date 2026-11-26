@@ -6,9 +6,11 @@ import { bolehBayar, transisiValid } from "@/features/langganan/aturan";
 import {
   LABEL_STATUS_PENGAJUAN,
   type DetailPengajuan,
+  type PesanNegosiasiTampilan,
   type StatusPengajuan,
 } from "@/features/langganan/types";
 import PaymentButton from "../payment-button";
+import { NegosiasiPelanggan } from "./negosiasi-pelanggan";
 import { RincianPengajuan } from "./rincian-pengajuan";
 import { TombolBatal } from "./tombol-batal";
 
@@ -50,8 +52,10 @@ const PENJELASAN_STATUS: Record<StatusPengajuan, string> = {
  */
 export function KartuStatusPengajuan({
   pengajuan,
+  daftarPesan,
 }: {
   pengajuan: DetailPengajuan;
+  daftarPesan: PesanNegosiasiTampilan[];
 }) {
   return (
     <Card className="space-y-5 p-6">
@@ -96,6 +100,17 @@ export function KartuStatusPengajuan({
       )}
 
       <RincianPengajuan pengajuan={pengajuan} />
+
+      {/* Panel negosiasi (1.3): Setujui/Tawar saat ditawarkan, form pesan, riwayat. */}
+      <NegosiasiPelanggan
+        idPengajuan={pengajuan.idPengajuan}
+        status={pengajuan.status}
+        daftarPesan={daftarPesan}
+        hariPengambilan={pengajuan.hariPengambilan}
+        jamMulai={pengajuan.jamMulai}
+        jamSelesai={pengajuan.jamSelesai}
+        jumlahEmber={pengajuan.jumlahEmber}
+      />
 
       {transisiValid("batalkanPengajuan", pengajuan.status) && (
         <TombolBatal idPengajuan={pengajuan.idPengajuan} />

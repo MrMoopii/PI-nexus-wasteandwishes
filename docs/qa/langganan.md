@@ -189,6 +189,85 @@ Ganti `<id A>` dan `<id pengajuan>` dengan nilai sebenarnya dari tabel `users` d
 - **Keadaan gagal yang dicek:** data rusak dibedakan dari data yang memang tidak ada (`CONTRIBUTING.md` bagian 8 no. 4).
 - **Hasil uji terakhir:** belum diuji
 
+## Data uji bersama untuk negosiasi
+
+Jalankan di SQL Editor branch Neon pribadimu. Ganti `<id pengajuan>` dan `<id A>` dengan nilai sebenarnya.
+
+```sql
+-- Pengajuan A berstatus ditawarkan, harga usulan admin terakhir Rp100.000.
+UPDATE pengajuan_langganan
+SET status = 'ditawarkan', harga_final = NULL
+WHERE id_pengajuan = <id pengajuan>;
+
+INSERT INTO pesan_negosiasi (pengajuan_id, pengirim, id_pengirim, harga_usulan, pesan)
+VALUES
+  (<id pengajuan>, 'admin', <id A_admin>, 100000, 'Penawaran 100 ribu per 30 hari.');
+```
+
+## LGN-15: Setujui penawaran
+
+- **Kode tugas:** 1.3
+- **Peran:** pelanggan
+- **Persiapan data:** pengajuan A `ditawarkan`, ada usulan admin Rp100.000.
+- **Langkah:**
+  1. Buka `/langganan` sebagai A.
+  2. Pastikan kartu penawaran menampilkan `Rp 100.000 / 30 hari` dan tombol **Setujui harga**.
+  3. Klik **Setujui harga**.
+- **Hasil yang diharapkan:** kartu penawaran menampilkan tanda **"Perlu tindakan Anda"**, harga `Rp 100.000 / 30 hari`, dan tombol **Setujui harga**. Setelah klik **Setujui harga**, status menjadi **Disetujui pelanggan** dan `harga_final = 100000`. Halaman tidak lagi menampilkan tombol Setujui/Tawar maupun tanda "Perlu tindakan Anda". Riwayat negosiasi menampilkan pesan admin Rp100.000.
+- **Keadaan gagal yang dicek:** lihat LGN-18.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-16: Tawar dengan harga valid
+
+- **Kode tugas:** 1.3
+- **Peran:** pelanggan
+- **Persiapan data:** pengajuan A `ditawarkan`.
+- **Langkah:**
+  1. Isi "Tawarkan harga" `80000`, isi "Pesan" `Bisa 80 ribu?`, lalu klik **Tawar harga**.
+- **Hasil yang diharapkan:** status menjadi **Negosiasi**, baris baru di `pesan_negosiasi` dengan `pengirim='pelanggan'`, `harga_usulan=80000`, `pesan='Bisa 80 ribu?'`. `harga_final` tetap NULL. Halaman menampilkan status Negosiasi dan riwayat pesan terbaru.
+- **Keadaan gagal yang dicek:** lihat LGN-17.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-17: Tawar dengan harga 0, negatif, atau bukan angka
+
+- **Kode tugas:** 1.3
+- **Peran:** pelanggan
+- **Persiapan data:** pengajuan A `ditawarkan`.
+- **Langkah:**
+  1. Isi harga `0`, klik **Tawar harga**.
+  2. Isi harga `-50000`, klik.
+  3. Isi harga `abc`, klik.
+  4. Isi harga `123456.789` (lebih dari 2 desimal), klik.
+- **Hasil yang diharapkan:** setiap langkah menampilkan pesan error di bawah form (misalnya "Harga harus lebih dari 0." / "Isian tidak valid.") dan status tetap `ditawarkan`, tidak ada baris baru di `pesan_negosiasi`.
+- **Keadaan gagal yang dicek:** harga 0, negatif, bukan angka, desimal berlebih.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-18: Setuju di dua tab sekaligus / setujui tanpa usulan harga
+
+- **Kode tugas:** 1.3
+- **Peran:** pelanggan
+- **Persiapan data:** pengajuan A `ditawarkan`. Untuk langkah 4, siapkan pengajuan `ditawarkan` yang hanya punya pesan admin **tanpa** `harga_usulan` (INSERT pesan `pengirim='admin'`, `harga_usulan=NULL`).
+- **Langkah:**
+  1. Buka `/langganan` di dua tab sebagai A.
+  2. Klik **Setujui harga** di tab pertama sampai status **Disetujui pelanggan**.
+  3. Tanpa memuat ulang, klik **Setujui harga** di tab kedua.
+  4. Buka pengajuan `ditawarkan` yang hanya punya pesan admin tanpa `harga_usulan`, lalu klik **Setujui harga**.
+- **Hasil yang diharapkan:** langkah 3 menampilkan "Status pengajuan sudah berubah. Muat ulang halaman." (pesan gagal, bukan error 500), status tetap `disetujui_pelanggan` dan `harga_final` tidak berubah. Langkah 4 menampilkan pesan yang sama karena `WHERE EXISTS` tidak menemukan usulan admin berisi harga, sehingga status tetap `ditawarkan` dan `harga_final` tetap NULL (bukan jatuh ke error LGN-14).
+- **Keadaan gagal yang dicek:** dua tab menyetujui penawaran yang sama; setujui tanpa usulan admin berisi harga.
+- **Hasil uji terakhir:** belum diuji
+
+## LGN-19: Aksi ke pengajuan milik akun lain ditolak
+
+- **Kode tugas:** 1.3
+- **Peran:** pelanggan
+- **Persiapan data:** A dan B masing-masing punya pengajuan `ditawarkan`.
+- **Langkah:**
+  1. Login sebagai A. Lewat DevTools, ubah nilai tersembunyi `idPengajuan` di form Setujui menjadi ID pengajuan B, lalu klik **Setujui harga**.
+  2. Ulangi dengan form Tawar (harga `90000`) dan form pesan (`Halo`).
+- **Hasil yang diharapkan:** ketiga aksi menampilkan pesan gagal (status berubah / tidak dapat dikirim) dan tidak ada perubahan di pengajuan B maupun di `pesan_negosiasi`. Pengajuan A tetap `ditawarkan`.
+- **Keadaan gagal yang dicek:** bukan pemilik data.
+- **Hasil uji terakhir:** belum diuji
+
 ## Data uji bersama untuk pembayaran
 
 Jalankan di SQL Editor branch Neon pribadimu (`CONTRIBUTING.md` bagian 6.5). Ganti `<email akun uji>` dengan email akun berperan `user` yang profilnya sudah lengkap.
