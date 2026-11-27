@@ -15,6 +15,9 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `validasi/jadwal.ts`           | `skemaRentangKunjungan`, `tanggalWajib()`, `teksIsian()`, `NilaiIsian`, `GalatIsian`   | 2.2        |
 | `actions/hari-libur.ts`        | `tambahHariLibur()`, `ubahHariLibur()`, `hapusHariLibur()`                             | 2.2        |
 | `validasi/hari-libur.ts`       | `skemaHariLibur` (tanggal, keterangan, aturan) dan `skemaIdHariLibur`                  | 2.2        |
+| `queries/jadwal-pelanggan.ts`  | `getPelangganPolaAktif()`: pelanggan aktif dengan pengajuan siap_bayar dan polanya. Hanya admin | 2.7 |
+| `actions/ubah-pola.ts`         | `ubahPolaJadwal()`: catat perubahan, perbarui pola, batalkan dan buat ulang kunjungan | 2.7        |
+| `validasi/ubah-pola.ts`        | `skemaUbahPola`, `IsianUbahPola`, `NilaiIsianUbahPola`, `GalatIsianUbahPola`            | 2.7        |
 | `queries/admin.ts`             | Daftar kunjungan per tanggal untuk pencatatan                                          | 2.3        |
 | `actions/pencatatan.ts`        | Catat ember dan foto, catat berat (kg), tandai tertunda dengan tanggal paling lambat   | 2.3        |
 | `validasi/pencatatan.ts`       | Skema Zod jumlah ember, berat (kg), dan tanggal paling lambat                          | 2.3        |
@@ -27,6 +30,7 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `validasi/tanggapi-kendala.ts` | Skema Zod tanggapan admin                                                              | 2.6        |
 | `app/admin/hari-libur/`        | Halaman admin hari libur: tambah, daftar mendatang, ubah, hapus                        | 2.2        |
 | `app/admin/buat-kunjungan/`    | Halaman admin buat kunjungan: form rentang, ringkasan hasil, hari libur dihitung       | 2.2        |
+| `app/admin/jadwal-pelanggan/`  | Halaman admin ubah pola jadwal tetap pelanggan aktif                                   | 2.7        |
 | `app/admin/kunjungan/`         | Halaman admin pencatatan harian                                                        | 2.3        |
 | `app/tracker/`                 | Halaman tracker pelanggan                                                              | 2.4        |
 | `app/admin/kendala/`           | Halaman admin laporan kendala                                                          | 2.6        |
@@ -65,6 +69,21 @@ Keputusan 2.2: kunjungan yang sudah ada tidak diubah, apa pun statusnya, termasu
 ### Hari libur
 
 `/admin/hari-libur` memakai `tambahHariLibur()`, `ubahHariLibur()`, dan `hapusHariLibur()` di `actions/hari-libur.ts`. Tanggal libur harus hari kerja dan tidak sebelum hari ini. Aturan bawaan `geser` masih usulan dan belum dikonfirmasi WW. Daftar di kedua halaman hanya memuat libur mulai hari ini (`getDaftarHariLibur()`), karena libur yang sudah lewat tidak memengaruhi pembuatan kunjungan.
+
+## Ubah pola jadwal (2.7)
+
+`/admin/jadwal-pelanggan` menampilkan pelanggan dengan langganan aktif (`kondisiLanggananAktif()`) yang punya pengajuan `siap_bayar`, beserta pola jadwal tetapnya. Pola tetap ditentukan WW, jadi **hanya admin** yang bisa mengubahnya dan pelanggan tidak bisa mengajukannya.
+
+`ubahPolaJadwal()` di `actions/ubah-pola.ts` dipanggil lewat `useActionState` dari form ubah pola:
+
+1. `requireAdmin()`, lalu validasi `skemaUbahPola`: minimal satu hari Senin–Jumat, jam diisi berpasangan dan selesai setelah mulai, tanggal berlaku tidak sebelum hari ini (WIB), alasan wajib.
+2. Pelanggan harus masih berlangganan aktif dengan pengajuan `siap_bayar`. MOU wajib punya rentang jam, dan pola yang sama dengan pola sekarang ditolak supaya tracker tidak menampilkan notifikasi palsu.
+3. Tanggal kunjungan baru dihitung dengan `tanggalKunjungan()` dari 2.2, mulai `berlaku_mulai` sampai `tanggal_akhir_langganan`, memakai hari libur yang sudah ada.
+4. **Satu perintah SQL** (CONTRIBUTING 6.2): `UPDATE pengajuan_langganan` (pola dan `diperbarui_pada`), `INSERT perubahan_jadwal` dengan `pengajuan_id` itu, `UPDATE kunjungan_pengambilan` menjadi `batal` untuk baris `dijadwalkan` sejak tanggal berlaku yang tidak ada di pola baru, lalu `INSERT … ON CONFLICT (id_user, tanggal) DO UPDATE` untuk kunjungan pola baru. Semuanya dalam satu `WITH`, jadi tidak ada keadaan setengah jadi.
+5. Kunjungan berstatus `diambil`, `ditimbang`, `tertunda`, dan `dilewati` tidak diubah. Kunjungan pengganti (`pengganti_dari` terisi) juga tidak dibatalkan atau ditimpa, karena tanggalnya berasal dari persetujuan lewati 2.6.
+6. Halaman `/admin/jadwal-pelanggan`, `/admin/kunjungan`, `/admin/buat-kunjungan`, dan `/tracker` disegarkan.
+
+Pemberitahuan pola di tracker (2.4) membaca `perubahan_jadwal` per `pengajuan_id` pengajuan `siap_bayar`; `alasan` ditampilkan apa adanya. Sesuai issue 2.7, `pengajuan_langganan.hari_pengambilan` langsung diganti walaupun `berlaku_mulai` masih beberapa hari lagi. Akibatnya pemberitahuan hari libur 2.4 yang memakai pola dari kolom itu bisa menghitung libur di antara hari ini dan `berlaku_mulai` dengan pola baru. Kasus ini jarang dan sudah dicatat ke 2.4 (lihat "Catatan antar-tugas").
 
 ## Tabel
 
@@ -105,4 +124,12 @@ Cara memakainya:
 
 Catatan untuk tugas lain yang belum di-merge. Format entri dan cara menulisnya ada di `CONTRIBUTING.md` bagian 4.7. Hapus entri di PR yang mengerjakannya.
 
-Belum ada.
+- **Untuk 2.4 (#154, @cintasuryasakti9-svg), dari 2.7 (#157):** tracker tidak perlu diubah
+  untuk menampilkan perubahan pola. `ubahPolaJadwal()` menulis satu baris `perubahan_jadwal`
+  per perubahan dengan `pengajuan_id` = pengajuan `siap_bayar` pelanggan, dan `alasan`
+  disimpan apa adanya. Pemberitahuan hari libur di `queries/pemberitahuan.ts` tetap memakai
+  `pengajuan_langganan.hari_pengambilan`; karena 2.7 langsung mengganti kolom itu walaupun
+  `berlaku_mulai` masih beberapa hari lagi, libur di antara hari ini dan `berlaku_mulai`
+  dihitung dengan pola baru. Ini disepakati mengikuti issue 2.7; kalau 2.4 ingin menghitung
+  libur dengan pola lama sampai `berlaku_mulai`, 2.4 perlu membaca `perubahan_jadwal` terbaru
+  yang `berlaku_mulai`-nya setelah hari ini.
