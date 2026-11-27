@@ -60,13 +60,14 @@ const KOLOM_KUNJUNGAN = {
 };
 
 /**
- * Langganan aktif akun ini (lib/langganan.ts, CONTRIBUTING 9.7) beserta kesepakatan
- * siap_bayar-nya, atau null jika tidak aktif. `kesepakatan` null untuk pelanggan
- * aktif tanpa pengajuan siap_bayar, misalnya dari alur langganan lama.
+ * Langganan aktif akun ini (lib/langganan.ts, CONTRIBUTING 9.7) beserta tanggal akhir
+ * dan kesepakatan siap_bayar-nya, atau null jika tidak aktif. `kesepakatan` null untuk
+ * pelanggan aktif tanpa pengajuan siap_bayar, misalnya dari alur langganan lama.
  */
 async function bacaLanggananAktif(idUser: number) {
   const [baris] = await getDb()
     .select({
+      tanggalAkhir: dataLangganan.tanggalAkhirLangganan,
       kesepakatan: {
         idPengajuan: pengajuanLangganan.idPengajuan,
         namaInstansi: pengajuanLangganan.namaInstansi,
@@ -94,6 +95,18 @@ async function bacaLanggananAktif(idUser: number) {
  */
 export async function isLanggananAktif(idUser: number): Promise<boolean> {
   return (await bacaLanggananAktif(idUser)) !== null;
+}
+
+/**
+ * Tanggal akhir langganan aktif akun ini, atau null jika tidak aktif. Dipakai
+ * mintaLewati(): usulan tanggal pengganti tidak boleh setelah tanggal ini (keputusan
+ * 2.6). idUser harus dari sesi (requireLogin()).
+ */
+export async function akhirLanggananAktif(
+  idUser: number,
+): Promise<string | null> {
+  const langganan = await bacaLanggananAktif(idUser);
+  return langganan ? langganan.tanggalAkhir : null;
 }
 
 /**
@@ -180,10 +193,13 @@ export async function getTrackerSaya(): Promise<DataTracker> {
   if (!cek.ok) redirect("/auth/login");
   const idUser = cek.idUser;
 
-  // 2. Tracker hanya untuk langganan aktif (CONTRIBUTING 9.7).
+  // 2. Tracker hanya untuk langganan aktif (CONTRIBUTING 9.7). Langganan aktif selalu
+  //    punya tanggal akhir; tanpa tanggal akhir dianggap tidak aktif, sama seperti
+  //    keadaanLangganan().
   const langganan = await bacaLanggananAktif(idUser);
-  if (!langganan) return { aktif: false };
+  if (!langganan || langganan.tanggalAkhir === null) return { aktif: false };
   const { kesepakatan } = langganan;
+  const akhirLangganan = langganan.tanggalAkhir;
   const hariPengambilan = kesepakatan?.hariPengambilan ?? [];
 
   // 3. Baca semua bagian bersamaan. Kolom date dibandingkan sebagai teks (CONTRIBUTING 9.2).
@@ -259,5 +275,6 @@ export async function getTrackerSaya(): Promise<DataTracker> {
       riwayat: riwayat.map(kePilihan),
     },
     pilihanLewati,
+    akhirLangganan,
   };
 }

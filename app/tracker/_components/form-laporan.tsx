@@ -129,7 +129,8 @@ function FormKendala({ pilihan }: { pilihan: IsiTracker["pilihanKendala"] }) {
 export function FormLaporan({
   pilihanKendala,
   pilihanLewati,
-}: Pick<IsiTracker, "pilihanKendala" | "pilihanLewati">) {
+  akhirLangganan,
+}: Pick<IsiTracker, "pilihanKendala" | "pilihanLewati" | "akhirLangganan">) {
   const [jenis, setJenis] = useState<JenisForm>("kendala");
 
   return (
@@ -164,7 +165,7 @@ export function FormLaporan({
         {jenis === "kendala" ? (
           <FormKendala pilihan={pilihanKendala} />
         ) : (
-          <FormLewati pilihan={pilihanLewati} />
+          <FormLewati pilihan={pilihanLewati} akhirLangganan={akhirLangganan} />
         )}
       </div>
     </Card>

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DialogKonfirmasi } from "@/components/ui/dialog-konfirmasi";
 import { Field } from "@/components/ui/field";
 import {
   mintaLewati,
@@ -19,6 +20,7 @@ import {
   type PilihanLewati,
 } from "@/features/kunjungan/types";
 import type { IsianLewati } from "@/features/kunjungan/validasi/lapor-kendala";
+import { formatTanggal } from "@/lib/format-tanggal";
 import { teksTanggal } from "./daftar-kunjungan";
 
 /** Kelas isian form laporan tracker, sama dengan form pelanggan di /langganan. */
@@ -66,14 +68,24 @@ function OpsiPengganti({
 
 /**
  * Form pelanggan untuk meminta satu kunjungan dilewati: pilih kunjungan, alasan
- * wajib, dan boleh mengusulkan tanggal pengganti. Hanya kunjungan yang masih
- * sebelum batas H-1 pukul 17.00 WIB yang bisa dipilih; server tetap mengecek semuanya.
+ * wajib, dan boleh mengusulkan tanggal pengganti paling lambat tanggal akhir
+ * langganan. Hanya kunjungan yang masih sebelum batas H-1 pukul 17.00 WIB yang bisa
+ * dipilih; server tetap mengecek semuanya.
  */
-export function FormLewati({ pilihan }: { pilihan: PilihanLewati[] }) {
+export function FormLewati({
+  pilihan,
+  akhirLangganan,
+}: {
+  pilihan: PilihanLewati[];
+  /** Tanggal akhir langganan aktif, batas usulan tanggal pengganti (2.6). */
+  akhirLangganan: string;
+}) {
   const [idKunjungan, setIdKunjungan] = useState("");
   const [alasan, setAlasan] = useState("");
   const [pengganti, setPengganti] = useState<Pengganti>("tidak");
   const [tanggalPengganti, setTanggalPengganti] = useState("");
+  // Isian yang menunggu konfirmasi; dialog tampil selama ini tidak null.
+  const [formMenunggu, setFormMenunggu] = useState<FormData | null>(null);
 
   const [hasil, aksi, sedangMengirim] = useActionState<
     HasilLaporan<IsianLewati> | null,
@@ -98,14 +110,26 @@ export function FormLewati({ pilihan }: { pilihan: PilihanLewati[] }) {
     (kunjungan) => String(kunjungan.idKunjungan) === idKunjungan,
   );
 
-  // Lewati tidak bisa dibatalkan dari tracker, jadi minta konfirmasi dulu.
-  // preventDefault di onSubmit membuat React tidak menjalankan action.
-  function tanyaDulu(e: FormEvent<HTMLFormElement>) {
-    if (!terpilih) return;
-    const yakin = window.confirm(
-      `Lewati pengambilan ${teksTanggal(terpilih.tanggal, terpilih.hari)}? Kunjungan langsung dilewati dan tidak bisa dibatalkan dari tracker.`,
-    );
-    if (!yakin) e.preventDefault();
+  // Dikirim lewat onSubmit, bukan <form action>: action bawaan React me-reset form
+  // setelah selesai, dan radio terkontrol kembali ke "Lewati saja" walaupun state-nya
+  // tidak berubah. Lewati tidak bisa dibatalkan dari tracker, jadi dikonfirmasi dulu;
+  // tanpa kunjungan terpilih langsung dikirim supaya server menampilkan pesan isian.
+  function kirim(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (terpilih) {
+      setFormMenunggu(formData);
+    } else {
+      startTransition(() => aksi(formData));
+    }
+  }
+
+  // Pelanggan menekan Lewati di dialog: kirim isian yang disimpan saat submit.
+  function lanjutkan() {
+    if (formMenunggu === null) return;
+    const formData = formMenunggu;
+    setFormMenunggu(null);
+    startTransition(() => aksi(formData));
   }
 
   return (
@@ -118,12 +142,7 @@ export function FormLewati({ pilihan }: { pilihan: PilihanLewati[] }) {
           lambat H-1 pukul 17.00 WIB.
         </p>
       ) : (
-        <form
-          action={aksi}
-          onSubmit={tanyaDulu}
-          noValidate
-          className="space-y-4"
-        >
+        <form onSubmit={kirim} noValidate className="space-y-4">
           <div className="space-y-1.5">
             <Field
               label="Kunjungan yang dilewati"
@@ -201,12 +220,14 @@ export function FormLewati({ pilihan }: { pilihan: PilihanLewati[] }) {
                   value={tanggalPengganti}
                   onChange={(e) => setTanggalPengganti(e.target.value)}
                   min={terpilih ? tambahHari(terpilih.tanggal, 1) : undefined}
+                  max={akhirLangganan}
                   className={KELAS_ISIAN}
                 />
               </Field>
               <p className="text-xs text-slate-500">
-                Hari kerja, bukan hari libur, setelah tanggal yang dilewati, dan
-                belum ada kunjungan di tanggal itu.
+                Hari kerja, bukan hari libur, setelah tanggal yang dilewati,
+                belum ada kunjungan di tanggal itu, dan paling lambat{" "}
+                {formatTanggal(akhirLangganan)} (akhir masa langganan Anda).
               </p>
             </div>
           )}
@@ -216,6 +237,22 @@ export function FormLewati({ pilihan }: { pilihan: PilihanLewati[] }) {
             {sedangMengirim ? "Mengirim…" : "Lewati pengambilan"}
           </Button>
         </form>
+      )}
+
+      {formMenunggu !== null && terpilih && (
+        <DialogKonfirmasi
+          judul="Lewati Pengambilan"
+          peringatan="Kunjungan langsung dilewati dan tidak bisa dibatalkan dari tracker."
+          labelKonfirmasi="Lewati"
+          onKonfirmasi={lanjutkan}
+          onBatal={() => setFormMenunggu(null)}
+        >
+          Apakah Anda yakin ingin melewati pengambilan{" "}
+          <span className="font-semibold text-slate-800">
+            {teksTanggal(terpilih.tanggal, terpilih.hari)}
+          </span>
+          ?
+        </DialogKonfirmasi>
       )}
     </div>
   );

@@ -230,6 +230,8 @@ export type IsiTracker = {
     riwayat: PilihanKunjungan[];
   };
   pilihanLewati: PilihanLewati[];
+  /** Tanggal akhir langganan aktif: batas usulan tanggal pengganti di form lewati (2.6). */
+  akhirLangganan: string;
 };
 
 /** Hasil getTrackerSaya(): akun tanpa langganan aktif tidak menerima data apa pun. */
