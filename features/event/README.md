@@ -11,13 +11,19 @@ Kode tugas mengikuti issue Tahap 3. Satu file dipegang pemilik kode tugasnya (`C
 | `types.ts`                 | `PERAN_WW` dengan `PeranWw`, `isPeranWw()`, dan `LABEL_PERAN_WW`; tipe tampilan `EventTampilan`                                          | 3.1        |
 | `queries/publik.ts`        | `getEventPublik()` dan `getEventDetailPublik()` untuk publik tanpa login: hanya status yang boleh tampil (bukan `draft`/`hidden`), yang akan datang lebih dulu | 3.2        |
 | `validasi/publik.ts`       | Skema Zod `skemaIdEventPublik` untuk ID event dari URL `/event/detail/[id]`                                                             | 3.2        |
-| `actions/admin.ts`         | Tambah dan ubah event, dipindah dari `page.tsx` admin, dengan `requireAdmin()` di awal                                                   | 3.3        |
+| `aturan.ts`                | Fungsi murni status event: `statusAkhirEvent()`, `eventYangStatusnyaBerubah()`, dan `eventSudahLewat()`                                   | 3.3        |
+| `queries/admin.ts`         | `getDaftarEventAdmin()` dan `getEventAdmin(id)` untuk halaman admin, dengan `requireAdmin()` di awal                                     | 3.3        |
+| `actions/admin.ts`         | `tambahEvent()` dan `ubahEvent()`, dipindah dari `page.tsx` admin, dengan `requireAdmin()` di awal dan `safeParse` skema Zod             | 3.3        |
 | `validasi/admin.ts`        | Skema Zod form event admin: penyelenggara dan peran WW wajib, tautan info opsional dan harus `https://`                                  | 3.3        |
 | `app/event/`               | Halaman publik daftar dan detail event, tanpa tombol daftar atau bayar. `/event/checkout/*` dan `/event/bukti/*` dialihkan ke `/event`  | 3.2        |
-| `app/admin/events/`        | Form tambah dan ubah event dengan isian penyelenggara, peran WW, dan tautan info. Daftar event menampilkan penyelenggara dan peran WW    | 3.3        |
-| `app/admin/peserta-event/` | Dialihkan ke `/admin/events`, dan action-nya menolak setiap panggilan                                                                    | 3.3        |
+| `app/admin/events/`        | Form tambah dan ubah event di `_components/form-event.tsx` dengan isian penyelenggara, peran WW, dan tautan info. Daftar event menampilkan penyelenggara dan peran WW lewat `_components/kartu-event.tsx` | 3.3        |
+| `app/admin/peserta-event/` | `page.tsx` dan `[id]/page.tsx` dialihkan ke `/admin/events`, dan `actions.ts` menolak setiap panggilan. Data pendaftaran lama tidak dihapus | 3.3        |
 
 `types.ts` berisi `PERAN_WW` beserta tipe, `LABEL_PERAN_WW`, dan pemeriksa `isPeranWw()` tanpa `as`. Tipe tampilannya `EventTampilan`, diturunkan dari skema: `peran_ww` menjadi `PeranWw | null`, sedangkan `kuota_peserta`, `biaya_event`, dan `gambar_file_id` tidak ikut.
+
+`aturan.ts` berisi aturan status event yang dipakai bersama oleh daftar admin dan Server Action admin, jadi perhitungan "event sudah lewat" hanya ditulis satu kali. `queries/admin.ts` mengembalikan `EventTampilan` untuk halaman admin, dan `actions/admin.ts` mengembalikan `HasilAksiEvent` untuk `useActionState` di `app/admin/events/_components/form-event.tsx`.
+
+Kuota peserta dan biaya event tidak lagi ada di form admin (3.3). Keduanya tidak ditulis Server Action, jadi nilai lama di database tetap utuh dan ikut terbaca di halaman detail publik sebagai data lama.
 
 Di luar folder ini, 3.2 menghapus `/event` dari daftar halaman wajib login di `auth.config.ts` dan menampilkan menu Event serta Toko Terdekat tanpa login di `components/header/Header.tsx`. Menu admin diatur 3.10 di `app/admin/AdminNav.tsx`.
 

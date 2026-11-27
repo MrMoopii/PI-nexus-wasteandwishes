@@ -158,3 +158,105 @@ $uji$;
   - Server Action menolak membuat pendaftaran walaupun dipanggil langsung via DevTools atau skrip.
 - **Hasil uji terakhir:** belum diuji
 
+
+## EVT-07: Form tambah event menolak event tanpa penyelenggara dan peran WW
+
+- **Kode tugas:** 3.3
+- **Peran:** admin
+- **Persiapan data:** akun admin yang sedang login.
+- **Langkah:**
+  1. Buka `/admin/events/tambah`.
+  2. Isi nama, jenis, tanggal, lokasi, tetapi biarkan **penyelenggara** dan **peran WW** kosong.
+  3. Klik "Simpan Event".
+- **Hasil yang diharapkan:**
+  - Form menampilkan pesan error di bawah isian penyelenggara ("Penyelenggara wajib diisi.") dan peran WW ("Pilih peran WW.").
+  - Event tidak tersimpan di database.
+- **Keadaan gagal yang dicek:**
+  - Event tanpa penyelenggara atau peran WW ditolak dengan pesan jelas.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-08: Form tambah event menolak tautan info selain https://
+
+- **Kode tugas:** 3.3
+- **Peran:** admin
+- **Persiapan data:** akun admin yang sedang login.
+- **Langkah:**
+  1. Buka `/admin/events/tambah`.
+  2. Isi semua isian wajib termasuk penyelenggara dan peran WW.
+  3. Isi tautan info dengan `http://contoh.id` (bukan https).
+  4. Klik "Simpan Event".
+- **Hasil yang diharapkan:**
+  - Form menampilkan pesan error "Tautan info harus diawali https://."
+  - Event tidak tersimpan.
+- **Keadaan gagal yang dicek:**
+  - Tautan selain https:// ditolak.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-09: Event lama tanpa penyelenggara tetap bisa dibuka dan diubah
+
+- **Kode tugas:** 3.3
+- **Peran:** admin
+- **Persiapan data:** akun admin yang sedang login. Di database ada event lama (sebelum 3.3) dengan `penyelenggara = NULL` dan `peran_ww = NULL`.
+- **Langkah:**
+  1. Buka `/admin/events` dan cari event lama.
+  2. Klik "Edit Event" untuk event itu.
+  3. Halaman edit terbuka menampilkan isian kosong untuk penyelenggara dan peran WW.
+  4. Isi penyelenggara dan pilih peran WW, lalu simpan.
+- **Hasil yang diharapkan:**
+  - Event lama terbuka di halaman edit tanpa error.
+  - Setelah penyelenggara dan peran WW diisi, perubahan tersimpan.
+  - Event lama tanpa penyelenggara tetap bisa dibuka di halaman detail publik `/event/detail/[id]`.
+- **Keadaan gagal yang dicek:**
+  - Data NULL di kolom 3.1 tidak crash halaman.
+  - Penyimpanan sukses setelah kolom wajib diisi.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-10: Halaman peserta event dialihkan ke /admin/events
+
+- **Kode tugas:** 3.3
+- **Peran:** admin
+- **Persiapan data:** akun admin yang sedang login.
+- **Langkah:**
+  1. Buka `/admin/peserta-event` di browser.
+  2. Buka `/admin/peserta-event/1` (ID event apa pun).
+- **Hasil yang diharapkan:**
+  - Keduanya langsung dialihkan ke `/admin/events` (HTTP 307/308).
+  - Tidak ada tampilan daftar peserta event.
+- **Keadaan gagal yang dicek:**
+  - Pengguna tidak dapat mengakses halaman peserta event lama.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-11: Server Action hapus peserta menolak setiap panggilan
+
+- **Kode tugas:** 3.3
+- **Peran:** admin
+- **Persiapan data:** akun admin yang sedang login.
+- **Langkah:**
+  1. Panggil `hapusPesertaEvent({ idPendaftaran: 1, eventId: 1 })` secara langsung.
+- **Hasil yang diharapkan:**
+  - Mengembalikan `{ error: "Pendaftaran event tidak lagi tersedia..." }`.
+  - Tidak ada baris yang dihapus dari `pendaftaran_event`.
+  - Kuota event tidak berubah.
+- **Keadaan gagal yang dicek:**
+  - Server Action menolak walaupun dipanggil langsung via DevTools.
+  - Data pendaftaran lama tidak terhapus.
+- **Hasil uji terakhir:** belum diuji
+
+## EVT-12: Akun bukan admin ditolak di setiap aksi event admin
+
+- **Kode tugas:** 3.3
+- **Peran:** user biasa
+- **Persiapan data:** akun user biasa yang sedang login.
+- **Langkah:**
+  1. Buka `/admin/events/tambah` → harus dialihkan (middleware).
+  2. Panggil `tambahEvent(formData)` secara langsung dari klien.
+  3. Panggil `ubahEvent(formData)` secara langsung dari klien.
+  4. Panggil `hapusPesertaEvent(formData)` secara langsung dari klien.
+- **Hasil yang diharapkan:**
+  - Middleware mencegah akses halaman `/admin/*` (redirect ke `/`).
+  - Server Action mengembalikan `{ ok: false, pesan: "Akses khusus admin." }` atau `{ error: "Akses khusus admin." }`.
+  - Tidak ada event atau pendaftaran yang berubah.
+- **Keadaan gagal yang dicek:**
+  - Akun bukan admin ditolak di middleware dan di Server Action (bagian 7.1).
+- **Hasil uji terakhir:** belum diuji
+
