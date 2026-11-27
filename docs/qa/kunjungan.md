@@ -273,3 +273,92 @@ $uji$;
   - Sesi idle: pesan "Sesi Anda telah berakhir. Silakan untuk login ulang."
   - Tanggal ganda, akhir pekan, tanggal lewat, isian kosong, ID salah, dan data yang sudah dihapus di tab lain.
 - **Hasil uji terakhir:** belum diuji
+
+## KJG-27: Admin mengubah pola jadwal pelanggan
+
+- **Kode tugas:** 2.7
+- **Peran:** admin
+- **Persiapan data:** akun admin dan akun `user` biasa (`CONTRIBUTING.md` bagian 6.4). Jalankan skrip ini sekali di SQL Editor Neon branch pribadimu; tanggal memakai Senin minggu depan supaya tetap bermakna.
+
+  ```sql
+  -- KJG-27: dua pelanggan uji dengan pola tetap dan kunjungan mendatang (kode tugas 2.7).
+  DO $uji$
+  DECLARE
+    a integer; b integer; pa integer; pb integer;
+    senin date := (date_trunc('week', (now() AT TIME ZONE 'Asia/Jakarta')::date) + interval '7 days')::date;
+  BEGIN
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-7-a@contoh.invalid', 'Uji 2.7 A') RETURNING id_user INTO a;
+    INSERT INTO users (email, nama_pelanggan) VALUES ('uji-2-7-b@contoh.invalid', 'Uji 2.7 B') RETURNING id_user INTO b;
+    -- A: MOU Senin-Rabu-Jumat 08.00-10.00, langganan aktif 30 hari lagi.
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic,
+      estimasi_ember, jenis_pelanggan, hari_pengambilan, jam_mulai, jam_selesai, jumlah_ember, harga_final, status)
+      VALUES (a, 'Uji 2.7 A', 'hotel', 'Alamat A', 'PIC A', '0800000027', 2, 'mou', '{1,3,5}', '08:00', '10:00', 2, 500000, 'siap_bayar')
+      RETURNING id_pengajuan INTO pa;
+    INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+      VALUES (a, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, (now() AT TIME ZONE 'Asia/Jakarta')::date + 30);
+    -- B: reguler Selasa-Kamis tanpa jam, langganan aktif 30 hari lagi.
+    INSERT INTO pengajuan_langganan (id_user, nama_instansi, jenis_instansi, alamat_pengambilan, nama_pic, telp_pic,
+      estimasi_ember, jenis_pelanggan, hari_pengambilan, jumlah_ember, harga_final, status)
+      VALUES (b, 'Uji 2.7 B', 'restoran', 'Alamat B', 'PIC B', '0800000028', 3, 'reguler', '{2,4}', 3, 400000, 'siap_bayar')
+      RETURNING id_pengajuan INTO pb;
+    INSERT INTO data_langganan (id_user, status_langganan, tanggal_mulai_langganan, tanggal_akhir_langganan)
+      VALUES (b, 'aktif', (now() AT TIME ZONE 'Asia/Jakarta')::date, (now() AT TIME ZONE 'Asia/Jakarta')::date + 30);
+    -- Kunjungan lama: A di Senin dan Rabu, B di Selasa dan Kamis.
+    INSERT INTO kunjungan_pengambilan (id_user, pengajuan_id, tanggal, jam_mulai, jam_selesai)
+      VALUES (a, pa, senin, '08:00', '10:00'), (a, pa, senin + 2, '08:00', '10:00'),
+             (b, pb, senin + 1, NULL, NULL), (b, pb, senin + 3, NULL, NULL);
+  END
+  $uji$;
+  ```
+
+- **Langkah:**
+  1. Login sebagai admin, buka `/admin/jadwal-pelanggan`. Cocokkan kedua pelanggan uji: A "Senin, Rabu, Jumat · 08.00 – 10.00 WIB" badge MOU, B "Selasa, Kamis · Jam menyesuaikan WW" badge Reguler.
+  2. Di baris A, buka **Ubah pola**. Kosongkan centang Jumat, centang Selasa, biarkan jam 08.00–10.00, isi tanggal berlaku = Senin minggu depan (hari kunjungan pertama), alasan "Rute kurir berubah", lalu simpan.
+  3. Jalankan query ini:
+
+     ```sql
+     SELECT u.email, k.tanggal, to_char(k.tanggal, 'TMDay') AS hari, k.jam_mulai, k.jam_selesai, k.status
+     FROM kunjungan_pengambilan k JOIN users u ON u.id_user = k.id_user
+     WHERE u.email LIKE 'uji-2-7-%@contoh.invalid' ORDER BY u.email, k.tanggal;
+     SELECT u.email, p.hari_pengambilan, p.jam_mulai, p.jam_selesai, j.hari_pengambilan AS pola_lama, j.alasan
+     FROM perubahan_jadwal j
+     JOIN pengajuan_langganan p ON p.id_pengajuan = j.pengajuan_id
+     JOIN users u ON u.id_user = p.id_user
+     WHERE u.email LIKE 'uji-2-7-%@contoh.invalid' ORDER BY j.id_perubahan;
+     ```
+
+  4. Di baris B, buka **Ubah pola**. Centang **Pakai rentang jam**, isi jam mulai 13.00 dan selesai 15.00, tanggal berlaku = Senin minggu depan, alasan "Jam pengambilan disepakati", lalu simpan.
+  5. Di baris B, buka **Ubah pola** lagi dan kirim tanpa mengubah apa pun (hari, jam, tanggal berlaku, alasan tetap). Lalu coba isi jam mulai 15.00 dan selesai 13.00.
+  6. Di baris A, kosongkan centang semua hari lalu simpan. Lalu centang **Pakai rentang jam** tetapi kosongkan jam mulai, dan simpan.
+  7. Di DevTools, ubah `<input type="hidden" name="idPengajuan">` menjadi `abc`, lalu `999999`, dan kirim.
+  8. Buka halaman di dua tab. Di tab pertama ubah pola A menjadi Senin saja. Di tab kedua, yang belum dimuat ulang, ubah pola A menjadi Kamis saja.
+  9. Jalankan query tanggal dan perubahan pola dari langkah 3 lagi.
+  10. Hapus data uji:
+
+      ```sql
+      DELETE FROM perubahan_jadwal WHERE pengajuan_id IN (
+        SELECT id_pengajuan FROM pengajuan_langganan WHERE id_user IN (
+          SELECT id_user FROM users WHERE email LIKE 'uji-2-7-%@contoh.invalid'));
+      DELETE FROM kunjungan_pengambilan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-7-%@contoh.invalid');
+      DELETE FROM data_langganan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-7-%@contoh.invalid');
+      DELETE FROM pengajuan_langganan WHERE id_user IN (SELECT id_user FROM users WHERE email LIKE 'uji-2-7-%@contoh.invalid');
+      DELETE FROM users WHERE email LIKE 'uji-2-7-%@contoh.invalid';
+      ```
+
+- **Hasil yang diharapkan:**
+  - Langkah 1: dua baris pelanggan uji dengan pola dan badge seperti di atas. Pelanggan aktif tanpa pengajuan `siap_bayar` tidak tampil.
+  - Langkah 2: pesan "Pola jadwal disimpan." Baris A berubah menjadi "Senin, Selasa, Rabu · 08.00 – 10.00 WIB".
+  - Langkah 3: kunjungan A di hari yang tidak ada di pola baru (Jumat) menjadi `batal`, dan muncul kunjungan baru di Selasa. Kunjungan Senin dan Rabu tetap satu baris dan berstatus `dijadwalkan` (ditimpa lewat `ON CONFLICT`). B tidak berubah. Query kedua menghasilkan satu baris: pola lama `{1,3,5}`, pola baru `{1,2,3}`, alasan "Rute kurir berubah".
+  - Langkah 4: pesan "Pola jadwal disimpan.", B menjadi "Selasa, Kamis · 13.00 – 15.00 WIB", dan kunjungan B yang `dijadwalkan` ditimpa jam barunya.
+  - Langkah 5: "Pola baru sama dengan pola yang sekarang." untuk kiriman pertama; "Jam selesai harus setelah jam mulai." untuk jam terbalik. Tidak ada data berubah.
+  - Langkah 6: "Pilih minimal satu hari pengambilan." dan "Isi jam mulai dan jam selesai, atau kosongkan keduanya." Tidak ada data berubah.
+  - Langkah 7: `abc` menampilkan "Pelanggan tidak valid."; `999999` menampilkan "Pelanggan tidak ditemukan atau langganannya tidak aktif." Tidak ada data berubah.
+  - Langkah 8: tab kedua menampilkan "Data pelanggan sudah berubah. Muat ulang halaman lalu coba lagi." Perubahan tab pertama tidak tertimpa.
+  - Langkah 9: hanya satu baris `perubahan_jadwal` untuk A dari langkah 2, dan pola A sesuai hasil tab pertama.
+- **Keadaan gagal yang dicek:**
+  - Belum login: membuka `/admin/jadwal-pelanggan` dialihkan ke halaman login.
+  - Akun `user` biasa: dialihkan ke beranda. Mengirim form dari tab admin yang sesinya sudah diganti `user` menampilkan "Akses khusus admin."
+  - Sesi idle: pesan "Sesi Anda telah berakhir. Silakan untuk login ulang."
+  - MOU tanpa rentang jam, pola sama, tanggal berlaku kemarin, isian kosong, ID salah, dan data yang berubah di tab lain.
+  - Pelanggan tanpa pengajuan `siap_bayar` atau langganan berakhir tidak tampil dan tidak bisa diubah lewat form.
+- **Hasil uji terakhir:** belum diuji
