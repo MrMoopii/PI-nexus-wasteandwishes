@@ -27,7 +27,6 @@ const eslintConfig = defineConfig([
   {
     files: [
       "components/admin/ImageKitUpload.tsx",
-      "app/event/actions.ts",
       "components/admin/ImageKitEventUpload.tsx",
       "app/admin/users/UsersManagementContent.tsx",
       "components/event-slider/EventSlider.tsx",

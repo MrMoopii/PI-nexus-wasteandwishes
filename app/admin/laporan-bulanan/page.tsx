@@ -1,6 +1,10 @@
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { getLaporanBulanan } from "@/features/laporan/queries/admin";
+import {
+  getLaporanBulanan,
+  getPilihanInstansi,
+} from "@/features/laporan/queries/admin";
 import { TabelLaporanBulanan } from "./_components/tabel-laporan-bulanan";
 import { TombolCetak } from "./_components/tombol-cetak";
 import {
@@ -12,7 +16,7 @@ import {
  * Halaman laporan bulanan (kode tugas 2.5): admin memilih bulan dan satu
  * instansi atau semua lewat URL (?bulan=, ?instansi=), melihat tabel berat
  * per pengambilan per instansi, lalu mencetak. Hanya admin; dicek
- * middleware, query, dan Server Action.
+ * middleware dan requireAdmin() di setiap query.
  */
 export default function HalamanLaporanBulanan({
   searchParams,
@@ -44,14 +48,31 @@ async function IsiLaporanBulanan({
   await connection();
   const params = await searchParams;
 
-  // Query admin memvalidasi ?bulan= dan ?instansi= serta memanggil
-  // requireAdmin() sendiri (CONTRIBUTING 7.2 dan 9.8).
-  const hasil = await getLaporanBulanan(params.bulan, params.instansi);
+  // 1. Kedua query admin memanggil requireAdmin() sendiri; getLaporanBulanan()
+  //    juga memvalidasi ?bulan= dan ?instansi= (CONTRIBUTING 7.2 dan 9.8).
+  const [hasil, pilihan] = await Promise.all([
+    getLaporanBulanan(params.bulan, params.instansi),
+    getPilihanInstansi(),
+  ]);
 
+  // 2. Instansi yang diisi tetapi tidak ada di pilihan (tidak ada, atau belum
+  //    pernah ditimbang) berarti tidak ditemukan: 404, bukan tabel kosong (9.3).
+  if (
+    hasil.instansi !== null &&
+    !pilihan.some((item) => item.idPengajuan === hasil.instansi)
+  ) {
+    notFound();
+  }
+
+  // 3. Susun form filter, tombol cetak, dan tabel.
   return (
     <div className="space-y-6">
       <div className="no-print flex items-center justify-between gap-4">
-        <PemilihLaporan hasil={hasil} />
+        <PemilihLaporan
+          bulan={hasil.bulan}
+          instansi={hasil.instansi}
+          pilihan={pilihan}
+        />
         <TombolCetak />
       </div>
       <TabelLaporanBulanan hasil={hasil} />

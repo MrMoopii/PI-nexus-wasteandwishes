@@ -9,8 +9,8 @@ Kode tugas mengikuti issue Tahap 3. Satu file dipegang pemilik kode tugasnya (`C
 | File                       | Isi                                                                                                                                      | Kode tugas |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | `types.ts`                 | `PERAN_WW` dengan `PeranWw`, `isPeranWw()`, dan `LABEL_PERAN_WW`; tipe tampilan `EventTampilan`                                          | 3.1        |
-| `queries/publik.ts`        | Daftar dan detail event untuk publik tanpa login: hanya status yang boleh tampil (bukan `draft`/`hidden`), yang akan datang lebih dulu | 3.2        |
-| `validasi/publik.ts`       | Skema Zod ID event dari URL `/event/detail/[id]`                                                                                         | 3.2        |
+| `queries/publik.ts`        | `getEventPublik()` dan `getEventDetailPublik()` untuk publik tanpa login: hanya status yang boleh tampil (bukan `draft`/`hidden`), yang akan datang lebih dulu | 3.2        |
+| `validasi/publik.ts`       | Skema Zod `skemaIdEventPublik` untuk ID event dari URL `/event/detail/[id]`                                                             | 3.2        |
 | `actions/admin.ts`         | Tambah dan ubah event, dipindah dari `page.tsx` admin, dengan `requireAdmin()` di awal                                                   | 3.3        |
 | `validasi/admin.ts`        | Skema Zod form event admin: penyelenggara dan peran WW wajib, tautan info opsional dan harus `https://`                                  | 3.3        |
 | `app/event/`               | Halaman publik daftar dan detail event, tanpa tombol daftar atau bayar. `/event/checkout/*` dan `/event/bukti/*` dialihkan ke `/event`  | 3.2        |

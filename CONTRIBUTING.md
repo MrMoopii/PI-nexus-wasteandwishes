@@ -549,7 +549,7 @@ Proyek ini menyalakan `cacheComponents`. Saat build, Next.js mencoba membuat ver
 
   | Kebutuhan                          | Pakai                                                                                     |
   | ---------------------------------- | ----------------------------------------------------------------------------------------- |
-  | Format tanggal, jam, rentang waktu | `formatTanggal`, `formatJam`, `formatWaktu` di `lib/format-tanggal.ts`                    |
+  | Format tanggal, jam, rentang waktu | `formatTanggal`, `formatBulan`, `formatJam`, `formatWaktu` di `lib/format-tanggal.ts`     |
   | Format harga Rupiah                | `formatRupiah()` di `lib/format-angka.ts`                                                 |
   | Tanggal hari ini (zona Jakarta)    | `tanggalHariIniJakarta()` di `lib/format-tanggal.ts`                                      |
   | Syarat "langganan aktif" di query  | `kondisiLanggananAktif()` di `lib/langganan.ts`, dipanggil dengan kurung (lihat di bawah) |

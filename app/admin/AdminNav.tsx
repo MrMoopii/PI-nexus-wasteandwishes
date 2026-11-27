@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/dist/client/components/navigation";
-import Link from "next/dist/client/link";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const adminNavigation = [
   { name: "Dashboard", href: "/admin", category: "NAVIGATION" },
@@ -19,6 +19,11 @@ const adminNavigation = [
     category: "NAVIGATION",
   },
   { name: "Laporan Kendala", href: "/admin/kendala", category: "NAVIGATION" },
+  {
+    name: "Laporan Bulanan",
+    href: "/admin/laporan-bulanan",
+    category: "NAVIGATION",
+  },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
   {
     name: "Peserta Event",
@@ -29,6 +34,10 @@ const adminNavigation = [
   { name: "Laporan", href: "/admin/reports", category: "APPLICATION" },
 ];
 
+/**
+ * Daftar menu sidebar admin dengan penanda menu aktif. activeHref null (dipakai
+ * sebagai fallback Suspense) berarti belum ada menu yang ditandai aktif.
+ */
 export function NavLinks({ activeHref }: { activeHref: string | null }) {
   const isLinkActive = (href: string) => {
     if (!activeHref) return false;
@@ -93,6 +102,10 @@ export function NavLinks({ activeHref }: { activeHref: string | null }) {
   );
 }
 
+/**
+ * Sidebar admin yang membaca path sekarang dengan usePathname(), jadi dipasang
+ * di bawah <Suspense> di AdminLayoutClient (CONTRIBUTING 8 no. 1).
+ */
 export default function AdminNav() {
   const pathname = usePathname();
   return <NavLinks activeHref={pathname} />;

@@ -21,10 +21,18 @@ export type RekapInstansi = {
   totalBeratKg: number;
 };
 
-/** Hasil query laporan bulanan untuk satu bulan: bulan yang dipakai dan rekannya. */
+/** Hasil query laporan bulanan: filter yang dipakai (bulan, instansi) dan rekapnya. */
 export type HasilLaporanBulanan = {
   bulan: string;
+  /** ID pengajuan yang difilter; null berarti semua instansi. */
+  instansi: number | null;
   daftar: RekapInstansi[];
   totalEmber: number;
   totalBeratKg: number;
+};
+
+/** Satu pilihan dropdown instansi: pengajuan yang pernah punya kunjungan ditimbang. */
+export type PilihanInstansi = {
+  idPengajuan: number;
+  namaInstansi: string;
 };

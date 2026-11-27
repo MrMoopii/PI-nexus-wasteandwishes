@@ -15,11 +15,13 @@ export default async function Header() {
     <HeaderBingkai>
       <NavLink href="/">Beranda</NavLink>
       <NavLink href="/about">Tentang Kami</NavLink>
+      {/* Menu Event dan Mitra (/toko-terdekat) tampil tanpa login (issue #171, tugas 3.2). */}
+      <NavLink href="/event">Event</NavLink>
+      <NavLink href="/toko-terdekat">Mitra</NavLink>
       {loggedIn && (
         <>
           <NavLink href="/langganan">Langganan</NavLink>
           <NavLink href="/tracker">Tracker</NavLink>
-          <NavLink href="/event">Daftar Event</NavLink>
           <NavLink href="/toko">Toko</NavLink>
         </>
       )}
