@@ -1,5 +1,16 @@
-import { formatBulan, formatTanggal } from "@/lib/format-tanggal";
-import type { HasilLaporanBulanan } from "@/features/laporan/types";
+import { formatBulan, formatJam, formatTanggal } from "@/lib/format-tanggal";
+import type {
+  BarisLaporan,
+  HasilLaporanBulanan,
+} from "@/features/laporan/types";
+
+/** Rentang jam satu kunjungan; jam kosong berarti menyesuaikan WW (jam selalu berpasangan). */
+function teksJam(baris: BarisLaporan): string {
+  if (baris.jamMulai === null || baris.jamSelesai === null) {
+    return "Jam menyesuaikan WW";
+  }
+  return `${formatJam(baris.jamMulai)}–${formatJam(baris.jamSelesai)} WIB`;
+}
 
 /** Tabel laporan bulanan: per instansi, daftar berat per pengambilan, dan total. */
 export function TabelLaporanBulanan({
@@ -50,11 +61,7 @@ export function TabelLaporanBulanan({
                 {rekap.daftar.map((baris, index) => (
                   <tr key={index}>
                     <td className="px-4 py-2">{formatTanggal(baris.tanggal)}</td>
-                    <td className="px-4 py-2">
-                      {baris.jamMulai ?? baris.jamSelesai
-                        ? `${baris.jamMulai ?? "-"} – ${baris.jamSelesai ?? "-"}`
-                        : "Jam menyesuaikan WW"}
-                    </td>
+                    <td className="px-4 py-2">{teksJam(baris)}</td>
                     <td className="px-4 py-2">{baris.jumlahEmber ?? "-"}</td>
                     <td className="px-4 py-2">{baris.beratKg.toFixed(2)} kg</td>
                   </tr>

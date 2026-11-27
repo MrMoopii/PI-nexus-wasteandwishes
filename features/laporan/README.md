@@ -10,7 +10,7 @@ Laporan bulanan untuk admin: pilih bulan dan satu instansi atau semua, tampilkan
 | `queries/admin.ts`           | `getLaporanBulanan(bulanMentah, instansiMentah)`: kunjungan berstatus "ditimbang" dalam satu bulan, dikelompokkan per instansi dengan total ember dan berat, beserta filter yang dipakai. `getPilihanInstansi()`: pilihan dropdown instansi, yaitu pengajuan yang pernah punya kunjungan "ditimbang", urut nama | 2.5        |
 | `validasi/admin.ts`          | `skemaBulan`, `skemaInstansi`, `skemaFilterLaporan`: skema Zod filter `?bulan=` dan `?instansi=` dari URL. String kosong dari form dianggap tidak diisi (`z.preprocess`) | 2.5        |
 | `components/`                | Belum dipakai (tabel laporan hanya untuk satu halaman, jadi masuk `app/admin/laporan-bulanan/_components/`); dibiarkan untuk tugas lain | —          |
-| `app/admin/laporan-bulanan/` | `page.tsx` (halaman tipis: memanggil kedua query, 404 jika `?instansi=` tidak ada di pilihan), `_components/pemilih-laporan-bulanan.tsx` (kerangka Suspense dan form filter GET), `_components/tabel-laporan-bulanan.tsx` (tabel + total), `_components/tombol-cetak.tsx` (`"use client"`, tombol `window.print()`) | 2.5        |
+| `app/admin/laporan-bulanan/` | `page.tsx` (halaman tipis: memanggil kedua query, 404 jika `?instansi=` tidak ada di pilihan), `error.tsx` (tampilan saat gagal dimuat, tombol "Coba lagi"), `_components/pemilih-laporan-bulanan.tsx` (kerangka Suspense dan form filter GET), `_components/tabel-laporan-bulanan.tsx` (tabel + total), `_components/tombol-cetak.tsx` (`"use client"`, tombol `window.print()`) | 2.5        |
 
 ## Catatan
 

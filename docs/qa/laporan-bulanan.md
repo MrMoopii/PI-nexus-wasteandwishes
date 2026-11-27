@@ -12,7 +12,7 @@ Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian
 - **Langkah:**
   1. Login sebagai admin, buka `/admin/laporan-bulanan?bulan=<bulan ini>`.
   2. Cocokkan total berat di kartu masing-masing instansi dengan jumlah berat baris-barisnya di tabel.
-- **Hasil yang diharapkan:** total di kartu dan total di baris "Total semua instansi" sama dengan jumlah berat per instansinya di bulan itu. Kunjungan di bulan lain tidak ikut terhitung.
+- **Hasil yang diharapkan:** total di kartu dan total di baris "Total semua instansi" sama dengan jumlah berat per instansinya di bulan itu. Kunjungan di bulan lain tidak ikut terhitung. Kolom jam tampil seperti "08.00–10.00 WIB", atau "Jam menyesuaikan WW" untuk kunjungan tanpa jam.
 - **Keadaan gagal yang dicek:** bulan berbeda, kunjungan di luar bulan yang difilter.
 - **Hasil uji terakhir:** belum diuji
 
@@ -143,4 +143,18 @@ Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian
   4. Buka halaman di bawah salah satu menu, misalnya `/admin/langganan/<id pengajuan>`.
 - **Hasil yang diharapkan:** di langkah 2 menu **Laporan Bulanan** aktif, juga setelah URL berisi `?bulan=` dan `?instansi=`. Di langkah 3 setiap menu membuka halamannya dan hanya menu itu yang aktif; **Laporan** (`/admin/reports`) dan **Laporan Bulanan** tidak pernah aktif bersamaan. Berpindah lewat sidebar tidak memuat ulang seluruh halaman: sidebar tetap di tempat dan layar memuat admin tidak muncul lagi. Di langkah 4 menu **Langganan** aktif.
 - **Keadaan gagal yang dicek:** menu tidak aktif karena ada query string, dua menu aktif bersamaan, menu tidak bisa diklik setelah impor diganti ke `next/link` dan `next/navigation`.
+- **Hasil uji terakhir:** belum diuji
+
+## LPR-12: Halaman error saat laporan gagal dimuat
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** sudah login sebagai admin di `pnpm dev`.
+- **Langkah:**
+  1. Ubah sementara password di `DATABASE_URL` pada `.env.local` (file ini tidak ikut Git), lalu jalankan ulang `pnpm dev`.
+  2. Buka `/admin/laporan-bulanan` dengan sesi admin yang masih aktif. Tutup overlay error Next.js jika muncul.
+  3. Klik **Coba lagi**.
+  4. Kembalikan `DATABASE_URL`, jalankan ulang `pnpm dev`, lalu muat ulang halaman.
+- **Hasil yang diharapkan:** langkah 2 dan 3 menampilkan "Laporan bulanan gagal dimuat" dengan tombol **Coba lagi** di dalam tampilan admin (sidebar tetap ada), bukan "This page couldn't load". Log server berisi error koneksi database. Setelah langkah 4, laporan tampil lagi.
+- **Keadaan gagal yang dicek:** query database gagal (`CONTRIBUTING.md` bagian 9.4).
 - **Hasil uji terakhir:** belum diuji

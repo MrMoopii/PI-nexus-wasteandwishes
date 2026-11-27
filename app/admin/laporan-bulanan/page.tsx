@@ -16,7 +16,7 @@ import {
  * Halaman laporan bulanan (kode tugas 2.5): admin memilih bulan dan satu
  * instansi atau semua lewat URL (?bulan=, ?instansi=), melihat tabel berat
  * per pengambilan per instansi, lalu mencetak. Hanya admin; dicek
- * middleware, query, dan Server Action.
+ * middleware dan requireAdmin() di setiap query.
  */
 export default function HalamanLaporanBulanan({
   searchParams,

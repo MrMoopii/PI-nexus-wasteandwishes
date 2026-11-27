@@ -33,6 +33,10 @@ const adminNavigation = [
   { name: "Laporan", href: "/admin/reports", category: "APPLICATION" },
 ];
 
+/**
+ * Daftar menu sidebar admin dengan penanda menu aktif. activeHref null (dipakai
+ * sebagai fallback Suspense) berarti belum ada menu yang ditandai aktif.
+ */
 export function NavLinks({ activeHref }: { activeHref: string | null }) {
   const isLinkActive = (href: string) => {
     if (!activeHref) return false;
@@ -97,6 +101,10 @@ export function NavLinks({ activeHref }: { activeHref: string | null }) {
   );
 }
 
+/**
+ * Sidebar admin yang membaca path sekarang dengan usePathname(), jadi dipasang
+ * di bawah <Suspense> di AdminLayoutClient (CONTRIBUTING 8 no. 1).
+ */
 export default function AdminNav() {
   const pathname = usePathname();
   return <NavLinks activeHref={pathname} />;
