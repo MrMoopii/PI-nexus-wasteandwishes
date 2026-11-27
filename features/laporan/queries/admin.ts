@@ -1,20 +1,26 @@
 import "server-only";
 
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, exists, sql } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { kunjunganPengambilan, pengajuanLangganan } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/require-admin";
 import { tanggalHariIniJakarta } from "@/lib/format-tanggal";
 import { skemaFilterLaporan } from "../validasi/admin";
-import type { BarisLaporan, HasilLaporanBulanan, RekapInstansi } from "../types";
+import type {
+  BarisLaporan,
+  HasilLaporanBulanan,
+  PilihanInstansi,
+  RekapInstansi,
+} from "../types";
 
 /**
  * Laporan bulanan per instansi (kode tugas 2.5): kunjungan berstatus
  * "ditimbang" dalam satu bulan, dikelompokkan per instansi beserta total
- * ember dan beratnya. Hanya admin; belum login dialihkan ke halaman
- * login, bukan admin ke beranda. Bulan kosong memakai bulan ini (WIB);
- * diisi tetapi tidak valid menjadi 404. Instansi kosong berarti semua.
+ * ember dan beratnya, ditambah filter yang dipakai. Hanya admin; belum login
+ * dialihkan ke halaman login, bukan admin ke beranda. Bulan kosong (tidak
+ * dikirim atau "") memakai bulan ini (WIB); instansi kosong berarti semua;
+ * diisi tetapi tidak valid menjadi 404.
  */
 export async function getLaporanBulanan(
   bulanMentah: string | undefined,
@@ -116,8 +122,52 @@ export async function getLaporanBulanan(
 
   return {
     bulan,
+    instansi: instansi ?? null,
     daftar: [...peta.values()],
     totalEmber,
     totalBeratKg,
   };
+}
+
+/**
+ * Pilihan dropdown instansi laporan bulanan (kode tugas 2.5, #185): pengajuan
+ * yang pernah punya kunjungan "ditimbang" di bulan mana pun, urut nama. Tidak
+ * bergantung pada filter, supaya pilihannya tetap lengkap setelah difilter dan
+ * di bulan tanpa data. Hanya admin; belum login ke login, bukan admin ke beranda.
+ */
+export async function getPilihanInstansi(): Promise<PilihanInstansi[]> {
+  // 1. Cek admin sebelum membaca data (CONTRIBUTING 7.2).
+  const cek = await requireAdmin();
+  if (!cek.ok) redirect(cek.status === 401 ? "/auth/login" : "/");
+
+  // 2. Hanya pengajuan yang punya kunjungan ditimbang, karena hanya kunjungan
+  //    itu yang masuk laporan (keputusan #185). Urutan id menjaga urutan tetap
+  //    jika dua pelanggan memakai nama instansi yang sama.
+  const db = getDb();
+  return db
+    .select({
+      idPengajuan: pengajuanLangganan.idPengajuan,
+      namaInstansi: pengajuanLangganan.namaInstansi,
+    })
+    .from(pengajuanLangganan)
+    .where(
+      exists(
+        db
+          .select({ idKunjungan: kunjunganPengambilan.idKunjungan })
+          .from(kunjunganPengambilan)
+          .where(
+            and(
+              eq(
+                kunjunganPengambilan.pengajuanId,
+                pengajuanLangganan.idPengajuan,
+              ),
+              eq(kunjunganPengambilan.status, "ditimbang"),
+            ),
+          ),
+      ),
+    )
+    .orderBy(
+      asc(pengajuanLangganan.namaInstansi),
+      asc(pengajuanLangganan.idPengajuan),
+    );
 }

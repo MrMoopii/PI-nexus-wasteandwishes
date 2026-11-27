@@ -1,6 +1,9 @@
-import { formatTanggal } from "@/lib/format-tanggal";
+"use client";
 
-/** Tombol cetak laporan bulanan; memakai window.print() bersama CSS print. */
+/**
+ * Tombol cetak laporan bulanan: membuka dialog cetak browser (window.print()).
+ * Komponen klien karena memasang onClick; yang ikut tercetak diatur CSS print.
+ */
 export function TombolCetak() {
   function cetak() {
     window.print();
@@ -15,9 +18,4 @@ export function TombolCetak() {
       Cetak
     </button>
   );
-}
-
-/** Tanggal dalam format Indonesia (WIB) untuk tampilan laporan. */
-export function formatTanggalLaporan(tanggal: string): string {
-  return formatTanggal(tanggal);
 }
