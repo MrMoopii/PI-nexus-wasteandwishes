@@ -8,9 +8,9 @@ import { z } from "zod";
 const BULAN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /**
- * Filter bulan dari ?bulan= di URL. Kosong berarti memakai bawaan
- * (bulan ini, WIB); diisi tetapi tidak cocok dengan pola berarti
- * halaman 404 (CONTRIBUTING 9.3 dan aturan tugas 2.5).
+ * Filter bulan dari ?bulan= di URL, dipakai lewat skemaFilterLaporan. Kosong
+ * berarti memakai bawaan (bulan ini, WIB); diisi tetapi tidak cocok dengan
+ * pola berarti halaman 404 (CONTRIBUTING 9.3 dan aturan tugas 2.5).
  */
 export const skemaBulan = z.string({ error: "Bulan tidak valid." }).regex(
   BULAN,
@@ -18,19 +18,28 @@ export const skemaBulan = z.string({ error: "Bulan tidak valid." }).regex(
 );
 
 /**
- * Filter instansi dari ?instansi= di URL: ID pengajuan, opsional.
- * Isiannya tidak ada atau kosong berarti semua instansi; diisi tetapi
- * tidak berupa angka positif berarti 404 (CONTRIBUTING 9.3).
+ * Filter instansi dari ?instansi= di URL: ID pengajuan, dipakai lewat
+ * skemaFilterLaporan. Kosong berarti semua instansi; diisi tetapi tidak
+ * berupa angka bulat positif berarti 404 (CONTRIBUTING 9.3).
  */
 export const skemaInstansi = z.coerce
   .number({ error: "Instansi tidak valid." })
   .int({ error: "Instansi tidak valid." })
   .positive({ error: "Instansi tidak valid." });
 
+/**
+ * String kosong dari URL dianggap tidak diisi. Form GET selalu mengirim
+ * ?bulan= dan ?instansi=, juga saat "Semua instansi" dipilih atau bulan
+ * dikosongkan; tanpa ini z.coerce.number("") menjadi 0 dan ditolak (#185).
+ */
+function kosongJadiUndefined(nilai: unknown): unknown {
+  return nilai === "" ? undefined : nilai;
+}
+
 /** Gabungan filter bulan dan instansi untuk halaman laporan bulanan. */
 export const skemaFilterLaporan = z.object({
-  bulan: skemaBulan.optional(),
-  instansi: skemaInstansi.optional(),
+  bulan: z.preprocess(kosongJadiUndefined, skemaBulan.optional()),
+  instansi: z.preprocess(kosongJadiUndefined, skemaInstansi.optional()),
 });
 
 /** Nama isian filter laporan; sama dengan parameter URL. */

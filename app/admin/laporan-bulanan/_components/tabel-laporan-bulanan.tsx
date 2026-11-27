@@ -1,4 +1,4 @@
-import { formatTanggalLaporan } from "./tombol-cetak";
+import { formatTanggal } from "@/lib/format-tanggal";
 import type { HasilLaporanBulanan } from "@/features/laporan/types";
 
 /** Tabel laporan bulanan: per instansi, daftar berat per pengambilan, dan total. */
@@ -11,7 +11,7 @@ export function TabelLaporanBulanan({
     <div className="print-area space-y-6">
       <section className="hidden print:block">
         <p className="text-sm font-semibold text-gray-900">
-          Laporan Bulanan {formatTanggalLaporan(hasil.bulan)}
+          Laporan Bulanan {formatTanggal(hasil.bulan)}
         </p>
         <p className="text-xs text-gray-500">
           Hanya kunjungan yang sudah ditimbang. Cetak oleh admin Waste and
@@ -49,7 +49,7 @@ export function TabelLaporanBulanan({
               <tbody className="divide-y divide-gray-100">
                 {rekap.daftar.map((baris, index) => (
                   <tr key={index}>
-                    <td className="px-4 py-2">{formatTanggalLaporan(baris.tanggal)}</td>
+                    <td className="px-4 py-2">{formatTanggal(baris.tanggal)}</td>
                     <td className="px-4 py-2">
                       {baris.jamMulai ?? baris.jamSelesai
                         ? `${baris.jamMulai ?? "-"} – ${baris.jamSelesai ?? "-"}`

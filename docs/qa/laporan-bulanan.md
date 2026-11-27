@@ -75,3 +75,72 @@ Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian
 - **Hasil yang diharapkan:** hanya kartu instansi A yang tampil, total "semua instansi" hanya menghitung instansi A.
 - **Keadaan gagal yang dicek:** instansi tidak ada di bulan itu, instansi milik pelanggan lain.
 - **Hasil uji terakhir:** belum diuji
+
+## LPR-07: Halaman terbuka dan tombol Cetak membuka dialog cetak
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** data LPR-01.
+- **Langkah:**
+  1. Login sebagai admin, buka `/admin/laporan-bulanan`.
+  2. Klik tombol **Cetak**, lalu tutup dialognya.
+  3. Ulangi langkah 1–2 di Preview Vercel, lalu buka Runtime Logs deployment itu.
+- **Hasil yang diharapkan:** halaman menampilkan form filter, tombol **Cetak**, dan tabel laporan, bukan "This page couldn't load". Klik **Cetak** membuka dialog cetak browser. Runtime Logs tidak berisi error baru untuk `/admin/laporan-bulanan`, misalnya "Event handlers cannot be passed to Client Component props".
+- **Keadaan gagal yang dicek:** isi halaman gagal dirender di server karena tombol yang memasang `onClick` tanpa `"use client"` (bug #185).
+- **Hasil uji terakhir:** belum diuji
+
+## LPR-08: Isian filter kosong tidak menjadi 404
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** data LPR-06.
+- **Langkah:**
+  1. Buka `/admin/laporan-bulanan?bulan=<bulan ini>&instansi=<id pengajuan A>`, pilih **Semua instansi**, lalu klik **Tampilkan**.
+  2. Kosongkan isian bulan, lalu klik **Tampilkan**.
+  3. Buka `/admin/laporan-bulanan?bulan=&instansi=<id pengajuan A>`.
+  4. Buka `/admin/laporan-bulanan?bulan=2026-13`, lalu `/admin/laporan-bulanan?instansi=abc`.
+- **Hasil yang diharapkan:** langkah 1 menampilkan semua instansi di bulan itu, dengan URL `?bulan=<bulan ini>&instansi=`. Langkah 2 (URL `?bulan=&instansi=`) menampilkan bulan ini (WIB) untuk semua instansi, dan isian bulan kembali terisi bulan ini. Langkah 3 menampilkan bulan ini untuk instansi A saja. Langkah 4 tetap menampilkan halaman 404.
+- **Keadaan gagal yang dicek:** isian kosong dari form GET dianggap tidak difilter, isian yang diisi tetapi salah tetap ditolak.
+- **Hasil uji terakhir:** belum diuji
+
+## LPR-09: Dropdown instansi tetap lengkap dan sesuai filter
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** instansi A dan B masing-masing punya kunjungan `ditimbang` di bulan ini, hanya A yang punya kunjungan `ditimbang` di bulan kemarin, dan instansi C punya kunjungan tetapi belum ada yang `ditimbang`. `<bulan tanpa data>` adalah bulan tanpa kunjungan `ditimbang` sama sekali.
+- **Langkah:**
+  1. Buka `/admin/laporan-bulanan?bulan=<bulan ini>`, lalu buka dropdown instansi.
+  2. Pilih instansi A, klik **Tampilkan**, lalu buka dropdown lagi.
+  3. Buka `/admin/laporan-bulanan?bulan=<bulan kemarin>`.
+  4. Buka `/admin/laporan-bulanan?bulan=<bulan tanpa data>&instansi=<id pengajuan B>`.
+- **Hasil yang diharapkan:** di setiap langkah dropdown berisi **Semua instansi**, A, dan B (urut nama), tidak berisi C, dan tidak menyempit. Pilihan yang terpilih mengikuti URL: langkah 2 memilih A; langkah 3 tetap **Semua instansi** walaupun hanya A yang punya data di bulan itu; langkah 4 memilih B, dengan pesan "Belum ada kunjungan ditimbang di bulan ini untuk filter yang dipilih."
+- **Keadaan gagal yang dicek:** setelah satu instansi dipilih, bulan tanpa data, hanya satu instansi yang punya data, instansi yang belum pernah ditimbang.
+- **Hasil uji terakhir:** belum diuji
+
+## LPR-10: Instansi yang tidak ada di pilihan menjadi 404
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** instansi C dari LPR-09, satu pengajuan tanpa kunjungan sama sekali (misalnya masih `menunggu_review`), dan satu ID yang tidak ada: `SELECT max(id_pengajuan) + 1 FROM pengajuan_langganan;`.
+- **Langkah:**
+  1. Buka `/admin/laporan-bulanan?instansi=<id pengajuan C>`.
+  2. Buka `/admin/laporan-bulanan?instansi=<id pengajuan tanpa kunjungan>`.
+  3. Buka `/admin/laporan-bulanan?instansi=<id yang tidak ada>`.
+  4. Catat satu kunjungan C sampai ditimbang di `/admin/kunjungan` (ember, lalu berat), lalu ulangi langkah 1.
+- **Hasil yang diharapkan:** langkah 1–3 menampilkan halaman 404, bukan tabel kosong dengan dropdown **Semua instansi**. Setelah langkah 4, C muncul di dropdown dan langkah 1 tidak lagi 404 (berat C tampil jika kunjungannya di bulan ini).
+- **Keadaan gagal yang dicek:** ID instansi tidak ditemukan, pengajuan tanpa kunjungan, instansi yang belum pernah ditimbang (`CONTRIBUTING.md` bagian 9.3).
+- **Hasil uji terakhir:** belum diuji
+
+## LPR-11: Menu Laporan Bulanan dan menu admin lain
+
+- **Kode tugas:** 2.5 (#185)
+- **Peran:** admin
+- **Persiapan data:** satu pengajuan apa pun untuk langkah 4.
+- **Langkah:**
+  1. Login sebagai admin, buka `/admin`.
+  2. Klik **Laporan Bulanan** di sidebar (kategori Navigation, di bawah **Pencatatan Kunjungan**). Pilih bulan, lalu klik **Tampilkan**.
+  3. Klik setiap menu sidebar satu per satu: Dashboard, Data Pengguna, Langganan, Buat Kunjungan, Hari Libur, Pencatatan Kunjungan, Laporan Bulanan, Data Event, Peserta Event, Produk, Laporan.
+  4. Buka halaman di bawah salah satu menu, misalnya `/admin/langganan/<id pengajuan>`.
+- **Hasil yang diharapkan:** di langkah 2 menu **Laporan Bulanan** aktif, juga setelah URL berisi `?bulan=` dan `?instansi=`. Di langkah 3 setiap menu membuka halamannya dan hanya menu itu yang aktif; **Laporan** (`/admin/reports`) dan **Laporan Bulanan** tidak pernah aktif bersamaan. Berpindah lewat sidebar tidak memuat ulang seluruh halaman: sidebar tetap di tempat dan layar memuat admin tidak muncul lagi. Di langkah 4 menu **Langganan** aktif.
+- **Keadaan gagal yang dicek:** menu tidak aktif karena ada query string, dua menu aktif bersamaan, menu tidak bisa diklik setelah impor diganti ke `next/link` dan `next/navigation`.
+- **Hasil uji terakhir:** belum diuji

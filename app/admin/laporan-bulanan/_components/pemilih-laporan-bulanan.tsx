@@ -1,4 +1,4 @@
-import type { HasilLaporanBulanan } from "@/features/laporan/types";
+import type { PilihanInstansi } from "@/features/laporan/types";
 
 /** Kerangka (fallback Suspense) laporan bulanan; setinggi isi aslinya (CONTRIBUTING 8 no. 10). */
 export function KerangkaLaporanBulanan() {
@@ -14,15 +14,19 @@ export function KerangkaLaporanBulanan() {
 /**
  * Form GET filter laporan bulanan: bulan (?bulan=) dan instansi (?instansi=).
  * Tanpa JavaScript, jadi hasilnya bisa dibagikan/di-bookmark (pola yang sama
- * dengan halaman /admin/kunjungan dan /admin/hari-libur).
+ * dengan halaman /admin/kunjungan dan /admin/hari-libur). Pilihan instansi dari
+ * getPilihanInstansi(), dan yang terpilih dari filter URL, bukan dari isi
+ * laporan, supaya tetap lengkap setelah difilter dan di bulan tanpa data.
  */
 export function PemilihLaporan({
-  hasil,
+  bulan,
+  instansi,
+  pilihan,
 }: {
-  hasil: HasilLaporanBulanan;
+  bulan: string;
+  instansi: number | null;
+  pilihan: PilihanInstansi[];
 }) {
-  const instansiAktif = hasil.daftar.length === 1 ? hasil.daftar[0] : undefined;
-
   return (
     <form
       method="get"
@@ -37,7 +41,7 @@ export function PemilihLaporan({
           id="bulan"
           type="month"
           name="bulan"
-          defaultValue={hasil.bulan}
+          defaultValue={bulan}
           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-(--hx-accent) focus:outline-none focus:ring-1 focus:ring-(--hx-accent)"
         />
       </div>
@@ -49,13 +53,13 @@ export function PemilihLaporan({
         <select
           id="instansi"
           name="instansi"
-          defaultValue={instansiAktif?.idPengajuan ?? ""}
+          defaultValue={instansi ?? ""}
           className="min-w-52 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-(--hx-accent) focus:outline-none focus:ring-1 focus:ring-(--hx-accent)"
         >
           <option value="">Semua instansi</option>
-          {hasil.daftar.map((rekap) => (
-            <option key={rekap.idPengajuan} value={rekap.idPengajuan}>
-              {rekap.namaInstansi}
+          {pilihan.map((item) => (
+            <option key={item.idPengajuan} value={item.idPengajuan}>
+              {item.namaInstansi}
             </option>
           ))}
         </select>

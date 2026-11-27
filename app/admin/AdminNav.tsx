@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/dist/client/components/navigation";
-import Link from "next/dist/client/link";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const adminNavigation = [
   { name: "Dashboard", href: "/admin", category: "NAVIGATION" },
@@ -16,6 +16,11 @@ const adminNavigation = [
   {
     name: "Pencatatan Kunjungan",
     href: "/admin/kunjungan",
+    category: "NAVIGATION",
+  },
+  {
+    name: "Laporan Bulanan",
+    href: "/admin/laporan-bulanan",
     category: "NAVIGATION",
   },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
