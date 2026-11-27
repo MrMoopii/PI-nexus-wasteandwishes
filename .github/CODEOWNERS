@@ -4,16 +4,31 @@
 # pemiliknya sendiri tetap punya reviewer lain. Nama = akun GitHub, bukan nama tampilan.
 
 # Bawaan: aturan, konfigurasi, skema database, autentikasi, types.ts dan aturan.ts
-# setiap fitur (kode tugas 0.2 dan 2.1), serta semua file tanpa pemilik khusus.
+# setiap fitur (kode tugas 0.2, 2.1, dan 3.1), serta semua file tanpa pemilik khusus.
+# Termasuk tugas ketua tim (3.5, 3.10), auth.config.ts, dan components/header/.
 *                                                @MrMoopii
 
-# Mity-U: komponen UI dasar (0.3), komponen negosiasi (1.2), laporan bulanan (2.5)
+# Mity-U: komponen UI dasar (0.3), komponen negosiasi (1.2), laporan bulanan (2.5),
+# produk by request (3.6, 3.7)
 /components/ui/                                  @Mity-U @MrMoopii
 /features/langganan/components/                  @Mity-U @MrMoopii
 /features/laporan/                               @Mity-U @MrMoopii
 /app/admin/laporan-bulanan/                      @Mity-U @MrMoopii
+# /app/toko/keranjang/ termasuk keranjang-client.tsx yang diubah 3.8, supaya PR 3.8
+# otomatis meminta review pemilik file itu.
+/app/admin/produk/                               @Mity-U @MrMoopii
+/app/toko/etalase-produk.tsx                     @Mity-U @MrMoopii
+/app/toko/detail/                                @Mity-U @MrMoopii
+/app/toko/keranjang/                             @Mity-U @MrMoopii
+/features/toko/actions/permintaan.ts             @Mity-U @MrMoopii
+/features/toko/validasi/permintaan.ts            @Mity-U @MrMoopii
+/app/admin/permintaan-produk/                    @Mity-U @MrMoopii
+/app/toko/permintaan/                            @Mity-U @MrMoopii
+/features/toko/queries/permintaan.ts             @Mity-U @MrMoopii
+/features/toko/actions/admin-permintaan.ts       @Mity-U @MrMoopii
+/features/toko/validasi/admin-permintaan.ts      @Mity-U @MrMoopii
 
-# cintasuryasakti9-svg: halaman dan aksi pelanggan (1.1, 1.3), tracker (2.4)
+# cintasuryasakti9-svg: halaman dan aksi pelanggan (1.1, 1.3), tracker (2.4), event (3.2, 3.3)
 /app/langganan/                                  @cintasuryasakti9-svg @MrMoopii
 /features/langganan/queries/pelanggan.ts         @cintasuryasakti9-svg @MrMoopii
 /features/langganan/actions/pelanggan.ts         @cintasuryasakti9-svg @MrMoopii
@@ -23,8 +38,15 @@
 /features/kunjungan/actions/lapor-kendala.ts     @cintasuryasakti9-svg @MrMoopii
 /features/kunjungan/validasi/lapor-kendala.ts    @cintasuryasakti9-svg @MrMoopii
 /features/kunjungan/components/                  @cintasuryasakti9-svg @MrMoopii
+/app/event/                                      @cintasuryasakti9-svg @MrMoopii
+/features/event/queries/publik.ts                @cintasuryasakti9-svg @MrMoopii
+/features/event/validasi/publik.ts               @cintasuryasakti9-svg @MrMoopii
+/app/admin/events/                               @cintasuryasakti9-svg @MrMoopii
+/app/admin/peserta-event/                        @cintasuryasakti9-svg @MrMoopii
+/features/event/actions/admin.ts                 @cintasuryasakti9-svg @MrMoopii
+/features/event/validasi/admin.ts                @cintasuryasakti9-svg @MrMoopii
 
-# Sanick69: admin langganan (1.4, 1.5), pencatatan harian (2.3)
+# Sanick69: admin langganan (1.4, 1.5), pencatatan harian (2.3), toko mitra (3.4)
 /app/admin/langganan/                            @Sanick69 @MrMoopii
 /features/langganan/queries/admin.ts             @Sanick69 @MrMoopii
 /features/langganan/actions/admin.ts             @Sanick69 @MrMoopii
@@ -33,8 +55,13 @@
 /features/kunjungan/queries/admin.ts             @Sanick69 @MrMoopii
 /features/kunjungan/actions/pencatatan.ts        @Sanick69 @MrMoopii
 /features/kunjungan/validasi/pencatatan.ts       @Sanick69 @MrMoopii
+/app/admin/toko-mitra/                           @Sanick69 @MrMoopii
+/features/toko-mitra/queries/admin.ts            @Sanick69 @MrMoopii
+/features/toko-mitra/actions/admin.ts            @Sanick69 @MrMoopii
+/features/toko-mitra/validasi/admin.ts           @Sanick69 @MrMoopii
 
-# jodi240506: pembayaran (1.6), halaman lama (1.7), jadwal dan hari libur (2.2), kendala (2.6)
+# jodi240506: pembayaran (1.6), halaman lama (1.7), jadwal dan hari libur (2.2), kendala (2.6),
+# checkout dan pesanan toko (3.8, 3.9)
 # Ditulis setelah /app/langganan/ supaya menimpa pemilik folder itu untuk file berikut.
 /features/langganan/actions/pembayaran.ts        @jodi240506 @MrMoopii
 /features/langganan/validasi/pembayaran.ts       @jodi240506 @MrMoopii
@@ -54,3 +81,11 @@
 /features/kunjungan/actions/tanggapi-kendala.ts  @jodi240506 @MrMoopii
 /features/kunjungan/validasi/tanggapi-kendala.ts @jodi240506 @MrMoopii
 /app/admin/kendala/                              @jodi240506 @MrMoopii
+/app/toko/checkout/                              @jodi240506 @MrMoopii
+/features/toko/actions/checkout.ts               @jodi240506 @MrMoopii
+/features/toko/validasi/checkout.ts              @jodi240506 @MrMoopii
+/app/toko/pesanan/                               @jodi240506 @MrMoopii
+/app/admin/pesanan-toko/                         @jodi240506 @MrMoopii
+/features/toko/queries/pesanan.ts                @jodi240506 @MrMoopii
+/features/toko/actions/admin-pesanan.ts          @jodi240506 @MrMoopii
+/features/toko/validasi/admin-pesanan.ts         @jodi240506 @MrMoopii

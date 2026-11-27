@@ -1,10 +1,8 @@
 import {
-  boolean,
   date,
   integer,
   numeric,
   pgTable,
-  primaryKey,
   text,
   time,
   timestamp,
@@ -35,155 +33,6 @@ export const users = pgTable(
     uniqueIndex("users_username_unique").on(table.username),
     uniqueIndex("users_email_unique").on(table.email),
   ],
-);
-
-export const events = pgTable("events", {
-  idEvent: integer("id_event").primaryKey().generatedAlwaysAsIdentity(),
-  namaEvent: text("nama_event").notNull(),
-  jenisEvent: text("jenis_event").notNull(),
-  deskripsi: text("deskripsi"),
-  kuotaPeserta: integer("kuota_peserta").notNull().default(0),
-  tanggalPelaksanaan: date("tanggal_pelaksanaan").notNull(),
-  waktuMulai: time("waktu_mulai"),
-  waktuSelesai: time("waktu_selesai"),
-  lokasi: text("lokasi"),
-  gambarUrl: text("gambar_url"),
-  gambarFileId: text("gambar_file_id"),
-  statusEvent: text("status_event").notNull().default("draft"),
-  biayaEvent: numeric("biaya_event", { precision: 12, scale: 2 })
-    .notNull()
-    .default("0"),
-});
-
-export const pendaftaranEvent = pgTable(
-  "pendaftaran_event",
-  {
-    idPendaftaran: integer("id_pendaftaran")
-      .primaryKey()
-      .generatedAlwaysAsIdentity(),
-    eventId: integer("event_id")
-      .notNull()
-      .references(() => events.idEvent),
-    userId: integer("id_user")
-      .notNull()
-      .references(() => users.idUser),
-    tanggalDaftar: timestamp("tanggal_daftar", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => [
-    uniqueIndex("pendaftaran_event_event_user_unique").on(
-      table.eventId,
-      table.userId,
-    ),
-  ],
-);
-
-export const pembayaranEvent = pgTable("pembayaran_event", {
-  idPembayaranEvent: integer("id_pembayaran_event")
-    .primaryKey()
-    .generatedAlwaysAsIdentity(),
-  eventId: integer("event_id")
-    .notNull()
-    .references(() => events.idEvent),
-  userId: integer("id_user")
-    .notNull()
-    .references(() => users.idUser),
-  orderId: text("order_id").notNull().unique(),
-  midtransTransactionId: text("midtrans_transaction_id"),
-  redirectUrl: text("redirect_url"),
-  jumlah: numeric("jumlah", { precision: 12, scale: 2 }).notNull(),
-  statusPembayaran: text("status_pembayaran").notNull(),
-  tanggalDibuat: timestamp("tanggal_dibuat", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  tanggalDibayar: timestamp("tanggal_dibayar", { withTimezone: true }),
-  tanggalKedaluwarsa: timestamp("tanggal_kedaluwarsa", { withTimezone: true })
-    .notNull(),
-});
-
-export const produk = pgTable("produk", {
-  idProduk: integer("id_produk").primaryKey().generatedAlwaysAsIdentity(),
-  namaProduk: text("nama_produk").notNull(),
-  jenisProduk: text("jenis_produk").notNull(),
-  hargaProduk: numeric("harga_produk", { precision: 12, scale: 2 }).notNull(),
-  jumlahStok: integer("jumlah_stok").notNull().default(0),
-  deskripsi: text("deskripsi"),
-  gambarUrl: text("gambar_url"),
-  berat: text("berat"),
-  statusProduk: text("status_produk").notNull().default("aktif"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-
-export const fotoProduk = pgTable("foto_produk", {
-  idFoto: integer("id_foto").primaryKey().generatedAlwaysAsIdentity(),
-  productId: integer("product_id")
-    .notNull()
-    .references(() => produk.idProduk, { onDelete: "cascade" }),
-  url: text("url").notNull(),
-  fileId: text("file_id").notNull(),
-  urutan: integer("urutan").notNull().default(0),
-  isPrimary: boolean("is_primary").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-
-export const transaksi = pgTable("transaksi", {
-  idTransaksi: integer("id_transaksi").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("id_user")
-    .notNull()
-    .references(() => users.idUser),
-  tanggalTransaksi: timestamp("tanggal_transaksi", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  metodePembayaran: text("metode_pembayaran").notNull(),
-});
-
-export const detailTransaksi = pgTable(
-  "detail_transaksi",
-  {
-    idDetailTransaksi: integer("id_detail_transaksi")
-      .primaryKey()
-      .generatedAlwaysAsIdentity(),
-    transaksiId: integer("transaksi_id")
-      .notNull()
-      .references(() => transaksi.idTransaksi),
-    produkId: integer("produk_id")
-      .notNull()
-      .references(() => produk.idProduk),
-    jumlahProduk: integer("jumlah_produk").notNull(),
-  },
-  (table) => [
-    uniqueIndex("detail_transaksi_transaksi_produk_unique").on(
-      table.transaksiId,
-      table.produkId,
-    ),
-  ],
-);
-
-export const keranjang = pgTable("keranjang", {
-  idKeranjang: integer("id_keranjang").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("id_user")
-    .notNull()
-    .unique()
-    .references(() => users.idUser),
-});
-
-export const detailKeranjang = pgTable(
-  "detail_keranjang",
-  {
-    keranjangId: integer("keranjang_id")
-      .notNull()
-      .references(() => keranjang.idKeranjang),
-    produkId: integer("produk_id")
-      .notNull()
-      .references(() => produk.idProduk),
-    jumlahProduk: integer("jumlah_produk").notNull().default(1),
-  },
-  (table) => [primaryKey({ columns: [table.keranjangId, table.produkId] })],
 );
 
 export const dataLangganan = pgTable("data_langganan", {
@@ -258,3 +107,5 @@ export const riwayatPengambilan = pgTable("riwayat_pengambilan", {
 
 export * from "./schema-langganan";
 export * from "./schema-kunjungan";
+export * from "./schema-event";
+export * from "./schema-toko";

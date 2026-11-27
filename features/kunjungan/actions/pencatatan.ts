@@ -40,6 +40,11 @@ function segarkanHalaman(): void {
  * diambil. Boleh dari dijadwalkan atau tertunda (tertunda berarti kunjungan
  * disusulkan dan akhirnya diambil). Hanya admin; gagal jika isian salah atau
  * status kunjungan sudah berubah.
+ *
+ * Catatan: kunjungan yang sedang dicentang untuk ditandai tertunda tidak
+ * dikirim ke aksi ini oleh tampilan, dan tampilan hanya mengatur tampilan.
+ * Aksi ini tetap hanya menerima status dijadwalkan/tertunda dari database,
+ * jadi permintaan langsung dengan ID kunjungan lain tetap mengikuti aturan status.
  */
 export async function catatEmber(
   _sebelumnya: HasilPencatatan | null,
