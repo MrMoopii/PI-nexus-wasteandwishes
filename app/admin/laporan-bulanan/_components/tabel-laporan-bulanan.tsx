@@ -1,4 +1,4 @@
-import { formatTanggal } from "@/lib/format-tanggal";
+import { formatBulan, formatTanggal } from "@/lib/format-tanggal";
 import type { HasilLaporanBulanan } from "@/features/laporan/types";
 
 /** Tabel laporan bulanan: per instansi, daftar berat per pengambilan, dan total. */
@@ -11,7 +11,7 @@ export function TabelLaporanBulanan({
     <div className="print-area space-y-6">
       <section className="hidden print:block">
         <p className="text-sm font-semibold text-gray-900">
-          Laporan Bulanan {formatTanggal(hasil.bulan)}
+          Laporan Bulanan {formatBulan(hasil.bulan)}
         </p>
         <p className="text-xs text-gray-500">
           Hanya kunjungan yang sudah ditimbang. Cetak oleh admin Waste and

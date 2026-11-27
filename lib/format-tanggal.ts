@@ -7,6 +7,19 @@ export function formatTanggal(tanggal: string): string {
   });
 }
 
+/**
+ * Nama bulan dan tahun dari nilai "YYYY-MM", misalnya "2026-11" menjadi
+ * "November 2026" (judul laporan bulanan). Memakai UTC seperti formatTanggal(),
+ * supaya bulan tidak bergeser karena zona waktu server.
+ */
+export function formatBulan(bulan: string): string {
+  return new Date(`${bulan}-01T00:00:00Z`).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function formatJam(jam: string): string {
   return jam.slice(0, 5).replace(":", ".");
 }

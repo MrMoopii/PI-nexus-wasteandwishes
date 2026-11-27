@@ -35,8 +35,8 @@ Data uji diisi lewat SQL Editor Neon di branch pribadi (`CONTRIBUTING.md` bagian
   1. Buka `/admin/laporan-bulanan?bulan=<bulan ini>`.
   2. Klik tombol **Cetak** (atau `Ctrl+P`).
   3. Pilih "Save as PDF" dengan ukuran kertas A4, lalu buka PDF-nya.
-- **Hasil yang diharapkan:** PDF berisi judul laporan, tabel per instansi, dan baris total saja. Sidebar admin, header admin, form filter, dan tombol cetak tidak ikut tercetak.
-- **Keadaan gagal yang dicek:** elemen UI layar ikut masuk ke hasil cetak.
+- **Hasil yang diharapkan:** PDF berisi judul laporan dengan nama bulan dan tahun (misalnya "Laporan Bulanan November 2026", bukan "1 November 2026"), tabel per instansi, dan baris total saja. Sidebar admin, header admin, form filter, dan tombol cetak tidak ikut tercetak.
+- **Keadaan gagal yang dicek:** elemen UI layar ikut masuk ke hasil cetak, judul memakai tanggal alih-alih nama bulan.
 - **Hasil uji terakhir:** belum diuji
 
 ## LPR-04: Akun bukan admin ditolak
