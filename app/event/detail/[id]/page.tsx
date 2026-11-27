@@ -1,56 +1,49 @@
-import Link from "next/link";
 import GambarEvent from "@/components/GambarEvent";
 import { formatTanggal, formatWaktu } from "@/lib/format-tanggal";
 import { notFound } from "next/navigation";
-import { getDb } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
 import { connection } from "next/server";
+import Link from "next/link";
+import {
+  getEventDetailPublik,
+  tanggalHariIniJakarta,
+} from "@/features/event/queries/publik";
+import { skemaIdEventPublik } from "@/features/event/validasi/publik";
+import { LABEL_PERAN_WW } from "@/features/event/types";
 
 export const instant = false;
 
+/**
+ * Halaman detail event publik (tanpa login).
+ * ID tidak valid atau event tidak aktif → notFound().
+ * Tidak ada tombol daftar atau bayar.
+ */
 export default async function EventDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 1. Validasi ID dari URL dengan skema Zod (CONTRIBUTING 9.8).
   const resolvedParams = await params;
-  const idEvent = Number(resolvedParams.id);
+  const hasilValidasi = skemaIdEventPublik.safeParse({ id: resolvedParams.id });
+  if (!hasilValidasi.success) notFound();
+  const { id: idEvent } = hasilValidasi.data;
 
-  if (!Number.isInteger(idEvent) || idEvent <= 0) {
-    notFound();
-  }
-
+  // 2. Ambil data dari query publik; event draft/hidden → notFound().
   await connection();
+  const eventDipilih = await getEventDetailPublik(idEvent);
+  if (!eventDipilih) notFound();
 
-  const [eventDipilih] = await getDb()
-    .select()
-    .from(eventsTable)
-    .where(
-      and(
-        eq(eventsTable.idEvent, idEvent),
-        eq(eventsTable.statusEvent, "aktif"),
-      ),
-    )
-    .limit(1);
-
-  if (!eventDipilih) {
-    notFound();
-  }
-
-  const tanggalHariIni = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jakarta",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+  // 3. Hitung hari ini untuk menentukan apakah event sudah lewat.
+  const tanggalHariIni = tanggalHariIniJakarta();
   const eventSudahLewat = eventDipilih.tanggalPelaksanaan < tanggalHariIni;
 
   const eventDateObj = new Date(`${eventDipilih.tanggalPelaksanaan}T00:00:00Z`);
   const bulanShort = new Intl.DateTimeFormat("id-ID", {
     month: "short",
     timeZone: "UTC",
-  }).format(eventDateObj).toUpperCase();
+  })
+    .format(eventDateObj)
+    .toUpperCase();
   const tanggalAngka = eventDateObj.getUTCDate();
 
   return (
@@ -75,9 +68,22 @@ export default async function EventDetailPage({
           <h1 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight text-(--hx-ink)">
             {eventDipilih.namaEvent}
           </h1>
-          <p className="mt-2 text-lg text-(--hx-ink-2)">
-            Diselenggarakan oleh Waste &amp; Wishes
-          </p>
+          {/* Penyelenggara dan peran WW (dari kolom 3.1). */}
+          {eventDipilih.penyelenggara ? (
+            <p className="mt-2 text-lg text-(--hx-ink-2)">
+              Diselenggarakan oleh{" "}
+              <span className="font-semibold">{eventDipilih.penyelenggara}</span>
+              {eventDipilih.peranWw && (
+                <span className="ml-2 inline-flex rounded-full bg-(--hx-accent)/10 px-2 py-0.5 text-sm font-semibold text-(--hx-accent-dark)">
+                  WW sebagai {LABEL_PERAN_WW[eventDipilih.peranWw]}
+                </span>
+              )}
+            </p>
+          ) : (
+            <p className="mt-2 text-lg text-(--hx-ink-2)">
+              Diselenggarakan oleh Waste &amp; Wishes
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -110,38 +116,58 @@ export default async function EventDetailPage({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <p className="text-sm text-(--hx-ink-2)">{eventDipilih.lokasi || "Lokasi acara menyusul"}</p>
+                <p className="text-sm text-(--hx-ink-2)">
+                  {eventDipilih.lokasi || "Lokasi acara menyusul"}
+                </p>
               </div>
             </div>
 
             {/* Tentang Event */}
             <section>
-              <h2 className="text-xl font-semibold text-(--hx-ink) mb-4 border-b pb-2">Tentang Event</h2>
+              <h2 className="text-xl font-semibold text-(--hx-ink) mb-4 border-b pb-2">
+                Tentang Event
+              </h2>
               <p className="text-base text-(--hx-ink-2) leading-relaxed">
                 {eventDipilih.deskripsi || "Tidak ada deskripsi acara"}
               </p>
             </section>
+
+            {/* Tautan info eksternal (jika ada) — dibuka di tab baru (CONTRIBUTING issue #171). */}
+            {eventDipilih.tautanInfo && (
+              <section>
+                <h2 className="text-xl font-semibold text-(--hx-ink) mb-4 border-b pb-2">
+                  Informasi Lebih Lanjut
+                </h2>
+                <a
+                  href={eventDipilih.tautanInfo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hx-btn-outline inline-flex"
+                >
+                  Buka halaman resmi event
+                  <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </section>
+            )}
           </div>
 
-          {/* Kolom Kanan: Pendaftaran (Sticky) */}
+          {/* Kolom Kanan: Status event (tanpa tombol daftar/bayar). */}
           <div className="lg:col-span-1">
             <div className="sticky top-10 rounded-2xl border border-(--hx-pastel) bg-white p-6 shadow-sm space-y-6">
-              <h3 className="text-lg font-semibold text-(--hx-ink)">Pendaftaran</h3>
-              <p className="text-sm text-(--hx-ink-2)">Selamat datang! Silakan daftar untuk mengikuti kegiatan ini.</p>
-
+              <h3 className="text-lg font-semibold text-(--hx-ink)">
+                Informasi Event
+              </h3>
               {eventSudahLewat ? (
                 <p className="rounded-xl bg-(--hx-sunk) px-4 py-3 text-center text-sm font-semibold text-(--hx-ink-3)">
-                  Pendaftaran event telah ditutup
+                  Event ini telah selesai
                 </p>
               ) : (
-                <Link
-                  href={`/event/checkout/${eventDipilih.idEvent}`}
-                  className="hx-btn-primary w-full justify-center text-center"
-                >
-                  Daftar
-                </Link>
+                <p className="rounded-xl bg-(--hx-accent)/10 px-4 py-3 text-center text-sm font-semibold text-(--hx-accent-dark)">
+                  Event akan datang
+                </p>
               )}
-
               <Link
                 href="/event"
                 className="hx-btn-outline w-full justify-center text-center"

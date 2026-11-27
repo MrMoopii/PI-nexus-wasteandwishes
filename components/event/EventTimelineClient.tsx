@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import GambarEvent from "@/components/GambarEvent";
 import EventDrawer, { type EventRingkas } from "./EventDrawer";
+import { LABEL_PERAN_WW } from "@/features/event/types";
 
 export type EventTimelineItem = EventRingkas & {
   waktuLabel: string;
@@ -71,6 +72,17 @@ export default function EventTimelineClient({
                       <h4 className="mt-2 text-xl font-semibold leading-snug text-(--hx-ink) group-hover:text-(--hx-accent)">
                         {event.namaEvent}
                       </h4>
+                      {event.penyelenggara && (
+                        <p className="mt-1 text-xs font-medium text-(--hx-ink-2)">
+                          Oleh {event.penyelenggara}
+                          {event.peranWw && ` (WW sebagai ${LABEL_PERAN_WW[event.peranWw]})`}
+                        </p>
+                      )}
+                      {event.lokasi && (
+                        <p className="mt-0.5 text-xs text-(--hx-ink-3)">
+                          {event.lokasi}
+                        </p>
+                      )}
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-(--hx-ink-2)">
                         {event.deskripsi || "Tidak ada deskripsi acara"}
                       </p>
@@ -81,7 +93,7 @@ export default function EventTimelineClient({
                             : "bg-(--hx-accent)/10 text-(--hx-accent-dark)"
                         }`}
                       >
-                        {isPast ? "Pendaftaran ditutup" : event.jenisEvent}
+                        {isPast ? "Selesai" : event.jenisEvent}
                       </span>
                     </div>
                     <div className="relative h-36 w-full shrink-0 overflow-hidden rounded-xl bg-(--hx-sunk) sm:h-32 sm:w-44">
