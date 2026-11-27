@@ -1,0 +1,37 @@
+import { z } from "zod";
+
+// Skema filter URL halaman /admin/laporan-bulanan (kode tugas 2.5, CONTRIBUTING 9.8).
+// Tanpa "use server" dan "server-only". idUser tidak pernah masuk skema:
+// admin yang memeriksa laporan selalu dari sesi (bagian 7.2 no. 3).
+
+/** Pola "YYYY-MM" untuk filter bulan. */
+const BULAN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+/**
+ * Filter bulan dari ?bulan= di URL. Kosong berarti memakai bawaan
+ * (bulan ini, WIB); diisi tetapi tidak cocok dengan pola berarti
+ * halaman 404 (CONTRIBUTING 9.3 dan aturan tugas 2.5).
+ */
+export const skemaBulan = z.string({ error: "Bulan tidak valid." }).regex(
+  BULAN,
+  { error: "Bulan tidak valid." },
+);
+
+/**
+ * Filter instansi dari ?instansi= di URL: ID pengajuan, opsional.
+ * Isiannya tidak ada atau kosong berarti semua instansi; diisi tetapi
+ * tidak berupa angka positif berarti 404 (CONTRIBUTING 9.3).
+ */
+export const skemaInstansi = z.coerce
+  .number({ error: "Instansi tidak valid." })
+  .int({ error: "Instansi tidak valid." })
+  .positive({ error: "Instansi tidak valid." });
+
+/** Gabungan filter bulan dan instansi untuk halaman laporan bulanan. */
+export const skemaFilterLaporan = z.object({
+  bulan: skemaBulan.optional(),
+  instansi: skemaInstansi.optional(),
+});
+
+/** Nama isian filter laporan; sama dengan parameter URL. */
+export type FilterLaporan = z.infer<typeof skemaFilterLaporan>;

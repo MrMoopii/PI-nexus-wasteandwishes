@@ -1100,6 +1100,56 @@ html[data-admin-theme="dark"] .admin-shell {
   color: #fff !important;
 }
 
+/* ── Cetak laporan bulanan: biarkan hanya area laporan, sembunyikan sisanya ── */
+@media print {
+  .admin-shell {
+    background: white !important;
+  }
+
+  .admin-shell .admin-sidebar,
+  .admin-shell .admin-header,
+  .admin-shell .no-print,
+  .admin-shell main > div > .print-area ~ * {
+    display: none !important;
+  }
+
+  .admin-shell main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .admin-shell .print-area {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  .admin-shell .print-area section,
+  .admin-shell .print-area table,
+  .admin-shell .print-area thead,
+  .admin-shell .print-area tbody,
+  .admin-shell .print-area tr,
+  .admin-shell .print-area th,
+  .admin-shell .print-area td {
+    background: white !important;
+    color: black !important;
+    border-color: #d1d5db !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .admin-shell .print-area section {
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}
+
 /* Helix Drift-inspired editorial styling for the admin workspace. */
 .admin-shell {
   --admin-canvas: #f4f7fa;
