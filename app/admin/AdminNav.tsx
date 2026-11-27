@@ -18,6 +18,7 @@ const adminNavigation = [
     href: "/admin/kunjungan",
     category: "NAVIGATION",
   },
+  { name: "Laporan Kendala", href: "/admin/kendala", category: "NAVIGATION" },
   { name: "Data Event", href: "/admin/events", category: "APPLICATION" },
   {
     name: "Peserta Event",
