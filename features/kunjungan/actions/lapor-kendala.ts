@@ -5,9 +5,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { hariLibur, kunjunganPengambilan } from "@/lib/db/schema";
+import { formatTanggal } from "@/lib/format-tanggal";
 import { requireLogin } from "@/lib/require-login";
 import { bolehMintaLewati } from "../jadwal";
-import { isLanggananAktif } from "../queries/pelanggan";
+import { akhirLanggananAktif, isLanggananAktif } from "../queries/pelanggan";
 import { isStatusKunjungan, LABEL_STATUS_KUNJUNGAN } from "../types";
 import {
   skemaKendala,
@@ -93,17 +94,22 @@ export async function laporKendala(
 
 /**
  * Pesan gagal untuk tanggal pengganti, atau null jika memenuhi usulan syarat 2.4:
- * setelah tanggal yang dilewati, bukan hari libur, dan belum ada kunjungan di tanggal
- * itu. Hari kerja sudah dicek skemaLewati.
+ * setelah tanggal yang dilewati, tidak setelah tanggal akhir langganan (keputusan 2.6),
+ * bukan hari libur, dan belum ada kunjungan di tanggal itu. Hari kerja sudah dicek
+ * skemaLewati.
  */
 async function periksaTanggalPengganti(
   idUser: number,
   tanggalDilewati: string,
   tanggal: string,
+  akhirLangganan: string,
 ): Promise<string | null> {
   // Teks "YYYY-MM-DD" dibandingkan langsung (CONTRIBUTING 9.2).
   if (tanggal <= tanggalDilewati) {
     return "Tanggal pengganti harus setelah tanggal yang dilewati.";
+  }
+  if (tanggal > akhirLangganan) {
+    return `Tanggal pengganti melewati masa langganan Anda (berakhir ${formatTanggal(akhirLangganan)}).`;
   }
 
   const db = getDb();
@@ -130,7 +136,8 @@ async function periksaTanggalPengganti(
  * mengusulkan tanggal pengganti. Kunjungan langsung menjadi dilewati; tanggal
  * pengganti menunggu persetujuan admin (2.6). Hanya pelanggan dengan langganan
  * aktif; gagal jika isian salah, kunjungan bukan miliknya, statusnya bukan
- * dijadwalkan, atau batas H-1 pukul 17.00 WIB sudah lewat.
+ * dijadwalkan, batas H-1 pukul 17.00 WIB sudah lewat, atau usulan tanggalnya tidak
+ * memenuhi syarat (termasuk setelah tanggal akhir langganan).
  */
 export async function mintaLewati(
   _sebelumnya: HasilLaporan<IsianLewati> | null,
@@ -154,7 +161,9 @@ export async function mintaLewati(
     isian.pengganti === "ya" ? isian.tanggalPengganti : null;
 
   // 3. Menyembunyikan form bukan pengaman, jadi langganan aktif dicek lagi (7.2 no. 9).
-  if (!(await isLanggananAktif(cek.idUser))) {
+  //    Tanggal akhirnya juga batas usulan tanggal pengganti (keputusan 2.6).
+  const akhirLangganan = await akhirLanggananAktif(cek.idUser);
+  if (akhirLangganan === null) {
     return { ok: false, pesan: TIDAK_AKTIF };
   }
 
@@ -192,6 +201,7 @@ export async function mintaLewati(
       cek.idUser,
       kunjungan.tanggal,
       tanggalPengganti,
+      akhirLangganan,
     );
     if (galat) {
       return {

@@ -8,7 +8,7 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 
 | File                           | Isi                                                                                    | Kode tugas |
 | ------------------------------ | -------------------------------------------------------------------------------------- | ---------- |
-| `types.ts`                     | Daftar status, jenis, dan aturan (label dan `is…()`), tipe tampilan tabel dan tracker  | 2.1, 2.4   |
+| `types.ts`                     | Daftar status, jenis, dan aturan (label dan `is…()`), tipe tampilan tabel dan tracker  | 2.1, 2.4, 2.6 |
 | `jadwal.ts`                    | Fungsi murni: tanggal kunjungan, aturan hari libur, batas minta lewati (lihat bawah)   | 2.2        |
 | `queries/hari-libur.ts`        | `getDaftarHariLibur()`: hari libur mulai hari ini, urut naik. Hanya admin              | 2.2        |
 | `actions/jadwal.ts`            | `buatKunjungan()`: kunjungan satu rentang dari pola pelanggan aktif dan hari libur     | 2.2        |
@@ -19,22 +19,22 @@ File dipisah per proses supaya setiap pemilik kode tugas memegang file sendiri (
 | `actions/pencatatan.ts`        | `catatEmber()`, `catatBerat()`, `ubahPencatatan()`                                     | 2.3        |
 | `actions/tertunda.ts`          | `tandaiTertunda()`, `ubahTertunda()`, `batalkanTertunda()`                             | 2.3        |
 | `validasi/pencatatan.ts`       | `skemaFilterTanggal`, `skemaCatatEmber`, `skemaCatatBerat`, `skemaUbahPencatatan`, `skemaTandaiTertunda`, `skemaUbahTertunda`, `skemaBatalkanTertunda` | 2.3 |
-| `queries/pelanggan.ts`         | Status hari ini, jadwal berikutnya, riwayat, total ember dan kg milik pelanggan        | 2.4        |
-| `actions/lapor-kendala.ts`     | Pelanggan melaporkan kendala                                                           | 2.4        |
+| `queries/pelanggan.ts`         | Status hari ini, jadwal berikutnya, riwayat, total ember dan kg milik pelanggan. `akhirLanggananAktif()` untuk batas usulan tanggal pengganti (2.6) | 2.4, 2.6 |
+| `actions/lapor-kendala.ts`     | Pelanggan melaporkan kendala dan meminta lewati. Batas usulan tanggal sampai akhir langganan ditambahkan 2.6 | 2.4, 2.6 |
 | `validasi/lapor-kendala.ts`    | Skema Zod isi laporan kendala                                                          | 2.4        |
 | `components/`                  | Komponen tracker (hanya menerima props)                                                | 2.4        |
-| `queries/kendala.ts`           | Daftar laporan kendala yang masih terbuka                                              | 2.6        |
-| `actions/tanggapi-kendala.ts`  | Admin menanggapi laporan kendala                                                       | 2.6        |
-| `validasi/tanggapi-kendala.ts` | Skema Zod tanggapan admin                                                              | 2.6        |
+| `queries/kendala.ts`           | `getHalamanKendala()`: kotak masuk dan 20 tanggapan terakhir. `bacaLaporanPengganti()` dan `bacaBentrokTanggal()` untuk aksi. Hanya admin | 2.6 |
+| `actions/tanggapi-kendala.ts`  | `tanggapiLaporan()` (kendala, lewati tanpa pengganti), `putuskanPengganti()` (setujui, tanggal lain, tolak) | 2.6 |
+| `validasi/tanggapi-kendala.ts` | `skemaTanggapiLaporan`, `skemaPutusanPengganti`, `tanggalPenggantiMin()`, `syaratTanggalPengganti()` | 2.6 |
 | `app/admin/hari-libur/`        | Halaman admin hari libur: tambah, daftar mendatang, ubah, hapus                        | 2.2        |
 | `app/admin/buat-kunjungan/`    | Halaman admin buat kunjungan: form rentang, ringkasan hasil, hari libur dihitung       | 2.2        |
 | `app/admin/kunjungan/`         | Halaman admin pencatatan harian: daftar per tanggal, catat ember/foto, catat berat, tandai tertunda | 2.3 |
 | `app/tracker/`                 | Halaman tracker pelanggan                                                              | 2.4        |
-| `app/admin/kendala/`           | Halaman admin laporan kendala                                                          | 2.6        |
+| `app/admin/kendala/`           | Halaman admin laporan kendala: kotak masuk tiga kelompok dengan form tanggapan, riwayat "Terakhir ditanggapi" | 2.6 |
 
 `types.ts` berisi `STATUS_KUNJUNGAN`, `JENIS_LAPORAN`, `STATUS_LAPORAN`, dan `ATURAN_HARI_LIBUR`, masing-masing dengan tipe, `LABEL_…`, dan pemeriksa `is…()` tanpa `as`. Tipe tampilannya `KunjunganTampilan`, `LaporanKendalaTampilan`, `HariLiburTampilan`, dan `PerubahanJadwalTampilan`, diturunkan dari skema (kolom `numeric` menjadi `number`, `id_user` tidak ikut).
 
-Tambahan 2.4 di `types.ts`: `LABEL_HARI` dan `namaHari()` (1 = Senin sampai 5 = Jumat), `PANJANG_PESAN_LAPORAN_MAKS` (1000, dipakai skema dan form), serta tipe tracker yang diturunkan dari tipe tampilan di atas: `KunjunganTracker`, `PilihanKunjungan`, `PilihanLewati`, `JadwalTetap`, `PemberitahuanLibur`, `PerubahanPolaTracker`, `LaporanTracker`, `IsiTracker`, dan `DataTracker`.
+Tambahan 2.4 di `types.ts`: `LABEL_HARI` dan `namaHari()` (1 = Senin sampai 5 = Jumat), `PANJANG_PESAN_LAPORAN_MAKS` (1000, dipakai skema dan form), serta tipe tracker yang diturunkan dari tipe tampilan di atas: `KunjunganTracker`, `PilihanKunjungan`, `PilihanLewati`, `JadwalTetap`, `PemberitahuanLibur`, `PerubahanPolaTracker`, `LaporanTracker`, `IsiTracker`, dan `DataTracker`. Tambahan 2.6: `IsiTracker.akhirLangganan`, tanggal akhir langganan aktif untuk batas usulan tanggal pengganti di form lewati.
 
 ## Jadwal dan hari libur (2.2)
 
@@ -49,7 +49,7 @@ Fungsi murni tanpa database dan sesi, jadi bisa dipakai di server maupun klien. 
   - Hasil geser yang jatuh di hari jadwal pelanggan menjadi satu kunjungan saja.
   - Hasilnya urut dan tanpa tanggal ganda. Dipakai `buatKunjungan()`, dan oleh 2.7 untuk membuat ulang kunjungan dari pola baru mulai `berlaku_mulai`.
 - `hariKerjaBerikutnya(tanggal, hariLibur): string`: hari kerja pertama setelah `tanggal` yang bukan hari libur, apa pun aturan liburnya.
-- `isHariKerja(tanggal): boolean`: Senin sampai Jumat. Bisa dipakai 2.4 dan 2.6 untuk memeriksa tanggal pengganti.
+- `isHariKerja(tanggal): boolean`: Senin sampai Jumat. Dipakai 2.4 dan 2.6 untuk memeriksa tanggal pengganti.
 - `tambahHari(tanggal, jumlah): string`: tanggal ditambah sejumlah hari kalender, boleh negatif.
 - `batasMintaLewati(tanggalKunjungan): Date`: batas meminta lewati, yaitu `<H-1>T17:00:00+07:00`, untuk ditampilkan tracker (2.4).
 - `bolehMintaLewati(tanggalKunjungan, sekarang: Date): boolean`: `true` jika `sekarang` masih sebelum batas. Kunjungan Senin: Minggu 16.59 WIB boleh, Minggu 17.00 WIB tidak. Status kunjungan (misalnya hanya `dijadwalkan`) dicek pemanggil (2.4).
@@ -74,7 +74,7 @@ Keputusan 2.2: kunjungan yang sudah ada tidak diubah, apa pun statusnya, termasu
 ### Akses
 
 - Login dijaga middleware (`/tracker` ada di `authorized()` di `auth.config.ts`) dan `getTrackerSaya()` (`requireLogin()`, gagal dialihkan ke `/auth/login`).
-- Langganan aktif dicek dengan `kondisiLanggananAktif()` di `getTrackerSaya()` dan di kedua aksi lewat `isLanggananAktif()`. Akun tanpa langganan aktif, termasuk admin, mendapat `{ aktif: false }` tanpa data apa pun. Halaman lalu menampilkan pesan dengan tautan ke `/langganan`.
+- Langganan aktif dicek dengan `kondisiLanggananAktif()` di `getTrackerSaya()` dan di kedua aksi, lewat `isLanggananAktif()` (kendala) dan `akhirLanggananAktif()` (lewati, sekaligus membaca tanggal akhir langganan). Akun tanpa langganan aktif, termasuk admin, mendapat `{ aktif: false }` tanpa data apa pun. Halaman lalu menampilkan pesan dengan tautan ke `/langganan`.
 - Menu **Tracker** ada di `components/header/Header.tsx` untuk semua akun yang login.
 
 ### Yang ditampilkan
@@ -103,16 +103,17 @@ Kunjungan yang dibuat sebelum hari liburnya ditambahkan tetap tampil di jadwal (
   1. Alasan wajib, juga untuk lewati tanpa pengganti.
   2. Kunjungan harus milik pelanggan dan berstatus `dijadwalkan`.
   3. `bolehMintaLewati(tanggal, new Date())` harus `true` (H-1 pukul 17.00 WIB). Form hanya menawarkan kunjungan yang masih boleh, tetapi server tetap mengecek ulang.
-  4. Tanggal pengganti (pilihan) harus hari kerja (skema), setelah tanggal yang dilewati, bukan hari libur, dan belum ada kunjungan pelanggan di tanggal itu, apa pun statusnya. Tanggal ini hanya usulan dan boleh setelah tanggal akhir langganan, karena admin yang memutuskan di 2.6.
+  4. Tanggal pengganti (pilihan) harus hari kerja (skema), setelah tanggal yang dilewati, tidak setelah tanggal akhir langganan, bukan hari libur, dan belum ada kunjungan pelanggan di tanggal itu, apa pun statusnya. Batas akhir langganan ditambahkan di 2.6 (sebelumnya usulan boleh melewatinya). Form membatasi kalender sampai `IsiTracker.akhirLangganan` dan menulis tanggal itu, tetapi server tetap mengecek ulang. Tanggal ini tetap usulan; admin yang memutuskan di `/admin/kendala` (2.6).
   5. Perubahan ditulis satu perintah: `WITH … UPDATE kunjungan_pengambilan SET status = 'dilewati' WHERE … AND status = 'dijadwalkan' RETURNING …`, lalu `INSERT laporan_kendala` jenis `lewati`. Tanpa baris kembali berarti kunjungan sudah berubah di tab lain atau oleh admin.
+- Form lewati meminta konfirmasi lewat `DialogKonfirmasi` (`components/ui/`) sebelum mengirim, bukan `window.confirm`. Form ini dikirim lewat `onSubmit` + `startTransition`, bukan `<form action>`; alasannya di bagian "Laporan kendala admin (2.6)".
 
-### Yang perlu diketahui 2.6 dan 2.7
+### Data dari 2.6 dan 2.7 di tracker
 
 Tracker hanya membaca kolom yang sudah ada sejak 2.1, jadi data dari 2.6 dan 2.7 langsung tampil tanpa perlu dipasang di file 2.4.
 
 - `tanggapan_admin` (2.6) dan `perubahan_jadwal.alasan` (2.7) tampil apa adanya ke pelanggan.
-- Laporan tetap "Menunggu tanggapan" sampai `status` diubah menjadi `ditanggapi`.
-- Kunjungan pengganti yang disetujui (2.6) muncul di jadwal mendatang dan di kartu laporan lewati. Syaratnya, kunjungan itu dibuat dengan `pengganti_dari`.
+- Laporan tetap "Menunggu tanggapan" sampai admin menanggapinya di `/admin/kendala` (status `ditanggapi`).
+- Kunjungan pengganti dari `putuskanPengganti()` (2.6) dibuat dengan `pengganti_dari`, jadi muncul di jadwal mendatang dan di kartu laporan lewati.
 - Pemberitahuan perubahan pola (2.7) dibaca per `pengajuan_id` pengajuan `siap_bayar` pelanggan.
 - Pemberitahuan libur memakai pola di `pengajuan_langganan.hari_pengambilan`. Jika 2.7 mengganti kolom itu sebelum `berlaku_mulai`, libur di antara hari ini dan `berlaku_mulai` dihitung dengan pola baru.
 
@@ -175,9 +176,58 @@ Cara memakainya:
 - Kunjungan `batal` dan `dilewati` tetap tampil di daftar, tanpa aksi.
 - Foto diunggah lebih dulu lewat `ImageKitReportUpload` (memakai `/api/admin/imagekit-auth` dan `getImageKitAuthParams()`), lalu url dan fileId dikirim sebagai hidden input. Server hanya menerima URL `https`.
 
+## Laporan kendala admin (2.6)
+
+`/admin/kendala` (menu **Laporan Kendala**) dipakai admin untuk menanggapi laporan dari tracker pelanggan (2.4). Akses dijaga middleware, `getHalamanKendala()` (`requireAdmin()`; belum login dialihkan ke login, bukan admin ke beranda), dan `requireAdmin()` di baris pertama setiap aksi. Tipe tampilannya (`LaporanAdmin`, `LaporanUsulan`, `HalamanKendala`) ada di `queries/kendala.ts`, seperti `KunjunganHarian` di 2.3.
+
+### Tampilan
+
+Halaman bekerja seperti kotak masuk:
+
+- **Menunggu tanggapan:** semua laporan `menunggu`, terlama dulu, tanpa batas jumlah, dalam tiga kelompok:
+  1. lewati dengan usulan tanggal pengganti, dengan form keputusan;
+  2. laporan kendala, dengan form tanggapan;
+  3. lewati tanpa tanggal pengganti, yang sudah berlaku sejak pelanggan mengirimnya, dengan form tanggapan.
+- **Terakhir ditanggapi:** 20 laporan `ditanggapi` terbaru, hanya untuk dibaca, tertutup saat halaman dibuka. Diurut menurut waktu kirim pelanggan, karena `laporan_kendala` tidak punya kolom waktu ditanggapi. Mengurutkan menurut waktu tanggapan butuh kolom baru lewat pemilik skema.
+- Setiap kartu menampilkan instansi, PIC, kunjungan yang dilaporkan beserta statusnya sekarang, isi laporan, usulan tanggal, dan waktu kirim.
+- Pesan gagal tampil di form, dan teks yang diketik tetap ada. Pesan sukses tampil sebagai notifikasi (`toast` sonner), karena kartunya langsung pindah ke riwayat.
+- Form keputusan dikirim lewat `onSubmit` + `startTransition`, bukan `<form action>`. Action bawaan React me-reset form setelah selesai (`form.reset()`), dan radio terkontrol kembali ke pilihan awalnya, karena React hanya mengisi `defaultChecked` saat radio pertama dirender. Isian teks dan tanggal tidak terkena, karena nilai bawaannya ikut diperbarui setiap render. Form lewati di tracker (2.4) memakai cara yang sama. Form tanpa radio (`form-tanggapan.tsx`) tetap memakai `<form action>`.
+
+### Aksi
+
+| Aksi | Laporan yang diterima (status `menunggu`) | Hasil |
+| --- | --- | --- |
+| `tanggapiLaporan()` | kendala, atau lewati tanpa usulan tanggal | `ditanggapi` dan `tanggapan_admin` |
+| `putuskanPengganti()` setujui | lewati dengan usulan tanggal | `ditanggapi` dan kunjungan pengganti di tanggal usulan (dibaca dari database, bukan dari form) |
+| `putuskanPengganti()` tanggal lain | lewati dengan usulan tanggal | `ditanggapi` dan kunjungan pengganti di tanggal pilihan admin |
+| `putuskanPengganti()` tolak | lewati dengan usulan tanggal | `ditanggapi` tanpa kunjungan pengganti; kunjungan asal tetap `dilewati` |
+
+- Tanggapan wajib untuk semua aksi (keputusan 2.6), paling banyak `PANJANG_PESAN_LAPORAN_MAKS` karakter, dan tampil apa adanya di tracker. Status tujuan selalu ditentukan aksi, tidak dari form.
+- Setiap aksi hanya mengubah laporan yang masih `menunggu`. Laporan yang sudah ditanggapi di tab lain tidak ditimpa; pesannya "Laporan ini sudah ditanggapi atau tidak ditemukan. Muat ulang halaman."
+- Syarat tanggal pengganti untuk setujui dan tanggal lain, dicek `syaratTanggalPengganti()` lalu `bacaBentrokTanggal()`:
+  - hari kerja;
+  - setelah tanggal yang dilewati;
+  - tidak sebelum hari ini (WIB), jadi usulan yang sudah lewat harus diganti tanggal lain;
+  - langganan pelanggan masih aktif (`kondisiLanggananAktif()`), dan tanggalnya tidak setelah tanggal akhir langganan;
+  - bukan hari libur;
+  - belum ada kunjungan pelanggan di tanggal itu, apa pun statusnya.
+- Isian tanggal di form dibatasi `tanggalPenggantiMin()` dan tanggal akhir langganan. Server tetap mengecek ulang semua syarat.
+- Pelanggan juga tidak bisa lagi mengusulkan tanggal setelah tanggal akhir langganannya (`mintaLewati()`, lihat bagian tracker di atas). Pemeriksaan masa langganan di sini tetap dipertahankan sebagai pengaman (keputusan 2.6), untuk usulan yang dikirim sebelum aturan itu dan untuk tanggal yang dipilih admin.
+
+### Kunjungan pengganti
+
+- Dibuat berstatus `dijadwalkan` dengan `pengganti_dari` = kunjungan yang dilewati. `pengajuan_id` dan jam disalin dari kunjungan itu (keputusan 2.6). Satu kunjungan asal paling banyak punya satu pengganti.
+- Laporan dan kunjungan ditulis dalam satu perintah (`CONTRIBUTING.md` bagian 6.2): `WITH lap AS (UPDATE laporan_kendala … WHERE status = 'menunggu' AND … RETURNING …) INSERT INTO kunjungan_pengambilan … SELECT … FROM lap`.
+  - `UPDATE` di depan, jadi dua admin yang menyetujui laporan yang sama bersamaan tidak menghasilkan dua pengganti: yang kedua tidak cocok lagi dengan `status = 'menunggu'`.
+  - Syarat bukan hari libur, belum ada kunjungan di tanggal itu, dan kunjungan asal `dilewati` tanpa pengganti ikut di `WHERE`.
+  - `INSERT` sengaja tanpa `ON CONFLICT`. Jika kunjungan lain masuk di tanggal yang sama tepat bersamaan, `kunjungan_pengambilan_user_tanggal_unique` menggagalkan seluruh perintah, termasuk `UPDATE`-nya. Hanya error ini (kode `23505`) yang diubah menjadi pesan; error lain naik ke `error.tsx`.
+- Kunjungan pengganti tampil di `/admin/kunjungan` pada tanggalnya, dan di tracker dengan keterangan "Kunjungan pengganti". Kartu laporan di tracker tetap menampilkan usulan pelanggan beserta tanggal dari admin.
+- Risiko yang diterima (keputusan 2.6): jika tanggal pengganti jatuh di hari pola pelanggan yang kunjungan rutinnya belum dibuat, "Buat kunjungan" (2.2) nanti melewati tanggal itu karena sudah terisi, sehingga pengganti dan kunjungan rutin menjadi satu. Buat kunjungan cukup jauh ke depan sebelum menyetujui, atau pilih tanggal di luar hari pola pelanggan.
+- Untuk 2.7: kunjungan dengan `pengganti_dari` adalah kesepakatan satu kali dari admin, bukan hasil pola. Saat membuat ulang kunjungan dari pola baru, baris itu jangan diubah atau dibatalkan, dan baris `dilewati` jangan dikembalikan ke `dijadwalkan`.
+
 ## Yang dipakai dari luar fitur ini
 
-- `kondisiLanggananAktif()` dari `lib/langganan.ts`: tracker hanya untuk pelanggan yang langganannya aktif, dan "Buat kunjungan" hanya membuat kunjungan untuk pelanggan aktif.
+- `kondisiLanggananAktif()` dari `lib/langganan.ts`: tracker hanya untuk pelanggan yang langganannya aktif, "Buat kunjungan" hanya membuat kunjungan untuk pelanggan aktif, dan kunjungan pengganti (2.6) hanya dibuat untuk pelanggan aktif.
 - `requireLogin()` dari `lib/require-login.ts`: query dan aksi tracker pelanggan.
 - `tanggalHariIniJakarta()` dan fungsi format dari `lib/format-tanggal.ts`.
 - Data pola hari dan rentang jam pelanggan dibaca langsung dari tabelnya lewat `lib/db/schema.ts`, bukan dengan mengimpor dari `features/langganan/`.

@@ -18,6 +18,7 @@ const adminNavigation = [
     href: "/admin/kunjungan",
     category: "NAVIGATION",
   },
+  { name: "Laporan Kendala", href: "/admin/kendala", category: "NAVIGATION" },
   {
     name: "Laporan Bulanan",
     href: "/admin/laporan-bulanan",

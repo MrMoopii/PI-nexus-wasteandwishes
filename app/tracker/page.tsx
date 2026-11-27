@@ -99,6 +99,7 @@ async function IsiTracker() {
           <FormLaporan
             pilihanKendala={data.pilihanKendala}
             pilihanLewati={data.pilihanLewati}
+            akhirLangganan={data.akhirLangganan}
           />
           <PermintaanSaya daftar={data.permintaan} />
         </div>

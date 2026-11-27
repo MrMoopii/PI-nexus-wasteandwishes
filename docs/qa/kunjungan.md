@@ -568,15 +568,15 @@ Catatan hari libur:
 - **Persiapan data:** skrip "Data uji tracker" sudah dijalankan.
 - **Langkah:**
   1. Buka tab **Minta lewati**, lalu buka pilihan kunjungan.
-  2. Pilih hari kerja ke-3, kosongkan alasan, biarkan **Lewati saja**, lalu klik **Lewati pengambilan**. Pilih OK di dialog konfirmasi.
-  3. Isi alasan "Kantor tutup karena acara internal". Klik **Lewati pengambilan**, lalu pilih Batal di dialog.
-  4. Klik **Lewati pengambilan** lagi dan pilih OK.
+  2. Pilih hari kerja ke-3, kosongkan alasan, biarkan **Lewati saja**, lalu klik **Lewati pengambilan**. Pilih **Lewati** di dialog konfirmasi.
+  3. Isi alasan "Kantor tutup karena acara internal". Klik **Lewati pengambilan**, lalu pilih **Batal** di dialog. Ulangi, lalu tekan Esc.
+  4. Klik **Lewati pengambilan** lagi dan pilih **Lewati**.
   5. Buka `/tracker` di dua tab. Di tab pertama, lewati hari kerja ke-4 dengan alasan apa saja. Di tab kedua, yang belum dimuat ulang, pilih hari kerja ke-4 lalu kirim.
   6. Jalankan query tanggal di "Data uji tracker" dan query laporan di KJG-22 langkah 5.
 - **Hasil yang diharapkan:**
   - Langkah 1: pilihan berisi hari kerja ke-1 sampai ke-4. Kunjungan hari ini dan kunjungan lampau tidak ada. Hari kerja ke-1 hanya muncul jika batasnya (H-1 pukul 17.00 WIB) belum lewat. Setelah satu kunjungan dipilih, di bawahnya tertulis "Batas permintaan: <hari>, <tanggal> pukul 17.00 WIB.".
-  - Langkah 2: "Alasan wajib diisi." di bawah isian alasan, dan tidak ada data yang berubah.
-  - Langkah 3: tidak terjadi apa-apa.
+  - Langkah 2: dialog aplikasi (bukan dialog browser) berjudul "Lewati Pengambilan", berisi "Apakah Anda yakin ingin melewati pengambilan <hari, tanggal>?" dengan tanggal tebal, teks merah "Kunjungan langsung dilewati dan tidak bisa dibatalkan dari tracker.", serta tombol **Batal** dan **Lewati** (merah). Setelah **Lewati**: "Alasan wajib diisi." di bawah isian alasan, dan tidak ada data yang berubah.
+  - Langkah 3: **Batal** dan Esc sama-sama menutup dialog tanpa mengirim apa pun, dan isian tetap seperti yang diketik.
   - Langkah 4: "Kunjungan dilewati. Alasan Anda sudah diteruskan ke admin.", lalu form kosong lagi.
     - Di **Jadwal mendatang**, hari kerja ke-3 berbadge "Dilewati" dengan keterangan "Dilewati atas permintaan Anda.".
     - Di **Permintaan saya** muncul "Lewati pengambilan", "Menunggu tanggapan", dan "Kunjungan sudah dilewati. Admin akan membaca alasan Anda.".
@@ -584,7 +584,7 @@ Catatan hari libur:
   - Langkah 5: tab kedua menampilkan "Kunjungan ini sudah berstatus dilewati, jadi tidak bisa dilewati.".
   - Langkah 6: hari kerja ke-3 dan ke-4 berstatus `dilewati`, dan ada dua baris laporan `lewati` dengan status `menunggu` dan `tanggal_pengganti` kosong.
 - **Keadaan gagal yang dicek:**
-  - Alasan kosong, batal di dialog konfirmasi, dan kunjungan yang sudah dilewati di tab lain.
+  - Alasan kosong, batal di dialog konfirmasi (tombol **Batal** dan Esc), dan kunjungan yang sudah dilewati di tab lain.
   - Admin tidak bisa memakai aksi ini: tidak ada langganan, jadi muncul "Laporan hanya untuk pelanggan dengan langganan aktif. Muat ulang halaman.".
 - **Hasil uji terakhir:** belum diuji
 
@@ -594,7 +594,7 @@ Catatan hari libur:
 - **Peran:** pelanggan
 - **Persiapan data:** skrip "Data uji tracker" sudah dijalankan. Catat id kunjungan riwayat yang berstatus `dijadwalkan` dan yang berstatus `diambil` dari query tanggal.
 - **Langkah:**
-  1. Di tab **Minta lewati**, pilih kunjungan apa saja dan isi alasan. Di DevTools, ubah `value` opsi yang terpilih menjadi id kunjungan riwayat `dijadwalkan`, lalu kirim dan pilih OK.
+  1. Di tab **Minta lewati**, pilih kunjungan apa saja dan isi alasan. Di DevTools, ubah `value` opsi yang terpilih menjadi id kunjungan riwayat `dijadwalkan`, lalu kirim dan pilih **Lewati** di dialog.
   2. Ulangi dengan id kunjungan hari ini, jika hari ini hari kerja.
   3. Ulangi dengan id kunjungan riwayat `diambil`.
   4. (Jika hari kerja ke-1 adalah besok) buka tracker sebelum pukul 17.00 WIB dan sesudahnya.
@@ -607,22 +607,23 @@ Catatan hari libur:
 
 ## KJG-25: Pelanggan meminta lewati dengan tanggal pengganti
 
-- **Kode tugas:** 2.4
-- **Peran:** pelanggan (langkah 7 meniru admin 2.6 lewat SQL)
+- **Kode tugas:** 2.4 (batas akhir langganan: 2.6)
+- **Peran:** pelanggan (langkah 7 lewat halaman admin 2.6 atau SQL)
 - **Persiapan data:** skrip "Data uji tracker" sudah dijalankan. Langkah di bawah memakai hari kerja ke-2 sebagai kunjungan yang dilewati.
 - **Langkah:**
   1. Di tab **Minta lewati**, pilih hari kerja ke-2, isi alasan, lalu pilih **Minta tanggal pengganti**.
-  2. Kirim berturut-turut dengan tanggal pengganti berikut. Ketik tanggalnya jika pemilih tanggal menolak:
+  2. Kirim berturut-turut dengan tanggal pengganti berikut, dan pilih **Lewati** di dialog setiap kali. Ketik tanggalnya jika pemilih tanggal menolak:
      - kosong;
      - Sabtu sesudah hari kerja ke-2;
      - tanggal hari kerja ke-2 itu sendiri;
      - hari kerja ke-6 (Libur uji 2.4);
-     - hari kerja ke-4.
+     - hari kerja ke-4;
+     - hari kerja pertama setelah tanggal akhir langganan (hari ini + 30).
   3. Kirim dengan tanggal hari kerja ke-5.
   4. Lihat kartu **Permintaan saya** dan **Jadwal mendatang**.
   5. Jalankan query laporan di KJG-22 langkah 5.
   6. Pilih **Lewati saja** lagi di form, lalu pastikan isian tanggal hilang.
-  7. Tiru persetujuan admin (tugas 2.6) dengan SQL ini, lalu muat ulang `/tracker`:
+  7. Setujui tanggal pengganti itu lewat `/admin/kendala` dengan akun admin (langkahnya di KJG-33), atau tiru persetujuannya dengan SQL ini jika tidak memakai akun admin. Lalu muat ulang `/tracker`:
 
      ```sql
      -- Meniru 2.6: admin menyetujui tanggal pengganti dan menanggapi laporan lewati terakhir.
@@ -657,21 +658,24 @@ Catatan hari libur:
      ```
 
 - **Hasil yang diharapkan:**
-  - Langkah 1: isian **Usulan tanggal pengganti** muncul, dengan keterangan "Hari kerja, bukan hari libur, setelah tanggal yang dilewati, dan belum ada kunjungan di tanggal itu.".
+  - Langkah 1: isian **Usulan tanggal pengganti** muncul, dengan keterangan "Hari kerja, bukan hari libur, setelah tanggal yang dilewati, belum ada kunjungan di tanggal itu, dan paling lambat <hari ini + 30> (akhir masa langganan Anda).". Kalender tidak bisa memilih tanggal setelah hari ini + 30.
   - Langkah 2: hari kerja ke-2 tetap `dijadwalkan`. Setiap kiriman menampilkan "Periksa kembali isian yang ditandai.", dengan pesan di bawah isian tanggal berturut-turut:
     - "Tanggal pengganti wajib diisi.";
     - "Tanggal pengganti harus hari kerja (Senin–Jumat).";
     - "Tanggal pengganti harus setelah tanggal yang dilewati.";
     - "Tanggal itu hari libur (Libur uji 2.4).";
-    - "Anda sudah punya kunjungan di tanggal itu.".
+    - "Anda sudah punya kunjungan di tanggal itu.";
+    - "Tanggal pengganti melewati masa langganan Anda (berakhir <hari ini + 30>).".
+
+    Setelah setiap kiriman, pilihan **Minta tanggal pengganti** tetap terpilih (titik radionya tidak kembali ke **Lewati saja**), dan isian tanggal serta alasan tetap seperti yang diketik.
   - Langkah 3: "Kunjungan dilewati. Tanggal pengganti menunggu persetujuan admin.".
   - Langkah 4: di **Permintaan saya** muncul "Usulan tanggal pengganti: <hari kerja ke-5>" dan "Kunjungan sudah dilewati. Tanggal pengganti menunggu persetujuan admin.". Hari kerja ke-2 berbadge "Dilewati".
   - Langkah 5: ada baris `lewati`, `menunggu`, dengan `tanggal_pengganti` = hari kerja ke-5.
   - Langkah 7:
-    - Laporan itu berbadge "Sudah ditanggapi", dengan "Tanggal pengganti dari admin: <hari kerja ke-5>" dan kotak "Tanggapan admin" berisi teks dari SQL.
+    - Laporan itu berbadge "Sudah ditanggapi", dengan "Tanggal pengganti dari admin: <hari kerja ke-5>" dan kotak "Tanggapan admin" berisi tanggapan yang ditulis admin (atau teks dari SQL).
     - Di **Jadwal mendatang** muncul hari kerja ke-5 dengan keterangan "Kunjungan pengganti".
   - Langkah 8: query tanggal di "Data uji tracker" tidak menghasilkan baris, dan `/tracker` kembali menampilkan "Tracker belum tersedia".
-- **Keadaan gagal yang dicek:** tanggal pengganti kosong, akhir pekan, tidak setelah tanggal yang dilewati, hari libur, dan sudah ada kunjungan.
+- **Keadaan gagal yang dicek:** tanggal pengganti kosong, akhir pekan, tidak setelah tanggal yang dilewati, hari libur, sudah ada kunjungan, dan setelah masa langganan berakhir.
 - **Hasil uji terakhir:** belum diuji
 
 ## KJG-26: Menu Tracker di header
@@ -692,4 +696,240 @@ Catatan hari libur:
     - 320 dan 375 px: menu terbagi beberapa baris.
     - Tidak ada menu yang saling menimpa atau terpotong.
 - **Keadaan gagal yang dicek:** layar sempit.
+- **Hasil uji terakhir:** belum diuji
+
+## Data uji kendala admin (KJG-30 sampai KJG-36)
+
+Skenario halaman admin laporan kendala (kode tugas 2.6) memakai akun user uji dan akun admin dari "Data uji tracker". Jalankan dulu skrip "Data uji tracker", lalu skrip di bawah sekali di SQL Editor Neon. Skrip ini meniru permintaan pelanggan (2.4) langsung di database, supaya semua jenis laporan tersedia sekaligus:
+
+- kendala untuk kunjungan riwayat terbaru (yang `ditimbang`);
+- lewati hari kerja ke-3 tanpa tanggal pengganti;
+- lewati hari kerja ke-1 dengan usulan hari kerja ke-5;
+- lewati hari kerja ke-2 dengan usulan hari kerja ke-7;
+- lewati kunjungan riwayat terlama (yang `dijadwalkan`) dengan usulan hari kerja terakhir sebelum hari ini, untuk menguji usulan yang sudah lewat saat direview.
+
+```sql
+-- Data uji kendala admin (kode tugas 2.6). Jalankan setelah skrip "Data uji tracker".
+-- Hapus lagi dengan skrip di KJG-25 langkah 8.
+DO $uji$
+DECLARE
+  surel text := 'email-akun-uji@contoh.com';
+  u integer;
+  hari_ini date := (now() AT TIME ZONE 'Asia/Jakarta')::date;
+  maju date[];   -- 8 hari kerja setelah hari ini, sama dengan "Data uji tracker"
+  mundur date[]; -- 4 hari kerja terakhir sebelum hari ini, terbaru dulu
+BEGIN
+  SELECT id_user INTO u FROM users WHERE email = surel AND peran = 'user';
+  IF u IS NULL THEN
+    RAISE EXCEPTION 'Akun user % tidak ditemukan.', surel;
+  END IF;
+  SELECT array_agg(d ORDER BY d) INTO maju FROM (
+    SELECT g::date AS d FROM generate_series(hari_ini + 1, hari_ini + 14, interval '1 day') AS g
+    WHERE extract(isodow FROM g) BETWEEN 1 AND 5 ORDER BY 1 LIMIT 8) AS x;
+  SELECT array_agg(d ORDER BY d DESC) INTO mundur FROM (
+    SELECT g::date AS d FROM generate_series(hari_ini - 10, hari_ini - 1, interval '1 day') AS g
+    WHERE extract(isodow FROM g) BETWEEN 1 AND 5 ORDER BY 1 DESC LIMIT 4) AS x;
+  UPDATE kunjungan_pengambilan SET status = 'dilewati'
+    WHERE id_user = u AND status = 'dijadwalkan'
+      AND tanggal IN (maju[1], maju[2], maju[3], mundur[4]);
+  INSERT INTO laporan_kendala (id_user, kunjungan_id, jenis, pesan, tanggal_pengganti)
+  SELECT u, k.id_kunjungan, v.jenis, v.pesan, v.pengganti
+  FROM (VALUES
+    (mundur[1], 'kendala', 'Uji 2.6: ember kemarin belum dikembalikan.', NULL::date),
+    (maju[3], 'lewati', 'Uji 2.6: kantor tutup karena acara internal.', NULL::date),
+    (maju[1], 'lewati', 'Uji 2.6: dapur sedang direnovasi.', maju[5]),
+    (maju[2], 'lewati', 'Uji 2.6: ada pemeriksaan dinas.', maju[7]),
+    (mundur[4], 'lewati', 'Uji 2.6: usulan yang terlambat direview.', mundur[1])
+  ) AS v(tanggal, jenis, pesan, pengganti)
+  JOIN kunjungan_pengambilan k ON k.id_user = u AND k.tanggal = v.tanggal;
+END
+$uji$;
+```
+
+Keadaan laporan dan kunjungan pengganti dilihat dengan dua query ini:
+
+```sql
+SELECT l.id_laporan, l.jenis, l.status, k.tanggal AS kunjungan, k.status AS status_kunjungan,
+       l.tanggal_pengganti AS usulan, l.tanggapan_admin
+FROM laporan_kendala l
+JOIN kunjungan_pengambilan k ON k.id_kunjungan = l.kunjungan_id
+JOIN users u ON u.id_user = l.id_user
+WHERE u.email = 'email-akun-uji@contoh.com'
+ORDER BY l.id_laporan;
+
+SELECT p.id_kunjungan, p.tanggal, p.status, p.jam_mulai, p.jam_selesai, asal.tanggal AS menggantikan
+FROM kunjungan_pengambilan p
+JOIN kunjungan_pengambilan asal ON asal.id_kunjungan = p.pengganti_dari
+JOIN users u ON u.id_user = p.id_user
+WHERE u.email = 'email-akun-uji@contoh.com'
+ORDER BY p.tanggal;
+```
+
+Skenario KJG-32 sampai KJG-36 saling berurutan, karena setiap laporan hanya bisa ditanggapi sekali. Hapus semua data uji dengan skrip di KJG-25 langkah 8. Kunjungan pengganti ikut terhapus karena milik akun uji yang sama.
+
+## KJG-30: Akses halaman admin kendala
+
+- **Kode tugas:** 2.6
+- **Peran:** publik, pelanggan, admin
+- **Persiapan data:** akun user uji dan akun admin. Langkah 4 memakai branch yang belum punya laporan apa pun.
+- **Langkah:**
+  1. Dalam keadaan logout, buka `/admin/kendala`.
+  2. Login sebagai akun user uji, lalu buka `/admin/kendala` lewat alamat.
+  3. Login sebagai admin. Lihat sidebar, lalu klik **Laporan Kendala**.
+  4. Lihat isi halaman, lalu buka bagian **Terakhir ditanggapi**.
+  5. Muat ulang dengan DevTools → Network → Regular 4G (centang Disable Cache), lalu perhatikan kerangka sebelum isi muncul.
+- **Hasil yang diharapkan:**
+  - Langkah 1: dialihkan ke halaman login.
+  - Langkah 2: dialihkan ke beranda.
+  - Langkah 3: menu **Laporan Kendala** ada tepat di bawah **Pencatatan Kunjungan** dan tampil aktif. Judul halaman "Laporan Kendala".
+  - Langkah 4: "Menunggu tanggapan (0)" dengan "Tidak ada laporan yang menunggu tanggapan.". Bagian **Terakhir ditanggapi** tertutup saat halaman dibuka, dan setelah dibuka menulis "Belum ada laporan yang ditanggapi.".
+  - Langkah 5: kerangka abu-abu tampil dulu dengan tinggi yang mirip, dan isi di bawahnya tidak terdorong jauh saat data muncul.
+- **Keadaan gagal yang dicek:** belum login, akun bukan admin, data kosong, dan sesi idle (membuka `/admin/kendala` setelah idle dialihkan ke `/auth/login?reason=idle`).
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-31: Isi kotak masuk
+
+- **Kode tugas:** 2.6
+- **Peran:** admin
+- **Persiapan data:** skrip "Data uji tracker" lalu "Data uji kendala admin" sudah dijalankan.
+- **Langkah:**
+  1. Login sebagai admin dan buka `/admin/kendala`.
+  2. Cocokkan setiap kartu dengan hasil query laporan di atas.
+  3. Ulangi di lebar layar HP (DevTools, 375 px).
+- **Hasil yang diharapkan:**
+  - "Menunggu tanggapan (5)", dalam tiga kelompok:
+    - "Lewati dengan usulan tanggal pengganti (3)": kunjungan hari kerja ke-1, ke-2, dan riwayat terlama, semuanya berbadge "Dilewati" dengan "Usulan tanggal pengganti: <hari, tanggal>". Form setiap kartu menulis "Langganan aktif sampai <hari ini + 30>…", dengan tiga pilihan dan **Setujui usulan** terpilih.
+    - "Laporan kendala (1)": kunjungan riwayat terbaru berbadge "Ditimbang", label "Pesan pelanggan", dan form tanggapan.
+    - "Lewati tanpa tanggal pengganti (1)": hari kerja ke-3 berbadge "Dilewati", label "Alasan pelanggan", dan form tanggapan.
+  - Setiap kartu menulis "Uji 2.4", "PIC PIC uji · 0800000024", kunjungan dengan nama hari, dan "Dikirim <tanggal, jam> WIB".
+  - Langkah 3: pilihan keputusan tersusun ke bawah, dan tidak ada teks yang terpotong atau saling menimpa.
+- **Keadaan gagal yang dicek:** kelompok tanpa laporan tidak ditampilkan (dicek lagi di KJG-36).
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-32: Admin menanggapi laporan kendala
+
+- **Kode tugas:** 2.6
+- **Peran:** admin, lalu pelanggan
+- **Persiapan data:** sama dengan KJG-31.
+- **Langkah:**
+  1. Di kartu kendala, klik **Kirim tanggapan** tanpa mengisi apa pun. Lalu isi tanggapan hanya dengan spasi dan kirim.
+  2. Di DevTools, ubah hidden input `idLaporan` kartu itu menjadi `abc`, isi tanggapan, lalu kirim. Ulangi dengan `999999`. Muat ulang halaman sesudahnya.
+  3. Buka `/admin/kendala` di dua tab. Di tab pertama, tulis "Maaf atas kendalanya. Ember kami antar besok pagi." lalu kirim.
+  4. Di tab kedua yang belum dimuat ulang, isi tanggapan apa saja untuk kartu kendala yang sama, lalu kirim.
+  5. Di SQL Editor, ubah `peran` akun admin menjadi `'user'`. Kirim tanggapan apa saja dari tab admin yang masih terbuka, lalu kembalikan `peran` menjadi `'admin'`.
+  6. Buka **Terakhir ditanggapi**, lalu jalankan query laporan.
+  7. Login sebagai akun user uji dan buka `/tracker`, kartu **Permintaan saya**.
+- **Hasil yang diharapkan:**
+  - Langkah 1: "Periksa kembali isian yang ditandai." dan "Tanggapan wajib diisi." di bawah isian. Status laporan tetap `menunggu`.
+  - Langkah 2: `abc` menampilkan "Laporan tidak valid.". `999999` menampilkan "Laporan ini sudah ditanggapi atau tidak ditemukan. Muat ulang halaman.".
+  - Langkah 3: notifikasi "Tanggapan terkirim ke pelanggan.", kartu hilang dari kotak masuk, dan jumlahnya menjadi 4.
+  - Langkah 4: "Laporan ini sudah ditanggapi atau tidak ditemukan. Muat ulang halaman.". Teks yang diketik di tab kedua tetap ada.
+  - Langkah 5: "Akses khusus admin.".
+  - Langkah 6: kartu kendala ada di riwayat dengan kotak "Tanggapan admin" berisi teks langkah 3. Query menunjukkan laporan kendala `ditanggapi` dengan tanggapan dari tab pertama, tidak tertimpa tab kedua.
+  - Langkah 7: laporan "Kendala" berbadge "Sudah ditanggapi" dengan kotak "Tanggapan admin" berisi teks yang sama.
+- **Keadaan gagal yang dicek:**
+  - Tanggapan kosong, ID salah, laporan yang sudah ditanggapi di tab lain, dan akun yang bukan admin lagi.
+  - Sesi idle: kirim tanggapan setelah idle, maka muncul "Sesi Anda telah berakhir. Silakan untuk login ulang.".
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-33: Admin menyetujui usulan tanggal pengganti
+
+- **Kode tugas:** 2.6
+- **Peran:** admin, lalu pelanggan
+- **Persiapan data:** lanjutan KJG-32. Laporan yang dipakai: lewati hari kerja ke-1 dengan usulan hari kerja ke-5.
+- **Langkah:**
+  1. Di kartu itu, biarkan **Setujui usulan** terpilih, kosongkan tanggapan, lalu klik **Setujui usulan**.
+  2. Buka `/admin/kendala` di tab kedua. Di tab pertama, isi "Baik, sampah Anda kami ambil di tanggal usulan Anda." lalu kirim.
+  3. Di tab kedua yang belum dimuat ulang, isi tanggapan apa saja di kartu yang sama, lalu klik **Setujui usulan**.
+  4. Jalankan query kunjungan pengganti.
+  5. Buka `/admin/kunjungan?tanggal=<hari kerja ke-5>`.
+  6. Buka **Terakhir ditanggapi** di `/admin/kendala`.
+  7. Login sebagai akun user uji dan buka `/tracker`.
+- **Hasil yang diharapkan:**
+  - Langkah 1: "Tanggapan wajib diisi." dan tidak ada kunjungan baru.
+  - Langkah 2: notifikasi "Kunjungan pengganti <tanggal hari kerja ke-5> dibuat. Tanggapan terkirim ke pelanggan.", lalu kartu pindah ke riwayat.
+  - Langkah 3: "Laporan ini sudah ditanggapi atau tidak ditemukan. Muat ulang halaman.".
+  - Langkah 4: tepat satu baris: hari kerja ke-5, `dijadwalkan`, jam 08:00–10:00 (disalin dari kunjungan yang dilewati), menggantikan hari kerja ke-1.
+  - Langkah 5: "Uji 2.4" tampil berstatus Dijadwalkan dengan jam 08.00–10.00 WIB.
+  - Langkah 6: kartu itu menulis "Kunjungan pengganti: <hari, tanggal hari kerja ke-5>." dan kotak "Tanggapan admin".
+  - Langkah 7:
+    - Di **Permintaan saya**, laporan itu berbadge "Sudah ditanggapi", dengan "Usulan tanggal pengganti: <hari kerja ke-5>", "Tanggal pengganti dari admin: <hari kerja ke-5>", dan kotak "Tanggapan admin".
+    - Di **Jadwal mendatang**, hari kerja ke-5 muncul dengan keterangan "Kunjungan pengganti".
+- **Keadaan gagal yang dicek:** tanggapan kosong, dan persetujuan ganda dari dua tab yang hanya menghasilkan satu kunjungan pengganti.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-34: Admin memilih tanggal lain
+
+- **Kode tugas:** 2.6
+- **Peran:** admin, lalu pelanggan
+- **Persiapan data:** lanjutan KJG-33. Laporan yang dipakai: lewati hari kerja ke-2 dengan usulan hari kerja ke-7.
+- **Langkah:**
+  1. Pilih **Pilih tanggal lain**. Pastikan isian tanggal muncul, lalu isi tanggapan "Tanggal usulan penuh, jadi kami ambil di tanggal ini.".
+  2. Kirim berturut-turut dengan tanggal berikut. Jika pemilih tanggal menolak, hapus atribut `min` dan `max` isian itu lewat DevTools, lalu ketik tanggalnya:
+     - kosong;
+     - Sabtu sesudah hari kerja ke-2;
+     - hari kerja ke-2 itu sendiri;
+     - hari kerja ke-6 (Libur uji 2.4);
+     - hari kerja ke-4 (sudah ada kunjungan);
+     - hari kerja pertama setelah tanggal akhir langganan (hari ini + 30).
+  3. Ubah langganan akun uji menjadi `dihentikan` (KJG-20 langkah 4), lalu muat ulang `/admin/kendala`. Pilih **Pilih tanggal lain** dengan hari kerja ke-8, isi tanggapan, lalu kirim. Kembalikan langganan ke `aktif` sampai hari ini + 30, lalu muat ulang.
+  4. Pilih **Pilih tanggal lain** dengan hari kerja ke-8, isi tanggapan, lalu kirim.
+  5. Jalankan query kunjungan pengganti, lalu login sebagai akun user uji dan buka `/tracker`.
+- **Hasil yang diharapkan:**
+  - Langkah 2: setiap kiriman menampilkan "Periksa kembali isian yang ditandai." dengan pesan di bawah isian tanggal berturut-turut:
+    - "Tanggal pengganti wajib diisi.";
+    - "Tanggal pengganti harus hari kerja (Senin–Jumat).";
+    - "Tanggal pengganti harus setelah tanggal yang dilewati (<tanggal hari kerja ke-2>).";
+    - "Tanggal itu hari libur (Libur uji 2.4).";
+    - "Pelanggan sudah punya kunjungan di tanggal itu. Pilih tanggal lain.";
+    - "Tanggal pengganti melewati masa langganan pelanggan (berakhir <hari ini + 30>).".
+
+    Setelah setiap kiriman, pilihan **Pilih tanggal lain** tetap terpilih (titik radionya tidak kembali ke **Setujui usulan**), tanggal dan tanggapan yang diketik tetap ada, dan tidak ada kunjungan baru.
+  - Langkah 3: setelah dimuat ulang, kartu menampilkan kotak merah "Langganan pelanggan ini sudah tidak aktif…" dan pilihan awalnya **Tolak**. Kiriman tanggal lain ditolak dengan pesan yang sama di bawah isian tanggal, dan tidak ada kunjungan baru. Setelah langganan dikembalikan, kotak merah hilang.
+  - Langkah 4: notifikasi "Kunjungan pengganti <tanggal hari kerja ke-8> dibuat. Tanggapan terkirim ke pelanggan.".
+  - Langkah 5:
+    - Ada baris baru: hari kerja ke-8, `dijadwalkan`, jam 08:00–10:00, menggantikan hari kerja ke-2.
+    - Di **Permintaan saya**: "Usulan tanggal pengganti: <hari kerja ke-7>" dan "Tanggal pengganti dari admin: <hari kerja ke-8>".
+    - Di **Jadwal mendatang**: hari kerja ke-8 dengan keterangan "Kunjungan pengganti".
+- **Keadaan gagal yang dicek:** tanggal kosong, akhir pekan, tidak setelah tanggal yang dilewati, hari libur, sudah ada kunjungan, setelah masa langganan, dan langganan yang tidak aktif.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-35: Admin menolak, dan usulan yang sudah lewat
+
+- **Kode tugas:** 2.6
+- **Peran:** admin, lalu pelanggan
+- **Persiapan data:** lanjutan KJG-34. Laporan yang dipakai: lewati kunjungan riwayat terlama dengan usulan hari kerja terakhir sebelum hari ini.
+- **Langkah:**
+  1. Biarkan **Setujui usulan** terpilih, isi tanggapan apa saja, lalu kirim.
+  2. Pilih **Tolak**, kosongkan tanggapan, lalu kirim.
+  3. Isi "Maaf, usulan tanggal Anda sudah lewat saat kami baca, jadi tidak ada pengganti." lalu kirim.
+  4. Jalankan kedua query, lalu login sebagai akun user uji dan buka `/tracker`.
+- **Hasil yang diharapkan:**
+  - Langkah 1: kotak merah "Tanggal pengganti sudah lewat. Pilih tanggal lain." dan tidak ada yang berubah.
+  - Langkah 2: "Tanggapan wajib diisi.".
+  - Langkah 3: notifikasi "Tanggal pengganti ditolak. Tanggapan terkirim ke pelanggan.". Di riwayat, kartu itu menulis "Tanggal pengganti ditolak." beserta tanggapannya.
+  - Langkah 4:
+    - Laporan itu `ditanggapi`, kunjungan asalnya tetap `dilewati`, dan tidak ada kunjungan pengganti untuknya.
+    - Di **Permintaan saya**, laporan itu berbadge "Sudah ditanggapi" dengan usulan tanggalnya dan kotak "Tanggapan admin", tanpa "Tanggal pengganti dari admin".
+- **Keadaan gagal yang dicek:** menyetujui usulan yang tanggalnya sudah lewat, dan menolak tanpa alasan.
+- **Hasil uji terakhir:** belum diuji
+
+## KJG-36: Admin menanggapi lewati tanpa tanggal pengganti
+
+- **Kode tugas:** 2.6
+- **Peran:** admin, lalu pelanggan
+- **Persiapan data:** lanjutan KJG-35. Laporan yang tersisa: lewati hari kerja ke-3 tanpa tanggal pengganti.
+- **Langkah:**
+  1. Kirim tanpa tanggapan.
+  2. Isi "Baik, pengambilan tanggal itu kami lewati. Terima kasih infonya." lalu kirim.
+  3. Buka **Terakhir ditanggapi**, lalu login sebagai akun user uji dan buka `/tracker`.
+  4. Hapus data uji dengan skrip di KJG-25 langkah 8.
+- **Hasil yang diharapkan:**
+  - Langkah 1: "Tanggapan wajib diisi.".
+  - Langkah 2: notifikasi "Tanggapan terkirim ke pelanggan.". Kotak masuk menulis "Menunggu tanggapan (0)" dan "Tidak ada laporan yang menunggu tanggapan.", tanpa judul kelompok apa pun.
+  - Langkah 3:
+    - Riwayat memuat kelima laporan. Kartu ini menulis "Dilewati tanpa tanggal pengganti." beserta tanggapannya.
+    - Di **Permintaan saya**, laporan "Lewati pengambilan" itu berbadge "Sudah ditanggapi" dengan kotak "Tanggapan admin", dan tidak lagi menulis "Admin akan membaca alasan Anda.".
+  - Langkah 4: kedua query tidak menghasilkan baris.
+- **Keadaan gagal yang dicek:** tanggapan kosong, dan kotak masuk yang kosong setelah semua laporan ditanggapi.
 - **Hasil uji terakhir:** belum diuji
